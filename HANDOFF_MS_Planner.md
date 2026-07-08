@@ -9,7 +9,7 @@
 - **Producto:** **MS Planner** — SaaS (demo) para administrar una congregación de Testigos de Jehová. Perfil **Administrador/Anciano**.
 - **Congregación:** **Las Flores** (Suba, Bogotá, Colombia). Circuito CO‑12.
 - **Usuario admin del demo:** **Paublo Díaz** (Anciano · Coordinador), avatar "PD".
-- **Archivo único:** `/Users/online-sales-group/Documents/Cloude/congregacion-admin-demo.html`
+- **Archivo único:** `/Users/online-sales-group/Documents/Cloude/MS Planner App.html`
   - HTML + CSS + JS **vanilla**, **autocontenido**, **datos simulados**, **sin backend/APIs**. Se abre con doble clic o `file://`.
   - ~230 KB, ~2.200 líneas. Todo el JS va en un único `<script>` al final del `<body>`.
 - **Otros archivos del proyecto:**
@@ -20,7 +20,7 @@
 
 ## 2. Cómo abrir / entorno
 
-- Abrir: `open "/Users/online-sales-group/Documents/Cloude/congregacion-admin-demo.html"` o pegar `file:///Users/online-sales-group/Documents/Cloude/congregacion-admin-demo.html` en el navegador (NO el link del chat).
+- Abrir: `open "/Users/online-sales-group/Documents/Cloude/MS Planner App.html"` o pegar `file:///Users/online-sales-group/Documents/Cloude/MS Planner App.html` en el navegador (NO el link del chat).
 - Entorno de la máquina: macOS (darwin). **Hay** `python3`, `qlmanage`, `sips`, `osascript`. **NO hay** `node`/`npm`, ni `poppler` (pdftoppm/pdftotext), ni `deno`/`bun`.
 - El **preview server** del IDE y `python -m http.server` fallan por sandbox; para servir usar un `-c` de http.server (raro que se necesite). El clasificador de Bash a veces cae temporalmente ("claude-opus-4-8 is temporarily unavailable") → reintentar.
 
@@ -101,7 +101,7 @@ Formatos oficiales replicados a partir de PDFs de referencia en `~/Downloads`: *
 
 ## 8. Flujo de validación (usar SIEMPRE tras editar el HTML)
 
-1. Control chars = 0: `LC_ALL=C grep -aP -c "[\x00-\x08\x0B-\x1F\x7F]" congregacion-admin-demo.html`
+1. Control chars = 0: `LC_ALL=C grep -aP -c "[\x00-\x08\x0B-\x1F\x7F]" "MS Planner App.html"`
 2. Balance JS: extraer el `<script>` **principal** (ahora hay 2: el anti-flash del `<head>` + el principal → tomar el más largo) y verificar `{} () []` y backticks pares.
 3. Compilación: `osascript -l JavaScript -e '... new Function(fs) ...'` (JavaScriptCore) para detectar errores de sintaxis.
 4. (Init sin errores) opcional: correr el script con DOM simulado en JavaScriptCore.
@@ -191,4 +191,4 @@ Formatos oficiales replicados a partir de PDFs de referencia en `~/Downloads`: *
 ---
 
 ### Prompt sugerido para arrancar el nuevo chat
-> "Continúo el proyecto MS Planner. El estado completo está en `/Users/online-sales-group/Documents/Cloude/HANDOFF_MS_Planner.md` y el app es `/Users/online-sales-group/Documents/Cloude/congregacion-admin-demo.html`. Lee el handoff antes de tocar nada y respeta el flujo de validación (control chars = 0, balance, qlmanage). Quiero [tu tarea aquí]."
+> "Continúo el proyecto MS Planner. El estado completo está en `/Users/online-sales-group/Documents/Cloude/HANDOFF_MS_Planner.md` y el app es `/Users/online-sales-group/Documents/Cloude/MS Planner App.html`. Lee el handoff antes de tocar nada y respeta el flujo de validación (control chars = 0, balance, qlmanage). Quiero [tu tarea aquí]."

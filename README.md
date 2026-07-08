@@ -6,7 +6,7 @@
 
 No requiere instalación, servidor ni dependencias:
 
-1. Descarga `congregacion-admin-demo.html`.
+1. Descarga `MS Planner App.html`.
 2. Ábrelo con doble clic en cualquier navegador moderno (Chrome, Edge, Safari, Firefox).
 
 Todo funciona localmente: los datos de demostración se generan al cargar y **tus cambios se guardan en el navegador** (localStorage). Para volver al estado original: **Configuración › Información general › Restablecer datos demo**.
