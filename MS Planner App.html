@@ -2304,7 +2304,7 @@ const CIRCUITO_CONGS=['Las Flores','Bellavista','El Carmelo','Nueva Esperanza','
 const PAGOS=[{f:'01 ene 2026',c:'Plan Anual 2026',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2025',c:'Plan Anual 2025',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2024',c:'Plan Anual 2024',m:'USD 18,00',e:'Pagado'}];
 VIEWS.config=()=>{
   if(!can('config.general')){document.getElementById('content').innerHTML=`<div class="page">${pageHead('Configuración de la Congregación','Las Flores · ajustes generales','')}<div class="card"><div class="empty" style="padding:52px 24px;text-align:center"><div class="kpi-ico t-amber" style="width:52px;height:52px;margin:0 auto 14px">${svg('shield')}</div><b style="font-size:15px;display:block;margin-bottom:6px">Acceso restringido</b><p class="muted" style="font-size:13px;max-width:420px;margin:0 auto">La configuración de la congregación está disponible solo para administradores (Nivel 1 y 2). Tu rol actual es <b>${(CURRENT_USER&&CURRENT_USER.role)||'Usuario Estándar'}</b>.</p></div></div></div>`;return;}
-  const tabs=[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['legalseg','Legal y seguridad']].concat(can('billing')?[['sub','Suscripción']]:[]).concat([['soporte','Soporte']]);
+  const tabs=[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['sync','Sincronización'],['legalseg','Legal y seguridad']].concat(can('billing')?[['sub','Suscripción']]:[]).concat([['soporte','Soporte']]);
   if(configTab==='sub'&&!can('billing'))configTab='general';
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Configuración de la Congregación','Las Flores · administra los datos y ajustes generales',`<button class="btn primary" onclick="saveWithFeedback(this,()=>saveCongConfig())">${svg('check')}Guardar cambios</button>`)}
@@ -2495,6 +2495,7 @@ function renderConfig(){
       ]);
     }
   }
+  else if(configTab==='sync'){h=syncPanelHTML();}
   else if(configTab==='soporte'){
     const tipos=['Problema técnico','Error en la plataforma','Solicitud de nueva funcionalidad','Consulta general','Problema con reportes','Problema con usuarios o permisos','Otro'];
     h=`<div class="cols-2">
@@ -2911,19 +2912,26 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){
 /* -------- PERSISTENCIA (API simulada sobre localStorage; los datos sobreviven recargas) -------- */
 const PERSIST_KEY='msp_data_v1';
 let __hydrating=false;
-function persistAll(){if(__hydrating)return;try{
-  const data={v:1,
-    db:DB,
-    tasks:TASKS.map(t=>({id:t.id,titulo:t.titulo,desc:t.desc,creadoPor:t.creadoPor,asignadoAId:t.asignadoA?t.asignadoA.id:null,creada:t.creada,creadaISO:t.creadaD?diso(t.creadaD):null,limite:t.limite,limiteISO:t.limiteD?diso(t.limiteD):null,prioridad:t.prioridad,estado:t.estado,progreso:t.progreso})),
-    notifs:NOTIFS.map(n=>({type:n.type,ico:n.ico,tint:n.tint,msg:n.msg,time:n.time,read:n.read,dateMs:n.date?n.date.getTime():null})),
-    terr:TERR.map(t=>({...t,resp:undefined,respId:t.resp?t.resp.id:null})),
-    terrAsign:TERR_ASIGN,taSeq:taSeq,noPredica:NO_PREDICA,anuncios:ANUNCIOS,eventos:EVENTS,
-    grupos:REAL_GROUPS.map(g=>({n:g.n,sup:g.sup,aux:g.aux})),
-    informes:INFORMES.map(r=>({pubId:r.pub.id,entregado:r.entregado,horas:r.horas,estudios:r.estudios,auxiliar:r.auxiliar})),
-    attReg:ATT_REG,meetOvr:MEET_OVR,discOvr:DISC_OVR,exhibOvr:EXHIB_OVR,congCfg:CONG_CFG};
-  localStorage.setItem(PERSIST_KEY,JSON.stringify(data));
-}catch(e){}}
-function hydrateAll(){let raw=null;try{raw=localStorage.getItem(PERSIST_KEY)}catch(e){}if(!raw)return;let d=null;try{d=JSON.parse(raw)}catch(e){return}
+let __sbReady=false;      // true tras cargar/sembrar Supabase con éxito
+let __syncState={state:'idle',at:0,msg:''};
+function dataBackend(){return (SB_ENABLED&&CURRENT_USER&&!CURRENT_USER.demo)?'supabase':'local';}
+/* Instantánea completa del estado (misma forma para localStorage y Postgres) */
+function buildSnapshot(){return {v:1,
+  db:DB,
+  tasks:TASKS.map(t=>({id:t.id,titulo:t.titulo,desc:t.desc,creadoPor:t.creadoPor,asignadoAId:t.asignadoA?t.asignadoA.id:null,creada:t.creada,creadaISO:t.creadaD?diso(t.creadaD):null,limite:t.limite,limiteISO:t.limiteD?diso(t.limiteD):null,prioridad:t.prioridad,estado:t.estado,progreso:t.progreso})),
+  notifs:NOTIFS.map(n=>({type:n.type,ico:n.ico,tint:n.tint,msg:n.msg,time:n.time,read:n.read,dateMs:n.date?n.date.getTime():null})),
+  terr:TERR.map(t=>Object.assign({},t,{resp:undefined,respId:t.resp?t.resp.id:null})),
+  terrAsign:TERR_ASIGN.map(a=>Object.assign({},a)),taSeq:taSeq,
+  noPredica:NO_PREDICA.map(x=>Object.assign({},x)),anuncios:ANUNCIOS.map(x=>Object.assign({},x)),eventos:EVENTS.map(x=>Object.assign({},x)),
+  grupos:REAL_GROUPS.map(g=>({n:g.n,sup:g.sup,aux:g.aux})),
+  informes:INFORMES.map(r=>({pubId:r.pub.id,entregado:r.entregado,horas:r.horas,estudios:r.estudios,auxiliar:r.auxiliar})),
+  attReg:ATT_REG,meetOvr:MEET_OVR,discOvr:DISC_OVR,exhibOvr:EXHIB_OVR,congCfg:CONG_CFG};}
+function persistAll(){if(__hydrating)return;
+  if(dataBackend()==='supabase'){scheduleSbSync();return;}
+  try{localStorage.setItem(PERSIST_KEY,JSON.stringify(buildSnapshot()))}catch(e){}}
+function readLocalSnapshot(){let raw=null;try{raw=localStorage.getItem(PERSIST_KEY)}catch(e){}if(!raw)return null;try{return JSON.parse(raw)}catch(e){return null}}
+/* Reconstruye el estado en memoria a partir de una instantánea (relinkea referencias) */
+function applySnapshot(d){
   if(!d||d.v!==1)return;__hydrating=true;
   try{
     const byId=id=>DB.find(x=>String(x.id)===String(id))||null;
@@ -2931,14 +2939,14 @@ function hydrateAll(){let raw=null;try{raw=localStorage.getItem(PERSIST_KEY)}cat
     if(Array.isArray(d.grupos)){d.grupos.forEach((g,i)=>{if(REAL_GROUPS[i]){REAL_GROUPS[i].n=g.n;REAL_GROUPS[i].sup=g.sup;REAL_GROUPS[i].aux=g.aux;GRUPOS[i]=g.n}else{REAL_GROUPS.push({n:g.n,sup:g.sup,aux:g.aux,m:[]});GRUPOS.push(g.n)}});}
     if(Array.isArray(d.tasks)){TASKS.length=0;d.tasks.forEach(t=>TASKS.push({id:t.id,titulo:t.titulo,desc:t.desc,creadoPor:t.creadoPor,asignadoA:byId(t.asignadoAId)||eldersM[0],creada:t.creada,creadaD:t.creadaISO?new Date(t.creadaISO+'T00:00:00'):new Date(TODAY),limite:t.limite,limiteD:t.limiteISO?new Date(t.limiteISO+'T00:00:00'):new Date(TODAY),prioridad:t.prioridad,estado:t.estado,progreso:t.progreso}));}
     if(Array.isArray(d.notifs)){NOTIFS.length=0;d.notifs.forEach(n=>NOTIFS.push({type:n.type,ico:n.ico,tint:n.tint,msg:n.msg,time:n.time,read:n.read,date:n.dateMs!=null?new Date(n.dateMs):new Date(TODAY)}));}
-    if(Array.isArray(d.terr)){d.terr.forEach(st=>{const respId=st.respId;delete st.respId;delete st.resp;const t=TERR.find(x=>x.num===st.num);if(t){Object.assign(t,st);t.resp=respId!=null?byId(respId):null;}else{st.resp=respId!=null?byId(respId):null;TERR.push(st);}});}
+    if(Array.isArray(d.terr)){d.terr.forEach(st=>{const respId=st.respId;const clone=Object.assign({},st);delete clone.respId;delete clone.resp;const t=TERR.find(x=>x.num===clone.num);if(t){Object.assign(t,clone);t.resp=respId!=null?byId(respId):null;}else{clone.resp=respId!=null?byId(respId):null;TERR.push(clone);}});}
     if(Array.isArray(d.terrAsign)){TERR_ASIGN.length=0;d.terrAsign.forEach(a=>TERR_ASIGN.push(a));}
     if(typeof d.taSeq==='number')taSeq=d.taSeq;
     if(Array.isArray(d.noPredica)){NO_PREDICA.length=0;d.noPredica.forEach(x=>NO_PREDICA.push(x));}
     if(Array.isArray(d.anuncios)){ANUNCIOS.length=0;d.anuncios.forEach(a=>ANUNCIOS.push(a));}
     if(Array.isArray(d.eventos)){EVENTS.length=0;d.eventos.forEach(ev=>EVENTS.push(ev));}
     if(Array.isArray(d.informes)){d.informes.forEach(si=>{const r=INFORMES.find(x=>x.pub&&String(x.pub.id)===String(si.pubId));if(r){r.entregado=si.entregado;r.horas=si.horas;r.estudios=si.estudios;r.auxiliar=si.auxiliar}else{const p=byId(si.pubId);if(p)INFORMES.push({pub:p,entregado:si.entregado,horas:si.horas,estudios:si.estudios,auxiliar:si.auxiliar})}});}
-    if(d.attReg)Object.keys(d.attReg).forEach(k=>ATT_REG[k]=d.attReg[k]);
+    if(d.attReg){Object.keys(ATT_REG).forEach(k=>delete ATT_REG[k]);Object.keys(d.attReg).forEach(k=>ATT_REG[k]=d.attReg[k]);}
     if(d.meetOvr)MEET_OVR=d.meetOvr;
     if(d.discOvr)DISC_OVR=d.discOvr;
     if(d.exhibOvr)EXHIB_OVR=d.exhibOvr;
@@ -2947,6 +2955,83 @@ function hydrateAll(){let raw=null;try{raw=localStorage.getItem(PERSIST_KEY)}cat
   }catch(e){}
   __hydrating=false;
 }
+async function hydrateAll(){
+  if(dataBackend()==='supabase'){await hydrateFromSupabase();}
+  else{applySnapshot(readLocalSnapshot());}
+}
+
+/* ============ CAPA DE DATOS SUPABASE (Postgres como espejo del estado) ============
+   Cada entidad se guarda en su tabla: columnas legibles + columna data(jsonb) con el
+   objeto completo (hidratación sin pérdida). Los "overrides"/config van en app_state. */
+const SB_ARRAYS=[
+  {t:'groups',               f:'grupos',    id:(x,i)=>i,               typed:x=>({name:x.n,overseer:x.sup,assistant:x.aux})},
+  {t:'publishers',           f:'db',        id:x=>x.id,                typed:x=>({full_name:x.fullName,first_name:x.nombre,last_name:x.apellidos,sex:x.sex,group_id:x.grupoIdx,role:x.role,status:x.estado,email:x.email,phone:x.tel})},
+  {t:'territories',          f:'terr',      id:x=>parseInt(x.num,10),  typed:x=>({number:x.num,neighborhood:x.barrio,locality:x.localidad,status:x.estado,responsible_id:(x.respId!=null?x.respId:null)})},
+  {t:'territory_assignments',f:'terrAsign', id:x=>x.id,                typed:x=>({assign_date:x.date,captain_id:x.encargadoId,confirmation:x.conf,notes:x.obs})},
+  {t:'do_not_call',          f:'noPredica', id:(x,i)=>i,               typed:x=>({territory_number:x.terr,address:x.dir,locality:x.localidad,reason:x.motivo,notes:x.obs})},
+  {t:'tasks',                f:'tasks',     id:x=>x.id,                typed:x=>({title:x.titulo,description:x.desc,priority:x.prioridad,status:x.estado,progress:x.progreso})},
+  {t:'reports',              f:'informes',  id:(x,i)=>i,               typed:x=>({publisher_id:x.pubId,submitted:x.entregado,hours:x.horas,studies:x.estudios,pioneer:x.auxiliar,period:'2026-06'})},
+  {t:'announcements',        f:'anuncios',  id:(x,i)=>i,               typed:x=>({title:x.t,body:x.d})},
+  {t:'events',               f:'eventos',   id:(x,i)=>i,               typed:x=>({name:x.n,detail:x.d})}
+];
+const SB_STATE=['notifs','attReg','meetOvr','discOvr','exhibOvr','congCfg','taSeq'];
+function sbInList(ids){return ids.map(v=>typeof v==='string'?('"'+v+'"'):v).join(',');}
+async function sbSyncNow(snap){snap=snap||buildSnapshot();
+  try{
+    for(const e of SB_ARRAYS){
+      const arr=snap[e.f]||[];
+      const rows=arr.map((x,i)=>Object.assign({id:e.id(x,i),ord:i,data:x},e.typed(x,i)));
+      if(rows.length)await sbRest(e.t+'?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:rows});
+      const ids=rows.map(r=>r.id);
+      await sbRest(e.t+(ids.length?('?id=not.in.('+sbInList(ids)+')'):'?id=not.is.null'),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    }
+    const kv=SB_STATE.map(k=>({key:k,value:(snap[k]!==undefined?snap[k]:null)}));
+    await sbRest('app_state?on_conflict=key',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:kv});
+    setSyncState('ok');
+  }catch(err){setSyncState('error',err);throw err;}
+}
+async function hydrateFromSupabase(){
+  try{
+    const probe=await sbRest('publishers?select=id&limit=1');
+    if(!probe||probe.length===0){ // proyecto vacío → sembrar con los datos actuales
+      const local=readLocalSnapshot();if(local)applySnapshot(local);
+      __sbReady=true;await sbSyncNow(buildSnapshot());setSyncState('seeded');return;
+    }
+    const d={v:1};
+    for(const e of SB_ARRAYS){const rows=await sbRest(e.t+'?select=data,ord&order=ord.asc');d[e.f]=(rows||[]).map(r=>r.data);}
+    const kv=await sbRest('app_state?select=key,value');const map={};(kv||[]).forEach(r=>{map[r.key]=r.value});
+    SB_STATE.forEach(k=>{if(map[k]!==undefined&&map[k]!==null)d[k]=map[k]});
+    applySnapshot(d);__sbReady=true;setSyncState('ok');
+  }catch(err){setSyncState('error',err);toast('No se pudo conectar con Supabase; usando datos locales');applySnapshot(readLocalSnapshot());}
+}
+let __sbTimer=null,__sbSyncing=false,__sbPending=false;
+function scheduleSbSync(){if(!__sbReady)return;if(__sbTimer)clearTimeout(__sbTimer);__sbTimer=setTimeout(runSbSync,700);}
+async function runSbSync(){if(__sbSyncing){__sbPending=true;return;}__sbSyncing=true;try{await sbSyncNow()}catch(e){}__sbSyncing=false;if(__sbPending){__sbPending=false;runSbSync();}}
+function setSyncState(state,err){__syncState={state:state,at:Date.now(),msg:err?String(err.message||err):''};const el=document.getElementById('syncStatusBox');if(el)el.innerHTML=syncStatusHTML();}
+
+/* ---- Panel de sincronización (Config → Sincronización) ---- */
+function syncStatusHTML(){const s=__syncState;const back=dataBackend();
+  const map={idle:['gray','Inactivo'],ok:['green','Sincronizado'],seeded:['green','Datos iniciales enviados'],error:['red','Error de sincronización']};
+  const st=map[s.state]||map.idle;
+  return `<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="badge ${back==='supabase'?'green':'gray'}">${svg(back==='supabase'?'db':'home')}${back==='supabase'?'Supabase (nube)':'Local (este navegador)'}</span><span class="badge ${st[0]}"><span class="bdot"></span>${st[1]}</span>${s.msg?`<small class="muted" style="font-size:11px">${s.msg}</small>`:''}</div>`;}
+function syncPanelHTML(){const back=dataBackend();
+  const counts=[['Publicadores',DB.length],['Territorios',TERR.length],['Tareas',TASKS.length],['Informes',INFORMES.length],['Asignaciones',TERR_ASIGN.length],['Notificaciones',NOTIFS.length]];
+  return `<div class="card"><div class="card-pad">
+    <div class="form-section-title">${svg('db')} Estado de la conexión</div>
+    <div id="syncStatusBox" style="margin-bottom:16px">${syncStatusHTML()}</div>
+    ${SB_ENABLED?`<div class="lst" style="border:1px solid var(--border);border-radius:12px;margin-bottom:16px">${counts.map(c=>`<div class="lst-item"><div class="lst-body"><b>${c[0]}</b></div><span class="tag">${c[1]}</span></div>`).join('')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="testSbConnection()">${svg('refresh')}Probar conexión</button><button class="btn" onclick="manualPull()">${svg('download')}Recargar desde Supabase</button><button class="btn primary" onclick="manualPush()">${svg('send')}Enviar datos a Supabase</button></div>
+    <p class="muted" style="font-size:12px;margin-top:14px;line-height:1.6">La sincronización con la nube es automática tras cada cambio cuando inicias sesión con una cuenta real. Usa <b>Enviar</b> para forzar una copia y <b>Recargar</b> para traer la versión del servidor.</p>`
+    :`<div style="font-size:13px;color:var(--ink-500);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;line-height:1.6">${svg('shield')} Estás en <b>modo local</b>: los datos se guardan solo en este navegador. Para activar el respaldo en la nube y compartir datos entre dispositivos, configura Supabase siguiendo <b>SETUP_SUPABASE.md</b> (pega tu URL y anon key en el archivo).</div>`}
+  </div></div>`;}
+async function testSbConnection(){if(!SB_ENABLED){toast('Supabase no está configurado');return;}toast('Probando conexión…');try{await sbRest('profiles?select=id&limit=1');setSyncState('ok');toast('Conexión con Supabase correcta ✓');}catch(e){setSyncState('error',e);toast('No se pudo conectar: '+(e.message||e));}}
+function manualPush(){if(!SB_ENABLED){toast('Supabase no está configurado');return;}confirmAction({icon:'send',tint:'t-brand',danger:false,title:'Enviar datos a Supabase',sub:'Copia el estado actual a la nube',body:'Se enviará el estado actual de la app a tu base de datos Supabase (crea o actualiza los registros). Úsalo para la carga inicial o para forzar una copia.',ok:'Enviar'},async()=>{toast('Enviando…');try{__sbReady=true;await sbSyncNow(buildSnapshot());toast('Datos enviados a Supabase ✓');if(currentView==='config')VIEWS.config();}catch(e){toast('Error al enviar: '+(e.message||e));}});}
+function manualPull(){if(!SB_ENABLED){toast('Supabase no está configurado');return;}confirmAction({icon:'download',tint:'t-amber',title:'Recargar desde Supabase',sub:'Reemplaza los datos en pantalla',body:'Se descargará la versión guardada en Supabase y reemplazará lo que ves ahora. Los cambios locales sin enviar se perderán.',ok:'Recargar'},async()=>{toast('Descargando…');try{await hydrateFromSupabase();renderNav();go('config');toast('Datos recargados desde Supabase ✓');}catch(e){toast('Error al recargar: '+(e.message||e));}});}
+/* overlay de carga de datos */
+function showDataLoading(on){let o=document.getElementById('dataLoading');
+  if(on){if(!o){o=document.createElement('div');o.id='dataLoading';o.style.cssText='position:fixed;inset:0;z-index:1200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;background:var(--bg)';o.innerHTML='<div class="spinner" style="width:34px;height:34px;border-width:3px"></div><div style="font-size:13.5px;color:var(--ink-500);font-weight:600">Cargando datos de la congregación…</div>';document.body.appendChild(o);}}
+  else if(o)o.remove();}
+
 function resetDemoData(){confirmAction({icon:'refresh',tint:'t-amber',title:'Restablecer datos de demostración',sub:'Se descartan todos los cambios guardados',body:'Se eliminarán los datos guardados en este navegador y la aplicación volverá al estado de demostración original. Esta acción no se puede deshacer.',ok:'Restablecer'},()=>{try{localStorage.removeItem(PERSIST_KEY)}catch(e){}location.reload();});}
 /* Confirmación genérica (antes de acciones destructivas) */
 let __confirmCb=null;
@@ -3039,7 +3124,7 @@ function toggleDemoPanel(){const p=document.getElementById('demoPanel');if(p)p.h
 async function submitLogin(e){e.preventDefault();const btn=document.getElementById('lg_submit');const err=document.getElementById('lg_err');
   const email=document.getElementById('lg_email').value.trim();const pw=document.getElementById('lg_pw').value;
   if(!email||!pw)return;err.style.display='none';btn.disabled=true;btn.classList.add('loading');btn.innerHTML='<span class="spinner"></span>Ingresando…';
-  try{await doLogin(email,pw);startApp();}
+  try{await doLogin(email,pw);await startApp();}
   catch(ex){err.textContent=/invalid|credentials|grant/i.test(String(ex.message))?'Correo o contraseña incorrectos.':('No se pudo iniciar sesión: '+ex.message);err.style.display='block';btn.disabled=false;btn.classList.remove('loading');btn.innerHTML=svg('logout')+'Iniciar sesión';}
 }
 function applyUserToChrome(){if(!CURRENT_USER)return;const u=CURRENT_USER;
@@ -3047,8 +3132,12 @@ function applyUserToChrome(){if(!CURRENT_USER)return;const u=CURRENT_USER;
   if(chip)chip.innerHTML=`<div class="avatar">${initials(u.name)}</div><div class="profile-meta"><b>${u.name}</b><small>${u.role}${u.demo?' · demo':''}</small></div><div class="chev">${svg('chevD')}</div>`;
   document.body.setAttribute('data-level',String(u.level));
 }
-function startApp(){removeAuthOverlay();document.querySelector('.app')&&(document.querySelector('.app').style.visibility='visible');
-  applyUserToChrome();hydrateAll();renderNav();go('dashboard');updateThemeToggle();
+async function startApp(){removeAuthOverlay();document.querySelector('.app')&&(document.querySelector('.app').style.visibility='visible');
+  applyUserToChrome();
+  if(dataBackend()==='supabase')showDataLoading(true);
+  try{await hydrateAll();}catch(e){}
+  showDataLoading(false);
+  renderNav();go('dashboard');updateThemeToggle();
   if(CURRENT_USER)toast(`Bienvenido, ${CURRENT_USER.name.split(' ')[0]} · ${CURRENT_USER.role}`);
 }
 async function initAuth(){const s=loadSession();

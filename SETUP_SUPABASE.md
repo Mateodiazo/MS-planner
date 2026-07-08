@@ -79,7 +79,26 @@ En el proyecto: **Project Settings** (engranaje) → **API**. Copia dos valores:
 - **Login por correo/contraseña funciona abriendo el HTML directamente** (`file://`), sin necesidad de hospedarlo.
 - Si más adelante quieres **acceso con Google o enlaces mágicos**, hay que **hospedar** la app (Netlify, Vercel o GitHub Pages) porque esos métodos requieren una URL de redirección. Avísame y lo configuramos.
 - La **anon key es pública y segura** siempre que las políticas RLS estén activas (lo están, las crea el `schema.sql`). El acceso real a los datos lo decide Postgres según el `access_level` del usuario.
-- **Estado actual:** esta primera iteración conecta **autenticación y roles** con Supabase. Los *datos* de los módulos siguen guardándose localmente (localStorage); la migración de cada módulo a las tablas de Postgres es el siguiente paso del roadmap.
+
+## 7. Datos en Postgres (Fase 2)
+
+Con Supabase configurado, **los datos ya no viven solo en el navegador: se guardan en Postgres** y se comparten entre dispositivos y usuarios.
+
+- **Primer inicio de sesión (siembra automática):** si las tablas están vacías, la app envía automáticamente los datos de ejemplo a Supabase. A partir de ahí, Postgres es la fuente de verdad.
+- **Sincronización automática:** cada cambio (crear/editar/eliminar publicadores, territorios, tareas, etc.) se guarda en la nube en segundo plano.
+- **Panel de control:** entra a **Configuración → Sincronización**. Ahí ves el estado de la conexión, el número de registros y tres botones:
+  - **Probar conexión** — verifica el acceso a Supabase.
+  - **Enviar datos a Supabase** — fuerza una copia del estado actual a la nube (útil para la carga inicial).
+  - **Recargar desde Supabase** — trae la versión del servidor.
+- **Verifícalo tú mismo:** en Supabase → **Table Editor** verás las tablas `publishers`, `territories`, `tasks`, etc., con tus datos. También puedes consultarlas en SQL:
+
+  ```sql
+  select full_name, role, status from public.publishers order by full_name;
+  ```
+
+- **Modo local sin conexión:** si Supabase falla o no está configurado, la app sigue funcionando con almacenamiento local (no se bloquea) y avisa con un mensaje.
+
+> **Cómo se guardan los datos:** cada tabla tiene columnas legibles (para consultas SQL y reportes) más una columna `data` (JSON) con el objeto completo que usa la app, de modo que la información se restaura sin pérdidas al volver a entrar.
 
 ## Solución de problemas
 
