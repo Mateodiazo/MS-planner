@@ -1,0 +1,8 @@
+# Este directorio contiene también archivos personales ajenos a MS Planner.
+# Se versiona SOLO el proyecto MS Planner (lista blanca).
+*
+!.gitignore
+!README.md
+!congregacion-admin-demo.html
+!HANDOFF_MS_Planner.md
+!AUDITORIA_UX_UI_MS_Planner.md
