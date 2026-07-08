@@ -2,6 +2,8 @@
 
 **MS Planner** es un SaaS (demo funcional) para administrar una congregación — perfil **Administrador/Anciano**. Congregación de ejemplo: **Las Flores** (Suba, Bogotá, Colombia).
 
+**🔗 App en vivo:** https://mateodiazo.github.io/MS-planner/ (requiere usuario; el acceso lo crea un administrador).
+
 ## 🚀 Cómo usarlo
 
 No requiere instalación, servidor ni dependencias:
