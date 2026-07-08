@@ -1,15 +1,18 @@
 -- ============================================================================
--- MS Planner — Esquema Supabase (PostgreSQL) · v2 (Fase 2: datos en Postgres)
+-- MS Planner — Esquema Supabase (PostgreSQL) · v3 (4 roles + datos sensibles)
+-- Instalación NUEVA: corre este archivo y LUEGO supabase_migration_roles.sql
+-- (la migración separa los datos sensibles y ajusta la seguridad por rol).
 -- ----------------------------------------------------------------------------
 -- Cómo usar:
 --   1. Supabase Dashboard → SQL Editor → New query
 --   2. Pega TODO este archivo y pulsa "Run".
 --   3. Crea tus usuarios en Authentication → Users (ver SETUP_SUPABASE.md).
 --
--- Modelo de roles (access_level):
---   1 = Administrador Global   (acceso total: usuarios, configuración, datos)
---   2 = Administrador de Datos (gestiona datos de la congregación)
---   3 = Usuario Estándar       (consulta y registro básico)  ← valor por defecto
+-- Modelo de roles (access_level) — ver supabase_migration_roles.sql y ROLES.md:
+--   1 = Super Administrador            (acceso total)
+--   2 = Administrador de Congregación  (datos completos de su congregación)
+--   3 = Administrador de Asignaciones  (programa/territorios, SIN datos sensibles)
+--   4 = Publicador                     (solo lo suyo)  ← valor por defecto
 --
 -- Modelo de datos:
 --   Cada entidad tiene su tabla con columnas legibles (para reportes/consultas
@@ -29,7 +32,7 @@ create table if not exists public.profiles (
   id           uuid primary key references auth.users(id) on delete cascade,
   email        text,
   full_name    text,
-  access_level int  not null default 3 check (access_level in (1,2,3)),
+  access_level int  not null default 4 check (access_level in (1,2,3,4)),
   congregation text default 'Las Flores',
   created_at   timestamptz default now()
 );
@@ -46,7 +49,7 @@ begin
   insert into public.profiles (id, email, full_name, access_level)
   values (new.id, new.email,
           coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
-          coalesce((new.raw_user_meta_data->>'access_level')::int, 3))
+          coalesce((new.raw_user_meta_data->>'access_level')::int, 4))
   on conflict (id) do nothing;
   return new;
 end; $$;

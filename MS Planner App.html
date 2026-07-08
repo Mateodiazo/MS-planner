@@ -564,10 +564,10 @@ const REAL_GROUPS=[
 const MALE_NAMES=new Set(['Andrés Esteban Mora','David Raigosa','Elías González','Hugo Molano','Paublo Díaz','Saúl Capera','Alfonso Manosalva','Carlos Jiménez','Cristian Vaca','Jhon Freddy Rendón Gallego','Jorge Martínez','Juan David Ríos','Luis Manuel Furnieles','Manuel Quintero','Serafín Mateus','Alejandro Castro','Arfaxad Aguiar','Daniel González','Félix Bonacho','Geovanny Sánchez','Gratiniano Prieto','Matías Mora','Ricardo Mora','Samuel Aguiar','Steven Moreno','Thomás González','Alexis Quintero','Andrés Mateo Díaz','Camilo Ortiz','Carlos Guzmán','Jairo Córdoba','Rauberto Rodríguez','Andrés Peña','Didier Flórez','Dídimo Quintero','Jhon Rincón','Juan Carlos Manosalva','Nel Soto','Reinaldo Rippe','Stiven Rippe','César Rodríguez','Daniel Cubillos','Gerardo Suárez','Gustavo Montenegro','Johan Tavera','Jonathan David Sánchez','José Manuel Rodríguez','Orlando Manosalva','Samuel Rodríguez']);
 const ROLES=['Anciano','Siervo Ministerial','Precursor Regular','Precursor Auxiliar','Publicador','Publicador no bautizado'];
 const PRIVILEGIOS=['Publicador','Publicador no bautizado','Precursor Auxiliar','Precursor Regular','Siervo Ministerial','Anciano'];
-const ACCESS_ROLES=['Nivel 1 – Administrador Global','Nivel 2 – Administrador de Datos','Nivel 3 – Usuario Estándar'];
+const ACCESS_ROLES=['Nivel 1 – Super Administrador','Nivel 2 – Administrador de Congregación','Nivel 3 – Administrador de Asignaciones','Nivel 4 – Publicador'];
 const PRIV_RANK={'Anciano':6,'Siervo Ministerial':5,'Precursor Regular':4,'Precursor Auxiliar':3,'Publicador':2,'Publicador no bautizado':1};
 function primaryPriv(list){if(!list||!list.length)return 'Publicador';return list.slice().sort((a,b)=>(PRIV_RANK[b]||0)-(PRIV_RANK[a]||0))[0];}
-function defaultAccessRole(list){return (list&&list.indexOf('Anciano')>=0)?'Nivel 2 – Administrador de Datos':'Nivel 3 – Usuario Estándar';}
+function defaultAccessRole(list){if(!list)return 'Nivel 4 – Publicador';if(list.indexOf('Anciano')>=0)return 'Nivel 2 – Administrador de Congregación';if(list.indexOf('Siervo Ministerial')>=0)return 'Nivel 3 – Administrador de Asignaciones';return 'Nivel 4 – Publicador';}
 const DISCURSOS=['¿Cómo afrontar la ansiedad?','La esperanza del Reino','El valor de la familia','La verdadera adoración','La sabiduría que viene de Dios','Confianza en tiempos difíciles','El amor que nunca falla','Vivir con propósito'];
 const AV_COLORS=['#5B21B6','#8B5CF6','#3B82F6','#06b6d4','#22C55E','#F59E0B','#ec4899','#4F46E5','#15803d'];
 function avColor(n){let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%AV_COLORS.length;return AV_COLORS[h]}
@@ -613,7 +613,7 @@ REAL_GROUPS.forEach((g,gi)=>{
       email:(parts[0]+'.'+parts[parts.length-1]).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')+'@correo.com',
       nacimiento:diso(daysAgo(7000+hashStr(fullName+'n')%17000)),
       dir:`${seededPick(VIAS,fullName+'v')} ${100+hashStr(fullName+'c')%60} #${90+hashStr(fullName+'d')%40}-${String(10+hashStr(fullName+'f')%80).padStart(2,'0')}, ${seededPick(BARRIOS_BOG[loc],fullName+'bb')}`,
-      localidad:loc,grupo:GRUPOS[gi],role,privilegio:role,privilegios:[role],accessRole:(role==='Anciano'?'Nivel 2 – Administrador de Datos':'Nivel 3 – Usuario Estándar'),estado,
+      localidad:loc,grupo:GRUPOS[gi],role,privilegio:role,privilegios:[role],accessRole:defaultAccessRole([role]),estado,
       bautismo:baptized?diso(daysAgo(400+hashStr(fullName+'ba')%8000)):'',
       nombramiento:(role==='Anciano'||role==='Siervo Ministerial')?diso(daysAgo(300+hashStr(fullName+'no')%3700)):'',obs:''});
   });
@@ -715,15 +715,17 @@ function refreshDerived(){males.length=0;DB.filter(p=>p.sex==='M'&&p.estado!=='I
 
 /* NAV */
 const NAV=[
-  {sec:'Principal',items:[{id:'dashboard',label:'Dashboard',ico:'dashboard'},{id:'programaciones',label:'Programaciones',ico:'calendar',badge:STATS.asignPend},{id:'asistencia',label:'Asistencia',ico:'people'}]},
-  {sec:'Congregación',items:[{id:'database',label:'Base de datos',ico:'db'},{id:'territorios',label:'Mapas y Territorios',ico:'map'},{id:'exhibidores',label:'Exhibidores',ico:'display'}]},
-  {sec:'Análisis',items:[{id:'informes',label:'Informes Mensuales',ico:'report',badge:STATS.infPend},{id:'actividad',label:'Actividad',ico:'bell',badge:activityPending()},{id:'reportes',label:'Reportes',ico:'chart'},{id:'ia',label:'AI Insights',ico:'star'}]},
+  {sec:'Principal',items:[{id:'dashboard',label:'Dashboard',ico:'dashboard'},{id:'programaciones',label:'Programaciones',ico:'calendar',badge:STATS.asignPend,cap:'program.manage'},{id:'asistencia',label:'Asistencia',ico:'people',cap:'stats.view'}]},
+  {sec:'Congregación',items:[{id:'database',label:'Base de datos',ico:'db',cap:'personal.view'},{id:'territorios',label:'Mapas y Territorios',ico:'map',cap:'territory.manage'},{id:'exhibidores',label:'Exhibidores',ico:'display',cap:'assign.manage'}]},
+  {sec:'Análisis',items:[{id:'informes',label:'Informes Mensuales',ico:'report',badge:STATS.infPend,cap:'stats.view'},{id:'actividad',label:'Actividad',ico:'bell',badge:activityPending()},{id:'reportes',label:'Reportes',ico:'chart',cap:'reports.download'},{id:'ia',label:'AI Insights',ico:'star',cap:'stats.view'}]},
 ];
+/* Capacidad requerida por vista (para ocultar del menú y bloquear navegación directa) */
+const VIEW_CAP={programaciones:'program.manage',asistencia:'stats.view',database:'personal.view',territorios:'territory.manage',exhibidores:'assign.manage',informes:'stats.view',reportes:'reports.download',ia:'stats.view',config:'config.general'};
 const TITLES={dashboard:'Dashboard',programaciones:'Programaciones',reuniones:'Reuniones',asistencia:'Asistencia',actividad:'Actividad',tareas:'Actividad',database:'Base de datos',territorios:'Mapas y Territorios',exhibidores:'Exhibidores',informes:'Informes Mensuales',reportes:'Reportes',ia:'AI Insights',notificaciones:'Actividad',config:'Configuración de la Congregación'};
 let currentView='dashboard';
 function navBadge(id){if(id==='actividad')return activityPending();if(id==='informes')return STATS.infPend;if(id==='programaciones')return STATS.asignPend;return 0}
-function renderNav(){document.getElementById('nav').innerHTML=NAV.map(s=>`<div class="nav-section-title">${s.sec}</div>${s.items.map(it=>{const badge=navBadge(it.id);return `<div class="nav-item ${it.id===currentView?'active':''}" ${it.id===currentView?'aria-current="page"':''} onclick="go('${it.id}')" data-tip="${it.label}" title="${it.label}">${svg(it.ico)}<span class="nav-label">${it.label}</span>${badge?`<span class="nav-badge ${it.badgeMuted?'muted':''}">${badge}</span>`:''}</div>`}).join('')}`).join('')}
-function go(id){refreshStats();currentView=id;renderNav();document.getElementById('breadcrumbs').innerHTML=`<span>Las Flores</span><span class="sep">${svg('chevR')}</span><b>${TITLES[id]}</b>`;closeMobileNav();const c=document.getElementById('content');c.innerHTML='';c.scrollTop=0;VIEWS[id]()}
+function renderNav(){document.getElementById('nav').innerHTML=NAV.map(s=>{const items=s.items.filter(it=>!it.cap||can(it.cap));if(!items.length)return '';return `<div class="nav-section-title">${s.sec}</div>${items.map(it=>{const badge=navBadge(it.id);return `<div class="nav-item ${it.id===currentView?'active':''}" ${it.id===currentView?'aria-current="page"':''} onclick="go('${it.id}')" data-tip="${it.label}" title="${it.label}">${svg(it.ico)}<span class="nav-label">${it.label}</span>${badge?`<span class="nav-badge ${it.badgeMuted?'muted':''}">${badge}</span>`:''}</div>`}).join('')}`}).join('')}
+function go(id){refreshStats();if(VIEW_CAP[id]&&!can(VIEW_CAP[id])){id='dashboard';}currentView=id;renderNav();document.getElementById('breadcrumbs').innerHTML=`<span>Las Flores</span><span class="sep">${svg('chevR')}</span><b>${TITLES[id]}</b>`;closeMobileNav();const c=document.getElementById('content');c.innerHTML='';c.scrollTop=0;VIEWS[id]()}
 
 /* SHARED UI */
 function avatarHTML(name,cls='av-sm'){return `<div class="${cls}" style="background:${avColor(name)}">${initials(name)}</div>`}
@@ -745,7 +747,44 @@ function INF_ACTUAL_(){return STATS.infEntreg}
 function INF_PREV_(){return Math.min(STATS.total,STATS.infEntreg+(hashStr('ip')%9)-3)}
 const INF_NEXT=0;
 
+function renderPublisherHome(){
+  const u=CURRENT_USER||{name:'Publicador'};
+  document.getElementById('content').innerHTML=`<div class="page">
+    ${pageHead('Hola, '+(u.name?u.name.split(' ')[0]:'')+' 👋','Tu espacio personal de publicador · Congregación Las Flores','')}
+    <div class="card" style="margin-bottom:20px;background:linear-gradient(120deg,var(--brand-50),var(--violet-50));border-color:var(--brand-200)"><div class="card-pad" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="kpi-ico t-brand" style="width:48px;height:48px;background:var(--brand-500);color:#fff">${svg('user')}</div>
+      <div style="flex:1;min-width:200px"><b style="font-size:16px">Bienvenido a MS Planner</b><p style="color:var(--ink-500);font-size:13px;margin-top:3px">Desde aquí podrás consultar tu programa, ver y confirmar tus asignaciones y reportar tu predicación. Tu acceso de <b>Publicador</b> está activo.</p></div>
+    </div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
+      ${[
+        {i:'calendar',t:'t-brand',n:'Mi programa',d:'Tus próximas reuniones y partes.',fn:"toast('Tu programa estará disponible próximamente')"},
+        {i:'check',t:'t-green',n:'Mis asignaciones',d:'Confirma o rechaza lo asignado.',fn:"toast('Tus asignaciones estarán disponibles próximamente')"},
+        {i:'report',t:'t-violet',n:'Reportar predicación',d:'Envía tu informe mensual.',fn:"toast('El reporte de predicación estará disponible próximamente')"},
+        {i:'bell',t:'t-amber',n:'Notificaciones',d:'Avisos y recordatorios.',fn:"go('actividad')"},
+        {i:'user',t:'t-cyan',n:'Mi perfil',d:'Edita tus datos y preferencias.',fn:"openUserConfig()"}
+      ].map(c=>`<button type="button" onclick="${c.fn}" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px;line-height:1.45">${c.d}</p></button>`).join('')}
+    </div>
+    <p class="muted" style="font-size:12px;margin-top:22px;text-align:center">La experiencia completa del Publicador está en desarrollo. Por ahora puedes editar tu perfil y ver tus notificaciones.</p>
+  </div>`;
+}
+function renderOpsDashboard(){
+  const kpis=[
+    {v:STATS.terrActivos,l:'Territorios activos',ico:'map',t:'t-green'},
+    {v:STATS.terrVenc,l:'Territorios vencidos',ico:'warn',t:'t-red'},
+    {v:STATS.asignPend,l:'Asignaciones por confirmar',ico:'clock',t:'t-amber'},
+    {v:TERR_ASIGN.length,l:'Salidas de predicación',ico:'calendar',t:'t-brand'}
+  ];
+  document.getElementById('content').innerHTML=`<div class="page">
+    ${pageHead('Panel operativo','Programa, asignaciones y territorios · Congregación Las Flores','')}
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
+    <div class="dash-rowlabel">Accesos rápidos</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
+      ${[{i:'calendar',t:'t-brand',n:'Programa de reuniones',d:'Partes y asignaciones.',v:'programaciones'},{i:'map',t:'t-green',n:'Territorios',d:'Entrega y devolución.',v:'territorios'},{i:'display',t:'t-cyan',n:'Exhibidores',d:'Turnos de predicación pública.',v:'exhibidores'},{i:'bell',t:'t-amber',n:'Actividad',d:'Tus tareas y avisos.',v:'actividad'}].map(c=>`<button type="button" onclick="go('${c.v}')" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px">${c.d}</p></button>`).join('')}
+    </div></div>`;
+}
 VIEWS.dashboard=()=>{
+  if(userLevel()>=4){return renderPublisherHome();}
+  if(userLevel()===3){return renderOpsDashboard();}
   const cobertura=Math.round(STATS.terrComp/STATS.terrTotal*100);
   const irregulares=DB.filter(p=>p.estado==='Irregular').length;
   const next=upcomingMeetings(1)[0];
@@ -1181,7 +1220,7 @@ function fichaViewConfig(id){
       </div>`,
     footer:`<button class="btn" onclick="closeModal();openHistAsign(${id})">${svg('calendar')}Historial</button><button class="btn primary" onclick="closeModal()">Cerrar</button>`};
 }
-function openFicha(id){openModalCustom(fichaViewConfig(id))}
+function openFicha(id){if(!requireCap('personal.view'))return;openModalCustom(fichaViewConfig(id))}
 function fichaToEdit(id){if(!requireCap('data.edit'))return;swapModalContent(fichaEditConfig(id,true))}
 function editFichaCancel(id){swapModalContent(fichaViewConfig(id))}
 function fichaField(label,ico,val){return `<div class="form-row"><label style="color:var(--ink-400);display:flex;align-items:center;gap:6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px">${svg(ico)} ${label}</label><div style="font-size:14px;font-weight:600">${val}</div></div>`}
@@ -1207,7 +1246,7 @@ function fichaEditConfig(id,fromView){
         <div class="form-row"><label>Estado</label><select class="select" id="ec_estado">${['Activo','Irregular','Inactivo'].map(e=>`<option ${e===p.estado?'selected':''}>${e}</option>`).join('')}</select></div>
         <div class="form-row full"><label>Privilegios ministeriales</label>
           <div id="ec_privs" style="display:flex;flex-wrap:wrap;gap:8px">${PRIVILEGIOS.map(pr=>`<button type="button" class="chip-sel${privs.includes(pr)?' on':''}" data-priv="${pr}" aria-pressed="${privs.includes(pr)}" onclick="togglePrivChip(this)">${pr}</button>`).join('')}</div>
-          <span class="field-hint" style="margin-top:8px">Selecciona uno o varios privilegios. El nivel de acceso se ajusta automáticamente (Anciano → Administrador de Datos; los demás → Usuario Estándar). El Administrador Global se asigna manualmente.</span>
+          <span class="field-hint" style="margin-top:8px">Selecciona uno o varios privilegios. El nivel de acceso se ajusta automáticamente (Anciano → Administrador de Congregación; Siervo Ministerial → Administrador de Asignaciones; los demás → Publicador). El Super Administrador se asigna manualmente.</span>
         </div></div>
       <div class="form-section-title">${svg('doc')} Información adicional</div>
       <div class="form-grid">
@@ -1258,7 +1297,7 @@ function saveContact(id,fromView){
 }
 function selectedPrivs(){return Array.prototype.slice.call(document.querySelectorAll('#ec_privs .chip-sel.on')).map(b=>b.getAttribute('data-priv'));}
 function togglePrivChip(el){const on=el.classList.toggle('on');el.setAttribute('aria-pressed',on?'true':'false');syncAccessRole();}
-function syncAccessRole(){const sel=document.getElementById('ec_access');if(!sel)return;if(sel.value==='Nivel 1 – Administrador Global')return;sel.value=defaultAccessRole(selectedPrivs());}
+function syncAccessRole(){const sel=document.getElementById('ec_access');if(!sel)return;if(sel.value==='Nivel 1 – Super Administrador')return;sel.value=defaultAccessRole(selectedPrivs());}
 
 function openHistAsign(id){
   const p=DB.find(x=>x.id===id);const items=[];
@@ -1296,7 +1335,7 @@ function deletePublisher(id){
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">Esta acción quitará de forma permanente a <b>${p.fullName}</b> de la base de datos de la congregación. Sus asignaciones e informes asociados dejarán de mostrarse.</p><p class="muted" style="font-size:12.5px;margin-top:12px">Esta acción no se puede deshacer.</p>`,
     footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="applyDelete(${id})">${svg('trash')}Eliminar definitivamente</button>`});
 }
-function applyDelete(id){if(!requireCap('data.delete'))return;const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${p.fullName} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${p.fullName} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
+function applyDelete(id){if(!requireCap('personal.manage'))return;const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${p.fullName} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${p.fullName} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
 
 /* ---- Tarjeta PDF del publicador (sin librerías) ---- */
 function ascii(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\x20-\x7E]/g,'')}
@@ -1510,7 +1549,7 @@ function saveTerrAsign(id){const date=document.getElementById('ta_date').value;c
   else{TERR_ASIGN.push({id:'ta'+(taSeq++),date:date,encargadoId:enc,territorios:terrs,obs:obs,conf:'pend'});}
   persistAll();closeModal();renderTerrAsign();toast(id?'Asignación actualizada ✓':'Asignación creada ✓');
 }
-function delTerrAsign(id){if(!requireCap('data.delete'))return;const i=TERR_ASIGN.findIndex(x=>x.id===id);if(i<0)return;const removed=TERR_ASIGN.splice(i,1)[0];persistAll();renderTerrAsign();toastAction('Asignación eliminada','Deshacer',()=>{TERR_ASIGN.splice(Math.min(i,TERR_ASIGN.length),0,removed);persistAll();renderTerrAsign();toast('Asignación restaurada');},{icon:'trash',cls:'undo'});}
+function delTerrAsign(id){if(!requireCap('assign.manage'))return;const i=TERR_ASIGN.findIndex(x=>x.id===id);if(i<0)return;const removed=TERR_ASIGN.splice(i,1)[0];persistAll();renderTerrAsign();toastAction('Asignación eliminada','Deshacer',()=>{TERR_ASIGN.splice(Math.min(i,TERR_ASIGN.length),0,removed);persistAll();renderTerrAsign();toast('Asignación restaurada');},{icon:'trash',cls:'undo'});}
 function terrFiltered(){
   const q=terrState.q.toLowerCase();
   let rows=TERR.filter(t=>!q||(t.barrio+t.localidad+t.num).toLowerCase().includes(q));
@@ -1581,7 +1620,7 @@ function saveNoPredica(){
   persistAll();closeModal();
   if(currentView==='territorios')renderTerr();
   toast('Dirección registrada ✓');}
-function delNoPredica(i){if(!requireCap('data.delete'))return;const n=NO_PREDICA[i];if(!n)return;
+function delNoPredica(i){if(!requireCap('territory.manage'))return;const n=NO_PREDICA[i];if(!n)return;
   confirmAction({title:'Eliminar registro',sub:n.dir.split(',')[0],body:'La dirección se quitará de la lista de casas donde no se predica.',ok:'Eliminar'},()=>{
     const removed=NO_PREDICA.splice(i,1)[0];persistAll();if(currentView==='territorios')renderTerr();
     toastAction('Registro eliminado','Deshacer',()=>{NO_PREDICA.splice(Math.min(i,NO_PREDICA.length),0,removed);persistAll();if(currentView==='territorios')renderTerr();toast('Registro restaurado');},{icon:'trash',cls:'undo'});});}
@@ -1799,7 +1838,7 @@ function exportTerrPdf(){
   toast('Reporte de territorios (PDF) descargado');
 }
 const XMIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-function exportDbFiltered(){const list=filteredDB();if(!list.length){toast('No hay registros para exportar con los filtros actuales');return;}const rows=[['Nombre','Apellidos','Grupo','Privilegios','Nivel de acceso','Estado','Teléfono','Correo','Dirección','Nacimiento','Bautismo']];list.forEach(p=>rows.push([p.nombre,p.apellidos,p.grupo,(p.privilegios||[p.role]).join(', '),p.accessRole||'',p.estado,p.tel,p.email,p.dir,fmtFecha(p.nacimiento),fmtFecha(p.bautismo)]));downloadBlob('Base_de_datos_Las_Flores.xlsx',buildXlsx(rows,'Publicadores'),XMIME);toast(`Base de datos exportada (${list.length} registros) ✓`)}
+function exportDbFiltered(){if(!requireCap('data.export'))return;const list=filteredDB();if(!list.length){toast('No hay registros para exportar con los filtros actuales');return;}const rows=[['Nombre','Apellidos','Grupo','Privilegios','Nivel de acceso','Estado','Teléfono','Correo','Dirección','Nacimiento','Bautismo']];list.forEach(p=>rows.push([p.nombre,p.apellidos,p.grupo,(p.privilegios||[p.role]).join(', '),p.accessRole||'',p.estado,p.tel,p.email,p.dir,fmtFecha(p.nacimiento),fmtFecha(p.bautismo)]));downloadBlob('Base_de_datos_Las_Flores.xlsx',buildXlsx(rows,'Publicadores'),XMIME);toast(`Base de datos exportada (${list.length} registros) ✓`)}
 function repBaseDatos(){const rows=[['Nombre','Grupo','Privilegio','Estado','Teléfono','Correo','Localidad','Superintendente','Auxiliar','Bautismo','Nombramiento']];DB.forEach(p=>rows.push([p.fullName,p.grupo,p.role,p.estado,p.tel,p.email,p.localidad,p.superintendente,p.auxiliar,fmtFecha(p.bautismo),fmtFecha(p.nombramiento)]));downloadBlob('Base_de_datos_Las_Flores.xlsx',buildXlsx(rows,'Publicadores'),XMIME);toast('Base de datos exportada')}
 function repPrecursores(){const rows=[['Nombre','Tipo','Grupo','Teléfono','Horas (mes)','Estudios']];DB.filter(p=>p.role==='Precursor Regular').forEach(p=>{const inf=INFORMES.find(r=>r.pub.id===p.id);rows.push([p.fullName,'Precursor Regular',p.grupo,p.tel,String(inf?inf.horas:0),String(inf?inf.estudios:0)])});downloadBlob('Precursores_Regulares.xlsx',buildXlsx(rows,'Precursores'),XMIME);toast('Reporte de precursores exportado')}
 function repPublicadores(){const rows=[['Nombre','Grupo','Privilegio','Estado','Teléfono','Correo']];DB.forEach(p=>rows.push([p.fullName,p.grupo,p.role,p.estado,p.tel,p.email]));downloadBlob('Publicadores_Las_Flores.xlsx',buildXlsx(rows,'Publicadores'),XMIME);toast('Reporte de publicadores exportado')}
@@ -2277,7 +2316,7 @@ function saveTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   closeModal();
   toast('Tarea actualizada ✓');}
 function reopenTask(id){const t=TASKS.find(x=>x.id===id);if(!t)return;t.estado='Pendiente';t.progreso=0;refreshStats();persistAll();closeModal();if(currentView==='actividad')VIEWS.actividad();renderNav();toast('Tarea reabierta');}
-function deleteTask(id){if(!requireCap('data.delete'))return;const t=TASKS.find(x=>x.id===id);if(!t)return;
+function deleteTask(id){if(!requireCap('assign.manage'))return;const t=TASKS.find(x=>x.id===id);if(!t)return;
   confirmAction({title:'Eliminar tarea',sub:t.titulo,body:'La tarea se eliminará de la lista de actividad. Podrás deshacer esta acción durante unos segundos.',ok:'Eliminar'},()=>{
     const i=TASKS.findIndex(x=>x.id===id);if(i<0)return;const removed=TASKS.splice(i,1)[0];refreshStats();persistAll();
     if(currentView==='actividad')VIEWS.actividad();renderNav();
@@ -2313,7 +2352,7 @@ let legalTab='legal';
 const CIRCUITO_CONGS=['Las Flores','Bellavista','El Carmelo','Nueva Esperanza','Monte Sion'];
 const PAGOS=[{f:'01 ene 2026',c:'Plan Anual 2026',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2025',c:'Plan Anual 2025',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2024',c:'Plan Anual 2024',m:'USD 18,00',e:'Pagado'}];
 VIEWS.config=()=>{
-  if(!can('config.general')){document.getElementById('content').innerHTML=`<div class="page">${pageHead('Configuración de la Congregación','Las Flores · ajustes generales','')}<div class="card"><div class="empty" style="padding:52px 24px;text-align:center"><div class="kpi-ico t-amber" style="width:52px;height:52px;margin:0 auto 14px">${svg('shield')}</div><b style="font-size:15px;display:block;margin-bottom:6px">Acceso restringido</b><p class="muted" style="font-size:13px;max-width:420px;margin:0 auto">La configuración de la congregación está disponible solo para administradores (Nivel 1 y 2). Tu rol actual es <b>${(CURRENT_USER&&CURRENT_USER.role)||'Usuario Estándar'}</b>.</p></div></div></div>`;return;}
+  if(!can('config.general')){document.getElementById('content').innerHTML=`<div class="page">${pageHead('Configuración de la Congregación','Las Flores · ajustes generales','')}<div class="card"><div class="empty" style="padding:52px 24px;text-align:center"><div class="kpi-ico t-amber" style="width:52px;height:52px;margin:0 auto 14px">${svg('shield')}</div><b style="font-size:15px;display:block;margin-bottom:6px">Acceso restringido</b><p class="muted" style="font-size:13px;max-width:420px;margin:0 auto">La configuración de la congregación está disponible solo para administradores (Nivel 1 y 2). Tu rol actual es <b>${(CURRENT_USER&&CURRENT_USER.role)||'Publicador'}</b>.</p></div></div></div>`;return;}
   const tabs=[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['sync','Sincronización'],['legalseg','Legal y seguridad']].concat(can('billing')?[['sub','Suscripción']]:[]).concat([['soporte','Soporte']]);
   if(configTab==='sub'&&!can('billing'))configTab='general';
   document.getElementById('content').innerHTML=`<div class="page">
@@ -2371,7 +2410,7 @@ function saveAnuncio(i){
   if(i===null)notify('Nuevo anuncio',`Se publicó el anuncio "${t}".`);
   if(currentView==='config')VIEWS.config();renderNav();
   toast(i!==null?'Anuncio actualizado ✓':'Anuncio publicado ✓');}
-function delAnuncio(i){if(!requireCap('data.delete'))return;const a=ANUNCIOS[i];if(!a)return;
+function delAnuncio(i){if(!requireCap('anuncio.manage'))return;const a=ANUNCIOS[i];if(!a)return;
   confirmAction({title:'Eliminar anuncio',sub:a.t,body:'El anuncio dejará de mostrarse a la congregación.',ok:'Eliminar'},()=>{
     const removed=ANUNCIOS.splice(i,1)[0];persistAll();if(currentView==='config')VIEWS.config();
     toastAction('Anuncio eliminado','Deshacer',()=>{ANUNCIOS.splice(Math.min(i,ANUNCIOS.length),0,removed);persistAll();if(currentView==='config')VIEWS.config();toast('Anuncio restaurado');},{icon:'trash',cls:'undo'});});}
@@ -2392,7 +2431,7 @@ function saveEvento(){
   notify('Nuevo anuncio',`Nuevo evento en el calendario: ${n}.`);
   if(currentView==='config')VIEWS.config();renderNav();
   toast('Evento creado ✓');}
-function delEvento(i){if(!requireCap('data.delete'))return;const e=EVENTS[i];if(!e)return;
+function delEvento(i){if(!requireCap('anuncio.manage'))return;const e=EVENTS[i];if(!e)return;
   confirmAction({title:'Eliminar evento',sub:e.n,body:'El evento se quitará del calendario.',ok:'Eliminar'},()=>{
     EVENTS.splice(i,1);persistAll();if(currentView==='config')VIEWS.config();toast('Evento eliminado');});}
 function openSubGestion(){if(!requireCap('billing'))return;
@@ -2734,7 +2773,7 @@ const MODALS={
 };
 const MODAL_SAVES={publisher:'savePublisher',task:'saveTaskModal',assignment:'saveAssignment',nopredica:'saveNoPredica'};
 const MODAL_INITS={assignment:()=>asgUpdateParts()};
-const MODAL_CAP={publisher:'data.create',task:'data.create',nopredica:'data.create',assignment:'assign.manage'};
+const MODAL_CAP={publisher:'personal.manage',task:'assign.manage',nopredica:'territory.manage',assignment:'assign.manage'};
 function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
 function asgUpdateParts(){const sel=document.getElementById('asg_meet');if(!sel)return;const v=sel.value.split('|');const parts=mkParts(new Date(v[0]+'T00:00:00'),v[1]);document.getElementById('asg_part').innerHTML=parts.map(p=>`<option>${p.role}</option>`).join('');}
 function saveAssignment(){const v=document.getElementById('asg_meet').value.split('|');const iso=v[0],type=v[1];const role=document.getElementById('asg_part').value;const pid=sselValue('asg_pub');
@@ -2795,7 +2834,7 @@ function closeNotifOnce(e){const p=document.getElementById('notifPop');if(p&&!p.
 function toggleProfile(e){e.stopPropagation();const ex=document.getElementById('profilePop');if(ex){ex.remove();return}
   const pop=document.createElement('div');pop.id='profilePop';pop.className='popover profile';
   const u=CURRENT_USER||{name:'Paublo Díaz',email:'demo@lasflores.org',level:1,role:ACCESS_LEVELS[1]};
-  pop.innerHTML=`<div class="profile-card"><div class="avatar">${initials(u.name)}</div><div><b>${u.name}</b><small>${u.email}</small><div style="margin-top:6px"><span class="badge ${u.level===1?'violet':u.level===2?'blue':'cyan'}">${svg('shield')}Nivel ${u.level} · ${u.role}</span></div></div></div><div class="profile-menu"><button class="ctx-item" onclick="closeProfile();openMiPerfil()">${svg('user')}Mi perfil</button><button class="ctx-item" onclick="closeProfile();openUserConfig()">${svg('settings')}Configuración</button><button class="ctx-item" onclick="closeProfile();openIdioma()">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" onclick="closeProfile();signOut()">${svg('logout')}Cerrar sesión</button></div>`;
+  pop.innerHTML=`<div class="profile-card"><div class="avatar">${initials(u.name)}</div><div><b>${u.name}</b><small>${u.email}</small><div style="margin-top:6px"><span class="badge ${u.level===1?'violet':u.level===2?'blue':u.level===3?'cyan':'gray'}">${svg('shield')}Nivel ${u.level} · ${u.role}</span></div></div></div><div class="profile-menu"><button class="ctx-item" onclick="closeProfile();openMiPerfil()">${svg('user')}Mi perfil</button><button class="ctx-item" onclick="closeProfile();openUserConfig()">${svg('settings')}Configuración</button><button class="ctx-item" onclick="closeProfile();openIdioma()">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" onclick="closeProfile();signOut()">${svg('logout')}Cerrar sesión</button></div>`;
   document.body.appendChild(pop);setTimeout(()=>document.addEventListener('click',closeProfileOnce),0);}
 function closeProfileOnce(e){const p=document.getElementById('profilePop');if(p&&!p.contains(e.target)&&!document.getElementById('profileBtn').contains(e.target)){p.remove();document.removeEventListener('click',closeProfileOnce)}}
 function closeProfile(){const p=document.getElementById('profilePop');if(p)p.remove()}
@@ -2903,7 +2942,7 @@ function gsGo(kind,id){gsClose();const inp=document.getElementById('globalSearch
 function renderGlobalSearch(){const inp=document.getElementById('globalSearch');const q=(inp.value||'').trim().toLowerCase();
   if(q.length<2){gsClose();return;}
   const res=[];const qd=q.replace(/\s/g,'');
-  DB.forEach(p=>{if(res.filter(r=>r.k==='pub').length<5&&(p.fullName.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.tel||'').replace(/\s/g,'').includes(qd)))res.push({k:'pub',id:p.id,t:p.fullName,s:p.grupo+' · '+p.role,ico:'user',tint:'t-brand'})});
+  if(can('personal.view'))DB.forEach(p=>{if(res.filter(r=>r.k==='pub').length<5&&(p.fullName.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.tel||'').replace(/\s/g,'').includes(qd)))res.push({k:'pub',id:p.id,t:p.fullName,s:p.grupo+' · '+p.role,ico:'user',tint:'t-brand'})});
   TERR.forEach(t=>{if(res.filter(r=>r.k==='terr').length<4&&(t.num.includes(qd)||('territorio '+t.num).includes(q)||('territorio '+(+t.num)).includes(q)||t.barrio.toLowerCase().includes(q)||t.localidad.toLowerCase().includes(q)))res.push({k:'terr',id:t.num,t:'Territorio #'+t.num,s:t.barrio+' · '+t.localidad,ico:'map',tint:'t-green'})});
   TASKS.forEach(t=>{if(res.filter(r=>r.k==='task').length<3&&t.titulo.toLowerCase().includes(q))res.push({k:'task',id:t.id,t:t.titulo,s:'Tarea · '+t.estado,ico:'tasks',tint:'t-violet'})});
   NAV.forEach(sec=>sec.items.forEach(it=>{if(it.label.toLowerCase().includes(q))res.push({k:'view',id:it.id,t:it.label,s:'Ir al módulo',ico:it.ico,tint:'t-cyan'})}));
@@ -2973,42 +3012,63 @@ async function hydrateAll(){
 /* ============ CAPA DE DATOS SUPABASE (Postgres como espejo del estado) ============
    Cada entidad se guarda en su tabla: columnas legibles + columna data(jsonb) con el
    objeto completo (hidratación sin pérdida). Los "overrides"/config van en app_state. */
+/* Datos personales SENSIBLES: viven en tabla aparte (publisher_private), solo Nivel 1-2 los leen/escriben */
+const SENSITIVE_FIELDS=['tel','email','dir','nacimiento','obs'];
+function cleanPub(p){const o=Object.assign({},p);SENSITIVE_FIELDS.forEach(k=>delete o[k]);return o;}
+function pubPrivate(p){const o={};SENSITIVE_FIELDS.forEach(k=>{o[k]=p[k]!==undefined?p[k]:null});return o;}
+/* wcap = capacidad requerida para ESCRIBIR esa entidad (sincroniza solo lo que el rol puede modificar) */
 const SB_ARRAYS=[
-  {t:'groups',               f:'grupos',    id:(x,i)=>i,               typed:x=>({name:x.n,overseer:x.sup,assistant:x.aux})},
-  {t:'publishers',           f:'db',        id:x=>x.id,                typed:x=>({full_name:x.fullName,first_name:x.nombre,last_name:x.apellidos,sex:x.sex,group_id:x.grupoIdx,role:x.role,status:x.estado,email:x.email,phone:x.tel})},
-  {t:'territories',          f:'terr',      id:x=>parseInt(x.num,10),  typed:x=>({number:x.num,neighborhood:x.barrio,locality:x.localidad,status:x.estado,responsible_id:(x.respId!=null?x.respId:null)})},
-  {t:'territory_assignments',f:'terrAsign', id:x=>x.id,                typed:x=>({assign_date:x.date,captain_id:x.encargadoId,confirmation:x.conf,notes:x.obs})},
-  {t:'do_not_call',          f:'noPredica', id:(x,i)=>i,               typed:x=>({territory_number:x.terr,address:x.dir,locality:x.localidad,reason:x.motivo,notes:x.obs})},
-  {t:'tasks',                f:'tasks',     id:x=>x.id,                typed:x=>({title:x.titulo,description:x.desc,priority:x.prioridad,status:x.estado,progress:x.progreso})},
-  {t:'reports',              f:'informes',  id:(x,i)=>i,               typed:x=>({publisher_id:x.pubId,submitted:x.entregado,hours:x.horas,studies:x.estudios,pioneer:x.auxiliar,period:'2026-06'})},
-  {t:'announcements',        f:'anuncios',  id:(x,i)=>i,               typed:x=>({title:x.t,body:x.d})},
-  {t:'events',               f:'eventos',   id:(x,i)=>i,               typed:x=>({name:x.n,detail:x.d})}
+  {t:'groups',               f:'grupos',    id:(x,i)=>i,               wcap:'data.edit',        typed:x=>({name:x.n,overseer:x.sup,assistant:x.aux})},
+  {t:'publishers',           f:'db',        id:x=>x.id,                wcap:'personal.manage',  clean:cleanPub, typed:x=>({full_name:x.fullName,first_name:x.nombre,last_name:x.apellidos,sex:x.sex,group_id:x.grupoIdx,role:x.role,status:x.estado})},
+  {t:'territories',          f:'terr',      id:x=>parseInt(x.num,10),  wcap:'territory.manage', typed:x=>({number:x.num,neighborhood:x.barrio,locality:x.localidad,status:x.estado,responsible_id:(x.respId!=null?x.respId:null)})},
+  {t:'territory_assignments',f:'terrAsign', id:x=>x.id,                wcap:'assign.manage',    typed:x=>({assign_date:x.date,captain_id:x.encargadoId,confirmation:x.conf,notes:x.obs})},
+  {t:'do_not_call',          f:'noPredica', id:(x,i)=>i,               wcap:'territory.manage', typed:x=>({territory_number:x.terr,address:x.dir,locality:x.localidad,reason:x.motivo,notes:x.obs})},
+  {t:'tasks',                f:'tasks',     id:x=>x.id,                wcap:'assign.manage',    typed:x=>({title:x.titulo,description:x.desc,priority:x.prioridad,status:x.estado,progress:x.progreso})},
+  {t:'reports',              f:'informes',  id:(x,i)=>i,               wcap:'informe.register', typed:x=>({publisher_id:x.pubId,submitted:x.entregado,hours:x.horas,studies:x.estudios,pioneer:x.auxiliar,period:'2026-06'})},
+  {t:'announcements',        f:'anuncios',  id:(x,i)=>i,               wcap:'anuncio.manage',   typed:x=>({title:x.t,body:x.d})},
+  {t:'events',               f:'eventos',   id:(x,i)=>i,               wcap:'anuncio.manage',   typed:x=>({name:x.n,detail:x.d})}
 ];
 const SB_STATE=['notifs','attReg','meetOvr','discOvr','exhibOvr','congCfg','taSeq'];
+const SB_STATE_OPS=['meetOvr','discOvr','exhibOvr','taSeq']; // operativo (Nivel<=3); el resto es admin (Nivel<=2)
 function sbInList(ids){return ids.map(v=>typeof v==='string'?('"'+v+'"'):v).join(',');}
 async function sbSyncNow(snap){snap=snap||buildSnapshot();
   try{
     for(const e of SB_ARRAYS){
+      if(e.wcap&&!can(e.wcap))continue; // el rol no puede escribir esta entidad → no la toca
       const arr=snap[e.f]||[];
-      const rows=arr.map((x,i)=>Object.assign({id:e.id(x,i),ord:i,data:x},e.typed(x,i)));
+      const rows=arr.map((x,i)=>Object.assign({id:e.id(x,i),ord:i,data:(e.clean?e.clean(x):x)},e.typed(x,i)));
       if(rows.length)await sbRest(e.t+'?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:rows});
       const ids=rows.map(r=>r.id);
       await sbRest(e.t+(ids.length?('?id=not.in.('+sbInList(ids)+')'):'?id=not.is.null'),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
     }
-    const kv=SB_STATE.map(k=>({key:k,value:(snap[k]!==undefined?snap[k]:null)}));
-    await sbRest('app_state?on_conflict=key',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:kv});
+    if(can('personal.view')){ // datos sensibles en tabla aparte
+      const priv=(snap.db||[]).map((p,i)=>({id:p.id,ord:i,data:pubPrivate(p)}));
+      if(priv.length)await sbRest('publisher_private?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:priv});
+      const pids=priv.map(r=>r.id);
+      await sbRest('publisher_private'+(pids.length?('?id=not.in.('+sbInList(pids)+')'):'?id=not.is.null'),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    }
+    if(can('assign.manage')){ // overrides/config: Nivel<=2 escribe todo; Nivel 3 solo lo operativo
+      const keys=can('config.general')?SB_STATE:SB_STATE_OPS;
+      const kv=keys.map(k=>({key:k,value:(snap[k]!==undefined?snap[k]:null)}));
+      await sbRest('app_state?on_conflict=key',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:kv});
+    }
     setSyncState('ok');
   }catch(err){setSyncState('error',err);throw err;}
 }
 async function hydrateFromSupabase(){
   try{
     const probe=await sbRest('publishers?select=id&limit=1');
-    if(!probe||probe.length===0){ // proyecto vacío → sembrar con los datos actuales
+    if(!probe||probe.length===0){ // proyecto vacío → sembrar (solo administradores con permiso de datos)
       const local=readLocalSnapshot();if(local)applySnapshot(local);
-      __sbReady=true;await sbSyncNow(buildSnapshot());setSyncState('seeded');return;
+      if(can('personal.manage')){__sbReady=true;await sbSyncNow(buildSnapshot());setSyncState('seeded');}
+      else{setSyncState('ok');}
+      return;
     }
     const d={v:1};
     for(const e of SB_ARRAYS){const rows=await sbRest(e.t+'?select=data,ord&order=ord.asc');d[e.f]=(rows||[]).map(r=>r.data);}
+    if(can('personal.view')){ // fusiona datos sensibles si el rol puede verlos
+      try{const priv=await sbRest('publisher_private?select=id,data');const pmap={};(priv||[]).forEach(r=>{pmap[r.id]=r.data});(d.db||[]).forEach(p=>{const pv=pmap[p.id];if(pv)Object.assign(p,pv);});}catch(e){}
+    }
     const kv=await sbRest('app_state?select=key,value');const map={};(kv||[]).forEach(r=>{map[r.key]=r.value});
     SB_STATE.forEach(k=>{if(map[k]!==undefined&&map[k]!==null)d[k]=map[k]});
     applySnapshot(d);__sbReady=true;setSyncState('ok');
@@ -3058,19 +3118,28 @@ const SUPABASE_URL='https://iibparqecemexsscgnay.supabase.co';        // ej: htt
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpYnBhcnFlY2VtZXhzc2NnbmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTA4OTAsImV4cCI6MjA5OTA4Njg5MH0.ra6DLxpgaosKL-d-tC4N0cUU7IJTArUalp5PA5W7Wj8';   // anon public key (empieza por eyJ...)
 const SB_ENABLED=/^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL)&&SUPABASE_ANON_KEY.length>20;
 
-const ACCESS_LEVELS={1:'Administrador Global',2:'Administrador de Datos',3:'Usuario Estándar'};
+const ACCESS_LEVELS={1:'Super Administrador',2:'Administrador de Congregación',3:'Administrador de Asignaciones',4:'Publicador'};
 let CURRENT_USER=null; // {id,email,name,level,role,demo}
 
-/* Capacidades por nivel (número MENOR = más permisos). can(cap)=nivel del usuario <= mínimo requerido */
+/* Capacidades por nivel (número MENOR = más permisos). can(cap)=nivel del usuario <= mínimo requerido.
+   1 Super Admin · 2 Admin de Congregación · 3 Admin de Asignaciones · 4 Publicador */
 const CAP_MIN={
-  'data.create':2,'data.edit':2,'data.delete':2,'assign.manage':2,'territory.manage':2,
-  'comm.send':2,'anuncio.manage':2,'report.send':2,'config.general':2,
-  'config.admin':1,'users.manage':1,'billing':1,'legal.edit':1,
-  'attendance.register':3,'informe.register':3,'report.generate':3,'view':3
+  /* Solo Nivel 1 (global) */
+  'config.global':1,'config.admin':1,'congregations.manage':1,'billing':1,'legal.edit':1,
+  /* Nivel 1-2 (administración de la congregación) */
+  'users.manage':2,'roles.manage':2,'personal.view':2,'personal.manage':2,'data.edit':2,
+  'anuncio.manage':2,'comm.send':2,'config.general':2,'report.send':2,
+  'reports.download':2,'data.export':2,'report.generate':2,'informe.register':2,
+  'attendance.register':2,'dashboard.full':2,'stats.view':2,
+  /* Nivel 1-3 (operativo: programa, asignaciones, territorios) */
+  'territory.manage':3,'assign.manage':3,'program.manage':3,'assign.create':3,'assign.confirm':3,
+  /* Nivel 1-4 (todos) */
+  'field.report':4,'profile.edit.own':4,'view':4
 };
 function userLevel(){return (CURRENT_USER&&CURRENT_USER.level)||1;}
 function can(cap){const m=CAP_MIN[cap];return m==null?true:userLevel()<=m;}
 function requireCap(cap){if(can(cap))return true;toast('No tienes permisos para realizar esta acción');return false;}
+function redact(val,ph){return can('personal.view')?(val==null?'':val):(ph||'— restringido —');}
 
 /* ---- sesión (localStorage) ---- */
 const SESSION_KEY='msp_session';
@@ -3092,7 +3161,7 @@ async function sbRest(path,opts){opts=opts||{};const s=loadSession();
   if(!r.ok){throw new Error('REST '+r.status+': '+(await r.text().catch(()=>'')))}
   return r.status===204?null:r.json();
 }
-function profileToUser(authUser,prof){const level=(prof&&prof.access_level)||3;
+function profileToUser(authUser,prof){const level=(prof&&prof.access_level)||4;
   return {id:authUser.id,email:authUser.email,name:(prof&&prof.full_name)||(authUser.email||'').split('@')[0]||'Usuario',level:level,role:ACCESS_LEVELS[level]};}
 async function doLogin(email,password){
   const tok=await sbAuth('password',{email:email,password:password});
@@ -3113,7 +3182,9 @@ function authOverlay(){let o=document.getElementById('authOverlay');if(o)return 
   o.style.cssText='position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#312E81,#5B21B6 55%,#8B5CF6);overflow:auto';document.body.appendChild(o);return o;}
 function removeAuthOverlay(){const o=document.getElementById('authOverlay');if(o)o.remove();document.getElementById('app')&&(document.getElementById('app').style.visibility='visible');}
 function showLogin(){document.querySelector('.app')&&(document.querySelector('.app').style.visibility='hidden');
-  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%"><span class="kpi-ico ${l===1?'t-violet':l===2?'t-brand':'t-cyan'}" style="width:34px;height:34px;flex-shrink:0">${svg(l===1?'shield':l===2?'db':'user')}</span><span><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="color:var(--ink-500);font-size:11.5px">${l===1?'Acceso total: usuarios, configuración y datos':l===2?'Gestión de datos: publicadores, territorios, programación':'Consulta y registro básico'}</small></span></span></button>`).join('')}</div>`;
+  const demoDesc={1:'Acceso total: todas las congregaciones, usuarios, configuración y datos',2:'Su congregación: publicadores (info completa), territorios, programa, reportes',3:'Operativo: programa, asignaciones y territorios · sin datos personales ni reportes',4:'Solo lo suyo: su perfil y sus asignaciones (en preparación)'};
+  const demoIco={1:'shield',2:'db',3:'map',4:'user'};const demoTint={1:'t-violet',2:'t-brand',3:'t-cyan',4:'t-indigo'};
+  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3,4].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="color:var(--ink-500);font-size:11.5px">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
   const realForm=`<form id="loginForm" onsubmit="submitLogin(event)" style="display:grid;gap:13px">
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Correo electrónico</label><input class="input" id="lg_email" type="email" autocomplete="username" placeholder="tucorreo@congregacion.org" required/></div>
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Contraseña</label><input class="input" id="lg_pw" type="password" autocomplete="current-password" placeholder="••••••••" required/></div>

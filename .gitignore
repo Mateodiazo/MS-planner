@@ -9,3 +9,5 @@
 !AUDITORIA_UX_UI_MS_Planner.md
 !SETUP_SUPABASE.md
 !supabase_schema.sql
+!supabase_migration_roles.sql
+!ROLES.md
