@@ -3044,8 +3044,8 @@ function notify(type,msg){const t=NOTIF_TYPES.find(x=>x.type===type)||{type:type
    Para activar el BACKEND REAL pega aquí las credenciales de tu proyecto Supabase.
    (Supabase → Project Settings → API). Usa la anon/public key, NUNCA la service_role.
    Si quedan vacías, la app corre en MODO DEMO: login local por rol, datos en este navegador. */
-const SUPABASE_URL='';        // ej: https://abcdxyz.supabase.co
-const SUPABASE_ANON_KEY='';   // anon public key (empieza por eyJ...)
+const SUPABASE_URL='https://iibparqecemexsscgnay.supabase.co';        // ej: https://abcdxyz.supabase.co
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpYnBhcnFlY2VtZXhzc2NnbmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTA4OTAsImV4cCI6MjA5OTA4Njg5MH0.ra6DLxpgaosKL-d-tC4N0cUU7IJTArUalp5PA5W7Wj8';   // anon public key (empieza por eyJ...)
 const SB_ENABLED=/^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL)&&SUPABASE_ANON_KEY.length>20;
 
 const ACCESS_LEVELS={1:'Administrador Global',2:'Administrador de Datos',3:'Usuario Estándar'};
