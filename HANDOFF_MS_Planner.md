@@ -198,6 +198,11 @@ Formatos oficiales replicados a partir de PDFs de referencia en `~/Downloads`: *
   - **Login demo** ahora con 4 botones de rol. `defaultAccessRole`/`ACCESS_ROLES` a 4 niveles (Anciano→2, Siervo Ministerial→3, resto→4).
   - **Validación:** 24/24 aserciones de roles (can por nivel, filtrado de nav, guard de go, dashboards por rol, redacción, `openFicha` bloqueado, `cleanPub`/`pubPrivate`, wcap de sync) + CRUD 26/26 y Fase2 24/24 (sin regresión). **Pendiente del usuario:** correr `supabase_migration_roles.sql` en su proyecto.
 
+- **Punto 2: GESTIÓN DE USUARIOS EN LA APP** (08 jul 2026):
+  - **Edge Function `admin-users`** (`supabase_edge_admin_users.ts`, Deno): valida el JWT del que llama y su `access_level` (≤2), usa la `service_role` (solo servidor) para acciones `list`/`create`/`set_level`/`set_active`. Reglas de servidor: no asignar nivel superior al propio, no modificar a alguien de mayor nivel, no auto-desactivarse. Deploy desde el panel (in-editor), sin CLI. Guía: `SETUP_USERS.md`.
+  - **App:** conector `sbFunc(action,payload)` (POST a `/functions/v1/admin-users` con el access_token). Nueva vista `VIEWS.usuarios` (nav en sección Congregación, `cap:'users.manage'`, en `VIEW_CAP`/`TITLES`): `loadUsers`/`renderUsersTable` (lista con nivel editable por `<select>`→`setUserLevel`, estado activo/inactivo→`toggleUserActive`), `openUserModal`/`saveNewUser` (crea con contraseña definida por el admin). Placeholder si `!usersBackendReady()` (demo/local). Selects de nivel filtrados a `l>=userLevel()`; no se puede editar la propia cuenta.
+  - **Decisión del usuario:** alta de usuarios **con contraseña que el admin define** (sin SMTP). **Pendiente del usuario:** desplegar la Edge Function (SETUP_USERS.md). Validado: 13/14 harness (el 1 es artefacto del stub; gating verificado aparte). Sigue el **Punto 3 (App del Publicador)** y **Punto 4 (endurecer: Realtime/Storage/QA)**.
+
 ## 10. Pendientes / próximos pasos posibles
 
 - **Demo del perfil Publicador** (segundo demo, aún no iniciado).

@@ -11,3 +11,5 @@
 !supabase_schema.sql
 !supabase_migration_roles.sql
 !ROLES.md
+!supabase_edge_admin_users.ts
+!SETUP_USERS.md
