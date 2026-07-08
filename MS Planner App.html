@@ -442,7 +442,7 @@ table.data tbody tr.clickable{cursor:pointer}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" style="visibility:hidden">
   <aside class="sidebar" id="sidebar">
     <div class="brand"><div class="brand-logo" id="brandLogo"></div><div class="brand-name">MS<span>PLANNER</span></div></div>
     <nav class="nav" id="nav"></nav>
@@ -757,7 +757,7 @@ VIEWS.dashboard=()=>{
   const rolesData=[{l:'Publicadores',v:DB.filter(p=>p.role==='Publicador').length,c:'#94a3b8'},{l:'Precursores',v:STATS.precReg+STATS.precAux,c:'#22C55E'},{l:'Siervos M.',v:STATS.siervos,c:'#06b6d4'},{l:'Ancianos',v:STATS.ancianos,c:'#8B5CF6'},{l:'No bautiz.',v:STATS.noBaut,c:'#F59E0B'}];
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Buenos días, Paublo 👋','Centro de control · Congregación Las Flores · '+dstr(TODAY),
-      `<button class="btn" onclick="openComm()">${svg('send')}Enviar notificación</button><button class="btn primary" onclick="go('programaciones')">${svg('calendar')}Ver calendario</button>`)}
+      `${can('comm.send')?`<button class="btn" onclick="openComm()">${svg('send')}Enviar notificación</button>`:''}<button class="btn primary" onclick="go('programaciones')">${svg('calendar')}Ver calendario</button>`)}
     <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div><span class="kpi-trend ${k.tr}">${k.tr==='down'?'▼':k.tr==='up'?'▲':'•'} ${k.trv}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
 
     <div class="dash-rowlabel">Indicadores y gráficas</div>
@@ -855,7 +855,7 @@ const DURACIONES=['1 min','2 min','3 min','4 min','5 min','8 min','10 min','15 m
 VIEWS.programaciones=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Programaciones','Reuniones entre semana y fin de semana, discursos y servicio del campo',
-      `<button class="btn primary" onclick="openAssignCategories()">${svg('plus')}Nueva asignación</button>`)}
+      `${can('assign.manage')?`<button class="btn primary" onclick="openAssignCategories()">${svg('plus')}Nueva asignación</button>`:''}`)}
     <div class="tabs">
       <div class="tab ${progTab==='calendario'?'active':''}" onclick="setProgTab('calendario')">Calendario</div>
       <div class="tab ${progTab==='vmc'?'active':''}" onclick="setProgTab('vmc')">Reunión entre semana</div>
@@ -925,7 +925,7 @@ function openDiscursoMenu(e,iso){
   menu.style.left=left+'px';menu.style.top=top+'px';setTimeout(()=>document.addEventListener('click',closeCtxOnce),0);
 }
 function verOradorContacto(name){const p=DB.find(x=>x.fullName===name);if(p)openFicha(p.id);else toast('Contacto: '+name);}
-function openReemplazarOrador(iso){const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
+function openReemplazarOrador(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'refresh',tint:'t-violet',title:'Reemplazar discursante',sub:`${dstr(dt)} · actualmente ${dc.orador.fullName}`,
     body:`<div class="form-row full"><label>Nuevo discursante</label>${searchSelect('rep_orador',males.map(m=>({value:m.id,label:m.fullName})),dc.orador.id)}</div>`,
     footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReemplazarOrador('${iso}'))">${svg('check')}Guardar</button>`});}
@@ -937,7 +937,7 @@ function saveReemplazarOrador(iso){const pid=sselValue('rep_orador');if(!pid){to
   notify('Cambio de asignación',`${per?per.fullName:'—'} dará el discurso público del ${dstr(dt)}.`);
   if(currentView==='programaciones')renderProgTab();
   toast('Discursante reemplazado por '+(per?per.fullName:'—'));}
-function openCambiarFechaDiscurso(iso){const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
+function openCambiarFechaDiscurso(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'calendar',tint:'t-violet',title:'Cambiar fecha del discurso',sub:`${dc.orador.fullName} · actual: ${dstr(dt)}`,
     body:`<div class="form-row full"><label>Nueva fecha (domingo)</label><input class="input" type="date" id="cfd_date" value="${iso}"/><span class="field-hint" id="cfd_hint" aria-live="polite" style="margin-top:6px">Los discursos públicos se programan los domingos.</span></div>`,
     footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveCambiarFechaDiscurso('${iso}'))">${svg('check')}Guardar</button>`});}
@@ -951,7 +951,7 @@ function saveCambiarFechaDiscurso(iso){const v=document.getElementById('cfd_date
   notify('Cambio de asignación',`El discurso "${dc.tema}" se movió del ${dstr(dt)} al ${dstr(nd)}.`);
   if(currentView==='programaciones')renderProgTab();
   toast('Fecha del discurso actualizada ✓');}
-function openDiscursoModal(iso){const isEdit=!!iso;const dc=isEdit?discFor(new Date(iso+'T00:00:00')):null;
+function openDiscursoModal(iso){if(!requireCap('assign.manage'))return;const isEdit=!!iso;const dc=isEdit?discFor(new Date(iso+'T00:00:00')):null;
   const defIso=isEdit?iso:(function(){let d=new Date(TODAY);while(d.getDay()!==0)d.setDate(d.getDate()+1);return diso(d)})();
   openModalCustom({icon:'speak',tint:'t-violet',title:isEdit?'Editar discurso público':'Nuevo discurso público',sub:isEdit?`Programado para ${dstr(new Date(iso+'T00:00:00'))}`:'Programa un discurso para el fin de semana',
     body:`<div class="form-grid">
@@ -985,7 +985,7 @@ const ASSIGN_CATS=[
   {id:'pub',ico:'display',t:'t-pink',l:'Predicación Pública'},
   {id:'limp',ico:'check',t:'t-blue',l:'Limpieza'},
 ];
-function openAssignCategories(){
+function openAssignCategories(){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'plus',tint:'t-brand',title:'Nueva asignación',sub:'Selecciona la categoría que deseas programar',size:'lg',
     body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" onclick="pickAssignCat('${c.id}')" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
     footer:`<button class="btn" onclick="closeModal()">Cancelar</button>`});
@@ -1014,7 +1014,7 @@ function meetingAccCard(dt,type,weekNo,meta){
       </tbody></table></div></div></div>`;
 }
 function toggleAcc(head){const card=head.parentElement;const body=card.querySelector('.acc-body');const willOpen=body.hidden;body.hidden=!willOpen;card.classList.toggle('open',willOpen);}
-function openReassignPart(iso,type,role){const date=new Date(iso+'T00:00:00');const parts=mkParts(date,type);const part=parts.find(p=>p.role===role);if(!part)return;
+function openReassignPart(iso,type,role){if(!requireCap('assign.manage'))return;const date=new Date(iso+'T00:00:00');const parts=mkParts(date,type);const part=parts.find(p=>p.role===role);if(!part)return;
   openModalCustom({icon:'refresh',tint:type==='mid'?'t-brand':'t-violet',title:'Reasignar parte',sub:`${role} · ${dstr(date)} · ${meetingMeta(type).title}`,
     body:`<div class="form-row full"><label>Publicador asignado</label>${searchSelect('rp_pub',[{value:'',label:'— Dejar vacante —'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),part.person?part.person.id:'')}</div>
       <div class="form-row full" style="margin-top:12px"><label>Estado</label><select class="select" id="rp_conf"><option value="0"${!part.confirmed?' selected':''}>Por confirmar</option><option value="1"${part.confirmed?' selected':''}>Confirmado</option></select></div>`,
@@ -1033,7 +1033,7 @@ let dbState={q:'',grupo:'',privilegio:'',estado:'',sortCol:'id',sortDir:'asc',pa
 VIEWS.database=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Base de datos','CRM interno · '+DB.length+' registros de la congregación',
-      `<button class="btn" onclick="exportDbFiltered()">${svg('download')}Exportar</button><button class="btn primary" onclick="openModal('publisher')">${svg('plus')}Nuevo publicador</button>`)}
+      `<button class="btn" onclick="exportDbFiltered()">${svg('download')}Exportar</button>${can('data.create')?`<button class="btn primary" onclick="openModal('publisher')">${svg('plus')}Nuevo publicador</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">
       ${[{v:STATS.total,l:'Publicadores',t:'t-brand',i:'people'},{v:DB.filter(p=>p.estado==='Activo').length,l:'Activos',t:'t-green',i:'check'},{v:DB.filter(p=>p.estado==='Irregular').length,l:'Irregulares',t:'t-amber',i:'warn'},{v:STATS.precReg+STATS.precAux,l:'Precursores',t:'t-violet',i:'flag'},{v:GRUPOS.length,l:'Grupos',t:'t-cyan',i:'people'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -1172,7 +1172,7 @@ function fichaViewConfig(id){
     footer:`<button class="btn" onclick="closeModal();openHistAsign(${id})">${svg('calendar')}Historial</button><button class="btn primary" onclick="closeModal()">Cerrar</button>`};
 }
 function openFicha(id){openModalCustom(fichaViewConfig(id))}
-function fichaToEdit(id){swapModalContent(fichaEditConfig(id,true))}
+function fichaToEdit(id){if(!requireCap('data.edit'))return;swapModalContent(fichaEditConfig(id,true))}
 function editFichaCancel(id){swapModalContent(fichaViewConfig(id))}
 function fichaField(label,ico,val){return `<div class="form-row"><label style="color:var(--ink-400);display:flex;align-items:center;gap:6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px">${svg(ico)} ${label}</label><div style="font-size:14px;font-weight:600">${val}</div></div>`}
 function fichaInline(label,ico,val){return `<label style="color:var(--ink-400);display:flex;align-items:center;gap:6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">${svg(ico)} ${label}</label><div style="font-size:14px;font-weight:600">${val}</div>`}
@@ -1206,7 +1206,7 @@ function fichaEditConfig(id,fromView){
         <div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="ec_obs" placeholder="Notas internas…">${p.obs}</textarea></div></div>`,
     footer:`<button class="btn" onclick="${fromView?`editFichaCancel(${id})`:'closeModal()'}">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveContact(${id},${fromView?'true':'false'}))">${svg('check')}Guardar cambios</button>`};
 }
-function openEditContact(id){openModalCustom(fichaEditConfig(id,false))}
+function openEditContact(id){if(!requireCap('data.edit'))return;openModalCustom(fichaEditConfig(id,false))}
 function fieldHintEl(el){const hid=el.getAttribute('aria-describedby')||(el.id?el.id+'_hint':'');return hid?document.getElementById(hid):null}
 function validateEmail(el){const v=el.value.trim();const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);el.classList.toggle('valid',ok&&!!v);el.classList.toggle('invalid',!!v&&!ok);el.setAttribute('aria-invalid',(!!v&&!ok)?'true':'false');const h=fieldHintEl(el);if(h){h.textContent=v?(ok?'✓ Correo válido':'Formato de correo inválido'):'';h.className='field-hint '+(ok?'ok':(v?'err':''))}}
 function maskPhone(el){const d=el.value.replace(/\D/g,'').slice(0,10);let out=d;if(d.length>6)out=d.slice(0,3)+' '+d.slice(3,6)+' '+d.slice(6);else if(d.length>3)out=d.slice(0,3)+' '+d.slice(3);el.value=out;const full=d.length===10;el.classList.toggle('valid',full);el.classList.toggle('invalid',d.length>0&&!full);el.setAttribute('aria-invalid',(d.length>0&&!full)?'true':'false');const h=fieldHintEl(el);if(h){const falta=10-d.length;h.textContent=d.length===0?'':(full?'✓ Número válido':`Faltan ${falta} dígito${falta!==1?'s':''}`);h.className='field-hint '+(full?'ok':'err')}}
@@ -1286,7 +1286,7 @@ function deletePublisher(id){
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">Esta acción quitará de forma permanente a <b>${p.fullName}</b> de la base de datos de la congregación. Sus asignaciones e informes asociados dejarán de mostrarse.</p><p class="muted" style="font-size:12.5px;margin-top:12px">Esta acción no se puede deshacer.</p>`,
     footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="applyDelete(${id})">${svg('trash')}Eliminar definitivamente</button>`});
 }
-function applyDelete(id){const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${p.fullName} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${p.fullName} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
+function applyDelete(id){if(!requireCap('data.delete'))return;const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${p.fullName} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${p.fullName} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
 
 /* ---- Tarjeta PDF del publicador (sin librerías) ---- */
 function ascii(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\x20-\x7E]/g,'')}
@@ -1407,7 +1407,7 @@ VIEWS.territorios=()=>{
   const proximo=TERR.find(t=>t.estado==='Pendiente')||TERR.find(t=>t.estado==='Activo');
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Mapas y Territorios','Panel de administración · '+STATS.terrTotal+' territorios en Bogotá D.C.',
-      `<button class="btn" onclick="exportTerrDocx()">${svg('download')}Descargar reporte</button><button class="btn primary" onclick="openTerrCreate()">${svg('plus')}Nuevo territorio</button>`)}
+      `<button class="btn" onclick="exportTerrDocx()">${svg('download')}Descargar reporte</button>${can('territory.manage')?`<button class="btn primary" onclick="openTerrCreate()">${svg('plus')}Nuevo territorio</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:18px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
       ${[{v:STATS.terrTotal,l:'Total de territorios',t:'t-brand',i:'map'},{v:STATS.terrTotal-STATS.terrComp,l:'Pendientes por cubrir',t:'t-amber',i:'clock'},{v:STATS.terrComp,l:'Completados este ciclo',t:'t-green',i:'check'},{v:cobertura+'%',l:'Cobertura del ciclo',t:'t-cyan',i:'chart'},{v:'#'+(proximo?proximo.num:'—'),l:'Próximo programado',t:'t-violet',i:'flag'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -1425,7 +1425,7 @@ VIEWS.territorios=()=>{
   renderTerr();
 };
 function setTerrTab(t){terrTab=t;VIEWS.territorios()}
-function openAsignTerr(num){const t=num?TERR.find(x=>x.num===num):null;
+function openAsignTerr(num){if(!requireCap('territory.manage'))return;const t=num?TERR.find(x=>x.num===num):null;
   openModalCustom({icon:'calendar',tint:'t-green',title:'Reasignar territorio',sub:t?`Territorio #${t.num} · ${t.barrio} (${t.localidad})`:'Programa una salida de predicación',
     body:`<div class="form-grid">
       <div class="form-row"><label>Fecha de asignación</label><input class="input" id="at_fecha" type="date" value="${diso(TODAY)}"/></div>
@@ -1500,7 +1500,7 @@ function saveTerrAsign(id){const date=document.getElementById('ta_date').value;c
   else{TERR_ASIGN.push({id:'ta'+(taSeq++),date:date,encargadoId:enc,territorios:terrs,obs:obs,conf:'pend'});}
   persistAll();closeModal();renderTerrAsign();toast(id?'Asignación actualizada ✓':'Asignación creada ✓');
 }
-function delTerrAsign(id){const i=TERR_ASIGN.findIndex(x=>x.id===id);if(i<0)return;const removed=TERR_ASIGN.splice(i,1)[0];persistAll();renderTerrAsign();toastAction('Asignación eliminada','Deshacer',()=>{TERR_ASIGN.splice(Math.min(i,TERR_ASIGN.length),0,removed);persistAll();renderTerrAsign();toast('Asignación restaurada');},{icon:'trash',cls:'undo'});}
+function delTerrAsign(id){if(!requireCap('data.delete'))return;const i=TERR_ASIGN.findIndex(x=>x.id===id);if(i<0)return;const removed=TERR_ASIGN.splice(i,1)[0];persistAll();renderTerrAsign();toastAction('Asignación eliminada','Deshacer',()=>{TERR_ASIGN.splice(Math.min(i,TERR_ASIGN.length),0,removed);persistAll();renderTerrAsign();toast('Asignación restaurada');},{icon:'trash',cls:'undo'});}
 function terrFiltered(){
   const q=terrState.q.toLowerCase();
   let rows=TERR.filter(t=>!q||(t.barrio+t.localidad+t.num).toLowerCase().includes(q));
@@ -1520,7 +1520,7 @@ function renderTerrTable(){
     <div class="pager-ctrl"><button class="pg" ${terrState.page===1?'disabled':''} onclick="terrGo(${terrState.page-1})">${svg('chevL')}</button>${pagerButtons(pages,terrState.page,'terrGo')}<button class="pg" ${terrState.page===pages?'disabled':''} onclick="terrGo(${terrState.page+1})">${svg('chevR')}</button></div>
   </div>`;
 }
-function setTerrResp(num,id){const t=TERR.find(x=>x.num===num);if(!t)return;const p=id?DB.find(x=>String(x.id)===String(id)):null;t.resp=p;if(p&&t.asign==='—')t.asign=dstr(TODAY);persistAll();renderTerrTable();toast(p?`Responsable de #${num}: ${p.fullName}`:`Asignación eliminada · Territorio #${num}`);}
+function setTerrResp(num,id){if(!requireCap('territory.manage'))return;const t=TERR.find(x=>x.num===num);if(!t)return;const p=id?DB.find(x=>String(x.id)===String(id)):null;t.resp=p;if(p&&t.asign==='—')t.asign=dstr(TODAY);persistAll();renderTerrTable();toast(p?`Responsable de #${num}: ${p.fullName}`:`Asignación eliminada · Territorio #${num}`);}
 /* --- imagen y ubicación de territorios --- */
 let terrEditImg=null;
 function terrImgFieldHTML(img,wrapId){const acc='image/jpeg,image/jpg,image/png,image/webp';
@@ -1531,7 +1531,7 @@ function terrImgRemove(wrapId){terrEditImg=null;const w=document.getElementById(
 function isValidMaps(v){v=(v||'').trim();return /^https?:\/\/\S+$/.test(v)&&/(google\.[a-z.]+\/maps|maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.)/i.test(v);}
 function validateMapsUrl(el){const v=el.value.trim();const ok=!v||isValidMaps(v);el.classList.toggle('valid',!!v&&ok);el.classList.toggle('invalid',!!v&&!ok);el.setAttribute('aria-invalid',(!!v&&!ok)?'true':'false');const h=fieldHintEl(el);if(h){h.textContent=v?(ok?'✓ Enlace válido':'Ingresa un enlace de Google Maps válido'):'';h.className='field-hint '+(ok?(v?'ok':''):'err');}}
 function openTerrMaps(num){const t=TERR.find(x=>x.num===num);if(t&&t.maps)window.open(t.maps,'_blank','noopener');}
-function openTerrEdit(num){const t=TERR.find(x=>x.num===num);if(!t)return;terrEditImg=t.img||null;
+function openTerrEdit(num){if(!requireCap('territory.manage'))return;const t=TERR.find(x=>x.num===num);if(!t)return;terrEditImg=t.img||null;
   openModalCustom({icon:'edit',tint:'t-green',title:`Editar territorio #${t.num}`,sub:`${t.barrio} · ${t.localidad}`,size:'lg',
     body:`<div class="form-grid">
         <div class="form-row"><label>Responsable</label>${searchSelect('te_resp',[{value:'',label:'Sin asignar'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),t.resp?t.resp.id:'')}</div>
@@ -1548,7 +1548,7 @@ function saveTerrEdit(num){const t=TERR.find(x=>x.num===num);if(!t)return;
   t.estado=document.getElementById('te_estado').value;t.maps=maps||null;t.img=terrEditImg||null;
   if(t.resp&&t.asign==='—')t.asign=dstr(TODAY);
   persistAll();renderTerrTable();closeModal();toast(`Territorio #${num} actualizado`);}
-function openTerrCreate(){terrEditImg=null;const nextNum=String(TERR.length+1).padStart(3,'0');
+function openTerrCreate(){if(!requireCap('territory.manage'))return;terrEditImg=null;const nextNum=String(TERR.length+1).padStart(3,'0');
   openModalCustom({icon:'map',tint:'t-green',title:'Nuevo territorio',sub:'Registra un territorio de predicación en Bogotá',size:'lg',
     body:`<div class="form-grid">
       <div class="form-row"><label>Número</label><input class="input" value="${nextNum}" disabled/></div>
@@ -1571,7 +1571,7 @@ function saveNoPredica(){
   persistAll();closeModal();
   if(currentView==='territorios')renderTerr();
   toast('Dirección registrada ✓');}
-function delNoPredica(i){const n=NO_PREDICA[i];if(!n)return;
+function delNoPredica(i){if(!requireCap('data.delete'))return;const n=NO_PREDICA[i];if(!n)return;
   confirmAction({title:'Eliminar registro',sub:n.dir.split(',')[0],body:'La dirección se quitará de la lista de casas donde no se predica.',ok:'Eliminar'},()=>{
     const removed=NO_PREDICA.splice(i,1)[0];persistAll();if(currentView==='territorios')renderTerr();
     toastAction('Registro eliminado','Deshacer',()=>{NO_PREDICA.splice(Math.min(i,NO_PREDICA.length),0,removed);persistAll();if(currentView==='territorios')renderTerr();toast('Registro restaurado');},{icon:'trash',cls:'undo'});});}
@@ -1986,7 +1986,7 @@ let exhibSel=0, exhibWeek=0;
 VIEWS.exhibidores=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Exhibidores','Predicación pública · domingo a domingo · 7:00 a. m. a 7:00 p. m. · turnos de 2 h',
-      `<button class="btn primary" onclick="openExhibTurn(EXHIB_NAMES[exhibSel],diso(TODAY),0)">${svg('plus')}Asignar turno</button>`)}
+      `${can('assign.manage')?`<button class="btn primary" onclick="openExhibTurn(EXHIB_NAMES[exhibSel],diso(TODAY),0)">${svg('plus')}Asignar turno</button>`:''}`)}
     <div id="exhibSummary"></div>
     <div class="tabs">${EXHIB_NAMES.map((n,i)=>`<div class="tab ${exhibSel===i?'active':''}" onclick="setExhib(${i})">${n}</div>`).join('')}</div>
     <div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('grid')}</div><h3>Agenda semanal · ${EXHIB_NAMES[exhibSel]}</h3>
@@ -2018,7 +2018,7 @@ function renderExhib(){
   document.getElementById('exhibGridWrap').innerHTML=html;
 }
 function countExhibFull(ex,days){let c=0;days.forEach(d=>TURN_SLOTS.forEach((s,si)=>{if(exhibTurn(ex,d,si))c++}));return c}
-function openExhibTurn(ex,iso,si){const d=new Date(iso+'T00:00:00');const cur=exhibTurn(ex,d,si);
+function openExhibTurn(ex,iso,si){if(!requireCap('assign.manage'))return;const d=new Date(iso+'T00:00:00');const cur=exhibTurn(ex,d,si);
   openModalCustom({icon:'display',tint:'t-cyan',title:'Turno de exhibidor',sub:`${ex} · ${dstr(d)} · ${TURN_SLOTS[si][0]}–${TURN_SLOTS[si][1]}`,
     body:`<div class="form-grid">
       <div class="form-row"><label>Exhibidor</label><select class="select" id="ext_ex">${EXHIB_NAMES.map(n=>`<option${n===ex?' selected':''}>${n}</option>`).join('')}</select></div>
@@ -2059,7 +2059,7 @@ VIEWS.informes=()=>{
   const pct=base.length?Math.round(entregados.length/base.length*100):0;
   const allEnt=INFORMES.filter(r=>r.entregado).length;const globalPct=Math.round(allEnt/INFORMES.length*100);
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Informes Mensuales','Junio 2026 · seguimiento de entrega y actividad',`<button class="btn primary" onclick="saveWithFeedback(this,()=>remindAllPending())">${svg('send')}Recordar pendientes</button>`)}
+    ${pageHead('Informes Mensuales','Junio 2026 · seguimiento de entrega y actividad',`${can('report.send')?`<button class="btn primary" onclick="saveWithFeedback(this,()=>remindAllPending())">${svg('send')}Recordar pendientes</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
       ${[{v:entregados.length,l:'Informes entregados',t:'t-green',i:'check'},{v:base.length-entregados.length,l:'Pendientes',t:'t-amber',i:'clock'},{v:totalHoras,l:'Horas reportadas',t:'t-brand',i:'clock'},{v:totalEst,l:'Estudios bíblicos',t:'t-violet',i:'people'},{v:pct+'%',l:'Tasa de entrega',t:'t-cyan',i:'chart'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -2199,7 +2199,7 @@ VIEWS.actividad=()=>{
   const items=actItems();
   const counts={all:items.length,notif:items.filter(i=>i.kind==='notif').length,tarea:items.filter(i=>i.kind==='tarea').length};
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" onclick="markAllActivity()">${svg('check')}Marcar todo leído</button><button class="btn" onclick="openNotifPrefs()">${svg('settings')}Preferencias</button><button class="btn primary" onclick="openModal('task')">${svg('plus')}Nueva tarea</button>`)}
+    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" onclick="markAllActivity()">${svg('check')}Marcar todo leído</button><button class="btn" onclick="openNotifPrefs()">${svg('settings')}Preferencias</button>${can('data.create')?`<button class="btn primary" onclick="openModal('task')">${svg('plus')}Nueva tarea</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:20px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       ${[{v:activityPending(),l:'Pendientes en total',t:'t-brand',i:'bell'},{v:NOTIFS.filter(n=>!n.read).length,l:'Notificaciones sin leer',t:'t-amber',i:'bell'},{v:TASKS.filter(t=>t.estado!=='Completada').length,l:'Tareas por completar',t:'t-violet',i:'tasks'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -2267,7 +2267,7 @@ function saveTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   closeModal();
   toast('Tarea actualizada ✓');}
 function reopenTask(id){const t=TASKS.find(x=>x.id===id);if(!t)return;t.estado='Pendiente';t.progreso=0;refreshStats();persistAll();closeModal();if(currentView==='actividad')VIEWS.actividad();renderNav();toast('Tarea reabierta');}
-function deleteTask(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
+function deleteTask(id){if(!requireCap('data.delete'))return;const t=TASKS.find(x=>x.id===id);if(!t)return;
   confirmAction({title:'Eliminar tarea',sub:t.titulo,body:'La tarea se eliminará de la lista de actividad. Podrás deshacer esta acción durante unos segundos.',ok:'Eliminar'},()=>{
     const i=TASKS.findIndex(x=>x.id===id);if(i<0)return;const removed=TASKS.splice(i,1)[0];refreshStats();persistAll();
     if(currentView==='actividad')VIEWS.actividad();renderNav();
@@ -2275,7 +2275,7 @@ function deleteTask(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
 
 /* -------- COMUNICACIÓN (#4) -------- */
 const COMM_DEST=['Congregación completa','Capitanes de grupo','Territorios','Cuerpo de Ancianos','Predicación Pública'];
-function openComm(){
+function openComm(){if(!requireCap('comm.send'))return;
   openModalCustom({icon:'send',tint:'t-brand',title:'Enviar notificación',sub:'Comunica a la congregación de forma segmentada',size:'lg',
     body:`<div class="form-section-title">${svg('people')} Destinatarios</div>
       <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:6px">${COMM_DEST.map((d,i)=>`<button type="button" data-on="${i===0?'1':'0'}" onclick="commChip(this)" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid ${i===0?'var(--brand-500)':'var(--border-strong)'};background:${i===0?'var(--brand-500)':'var(--surface-3)'};color:${i===0?'#fff':'var(--ink-700)'};transition:.15s">${svg('check')}${d}</button>`).join('')}</div>
@@ -2303,9 +2303,12 @@ let legalTab='legal';
 const CIRCUITO_CONGS=['Las Flores','Bellavista','El Carmelo','Nueva Esperanza','Monte Sion'];
 const PAGOS=[{f:'01 ene 2026',c:'Plan Anual 2026',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2025',c:'Plan Anual 2025',m:'USD 20,00',e:'Pagado'},{f:'01 ene 2024',c:'Plan Anual 2024',m:'USD 18,00',e:'Pagado'}];
 VIEWS.config=()=>{
+  if(!can('config.general')){document.getElementById('content').innerHTML=`<div class="page">${pageHead('Configuración de la Congregación','Las Flores · ajustes generales','')}<div class="card"><div class="empty" style="padding:52px 24px;text-align:center"><div class="kpi-ico t-amber" style="width:52px;height:52px;margin:0 auto 14px">${svg('shield')}</div><b style="font-size:15px;display:block;margin-bottom:6px">Acceso restringido</b><p class="muted" style="font-size:13px;max-width:420px;margin:0 auto">La configuración de la congregación está disponible solo para administradores (Nivel 1 y 2). Tu rol actual es <b>${(CURRENT_USER&&CURRENT_USER.role)||'Usuario Estándar'}</b>.</p></div></div></div>`;return;}
+  const tabs=[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['legalseg','Legal y seguridad']].concat(can('billing')?[['sub','Suscripción']]:[]).concat([['soporte','Soporte']]);
+  if(configTab==='sub'&&!can('billing'))configTab='general';
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Configuración de la Congregación','Las Flores · administra los datos y ajustes generales',`<button class="btn primary" onclick="saveWithFeedback(this,()=>saveCongConfig())">${svg('check')}Guardar cambios</button>`)}
-    <div class="tabs">${[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['legalseg','Legal y seguridad'],['sub','Suscripción'],['soporte','Soporte']].map(([id,l])=>`<div class="tab ${configTab===id?'active':''}" onclick="setConfigTab('${id}')">${l}</div>`).join('')}</div>
+    <div class="tabs">${tabs.map(([id,l])=>`<div class="tab ${configTab===id?'active':''}" onclick="setConfigTab('${id}')">${l}</div>`).join('')}</div>
     <div id="configContent"></div></div>`;
   renderConfig();
 };
@@ -2315,7 +2318,7 @@ function grpMembersChips(){return Array.from(window.__grpSel).map(id=>{const p=D
 function grpRefresh(){const m=document.getElementById('grp_members');if(m)m.innerHTML=grpMembersChips();const c=document.getElementById('grp_count');if(c)c.textContent='('+window.__grpSel.size+')';}
 function grpAddMember(){const id=sselValue('grp_add');if(!id)return;window.__grpSel.add(String(id));grpRefresh();}
 function grpRemoveMember(id){window.__grpSel.delete(String(id));grpRefresh();}
-function openGrupoModal(idx){const isEdit=(idx!==undefined&&idx!==null&&idx!=='');const gi=isEdit?+idx:-1;const g=isEdit?REAL_GROUPS[gi]:null;
+function openGrupoModal(idx){if(!requireCap('data.edit'))return;const isEdit=(idx!==undefined&&idx!==null&&idx!=='');const gi=isEdit?+idx:-1;const g=isEdit?REAL_GROUPS[gi]:null;
   const curMembers=isEdit?DB.filter(p=>p.grupoIdx===gi).map(p=>String(p.id)):[];window.__grpSel=new Set(curMembers);
   openModalCustom({icon:'people',tint:'t-brand',title:isEdit?'Configurar grupo':'Nuevo grupo',sub:isEdit?g.n:'Crea un nuevo grupo de servicio del campo',size:'lg',
     body:`<div class="form-grid">
@@ -2336,13 +2339,13 @@ function saveGrupo(idx){const nombre=(document.getElementById('grp_nombre').valu
   members.forEach(id=>{const p=DB.find(x=>String(x.id)===String(id));if(p){p.grupoIdx=gi;p.grupo=nombre;p.superintendente=sup;p.auxiliar=aux;}});
   persistAll();closeModal();if(currentView==='config')VIEWS.config();toast(isEdit?'Grupo actualizado ✓':'Grupo creado ✓');
 }
-function saveCongConfig(){
+function saveCongConfig(){if(!requireCap('config.general'))return;
   const ids=['nombre','numero','idioma','pais','dir','diamid','horamid','diawe','horawe','zoomid','zoompw','zoomurl','tel','mail','coord','secre'];
   let touched=false;
   ids.forEach(k=>{const el=document.getElementById('cfg_'+k);if(el){CONG_CFG[k]=el.value;touched=true;}});
   persistAll();
   toast(touched?'Configuración guardada ✓':'Cambios guardados ✓');}
-function openAnuncioModal(i){const isEdit=(i!==undefined&&i!==null);const a=isEdit?ANUNCIOS[i]:null;
+function openAnuncioModal(i){if(!requireCap('anuncio.manage'))return;const isEdit=(i!==undefined&&i!==null);const a=isEdit?ANUNCIOS[i]:null;
   openModalCustom({icon:'bell',tint:'t-brand',title:isEdit?'Editar anuncio':'Nuevo anuncio',sub:isEdit?a.t:'Publica un anuncio para la congregación',
     body:`<div class="form-grid">
       <div class="form-row full"><label>Título *</label><input class="input" id="an_titulo" value="${isEdit?a.t.replace(/"/g,'&quot;'):''}" placeholder="Ej. Asamblea de circuito"/></div>
@@ -2358,11 +2361,11 @@ function saveAnuncio(i){
   if(i===null)notify('Nuevo anuncio',`Se publicó el anuncio "${t}".`);
   if(currentView==='config')VIEWS.config();renderNav();
   toast(i!==null?'Anuncio actualizado ✓':'Anuncio publicado ✓');}
-function delAnuncio(i){const a=ANUNCIOS[i];if(!a)return;
+function delAnuncio(i){if(!requireCap('data.delete'))return;const a=ANUNCIOS[i];if(!a)return;
   confirmAction({title:'Eliminar anuncio',sub:a.t,body:'El anuncio dejará de mostrarse a la congregación.',ok:'Eliminar'},()=>{
     const removed=ANUNCIOS.splice(i,1)[0];persistAll();if(currentView==='config')VIEWS.config();
     toastAction('Anuncio eliminado','Deshacer',()=>{ANUNCIOS.splice(Math.min(i,ANUNCIOS.length),0,removed);persistAll();if(currentView==='config')VIEWS.config();toast('Anuncio restaurado');},{icon:'trash',cls:'undo'});});}
-function openEventoModal(){
+function openEventoModal(){if(!requireCap('anuncio.manage'))return;
   openModalCustom({icon:'calendar',tint:'t-violet',title:'Nuevo evento',sub:'Añade un evento al calendario de la congregación',
     body:`<div class="form-grid">
       <div class="form-row full"><label>Nombre del evento *</label><input class="input" id="ev_nombre" placeholder="Ej. Reunión de servicio"/></div>
@@ -2379,10 +2382,10 @@ function saveEvento(){
   notify('Nuevo anuncio',`Nuevo evento en el calendario: ${n}.`);
   if(currentView==='config')VIEWS.config();renderNav();
   toast('Evento creado ✓');}
-function delEvento(i){const e=EVENTS[i];if(!e)return;
+function delEvento(i){if(!requireCap('data.delete'))return;const e=EVENTS[i];if(!e)return;
   confirmAction({title:'Eliminar evento',sub:e.n,body:'El evento se quitará del calendario.',ok:'Eliminar'},()=>{
     EVENTS.splice(i,1);persistAll();if(currentView==='config')VIEWS.config();toast('Evento eliminado');});}
-function openSubGestion(){
+function openSubGestion(){if(!requireCap('billing'))return;
   const plan=CONG_CFG.plan||'Plan Anual';
   openModalCustom({icon:'star',tint:'t-brand',title:'Gestionar suscripción',sub:'MS Planner · congregación Las Flores',
     body:`<div class="form-row full"><label>Plan</label><select class="select" id="sub_plan">${['Plan Anual','Plan Mensual'].map(x=>`<option${plan===x?' selected':''}>${x}</option>`).join('')}</select></div>
@@ -2720,7 +2723,8 @@ const MODALS={
 };
 const MODAL_SAVES={publisher:'savePublisher',task:'saveTaskModal',assignment:'saveAssignment',nopredica:'saveNoPredica'};
 const MODAL_INITS={assignment:()=>asgUpdateParts()};
-function openModal(type){const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
+const MODAL_CAP={publisher:'data.create',task:'data.create',nopredica:'data.create',assignment:'assign.manage'};
+function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
 function asgUpdateParts(){const sel=document.getElementById('asg_meet');if(!sel)return;const v=sel.value.split('|');const parts=mkParts(new Date(v[0]+'T00:00:00'),v[1]);document.getElementById('asg_part').innerHTML=parts.map(p=>`<option>${p.role}</option>`).join('');}
 function saveAssignment(){const v=document.getElementById('asg_meet').value.split('|');const iso=v[0],type=v[1];const role=document.getElementById('asg_part').value;const pid=sselValue('asg_pub');
   if(!pid){toast('Selecciona un publicador');return;}
@@ -2779,7 +2783,8 @@ function toggleNotif(e){e.stopPropagation();const ex=document.getElementById('no
 function closeNotifOnce(e){const p=document.getElementById('notifPop');if(p&&!p.contains(e.target)&&e.target.id!=='notifBtn'){p.remove();document.removeEventListener('click',closeNotifOnce)}}
 function toggleProfile(e){e.stopPropagation();const ex=document.getElementById('profilePop');if(ex){ex.remove();return}
   const pop=document.createElement('div');pop.id='profilePop';pop.className='popover profile';
-  pop.innerHTML=`<div class="profile-card"><div class="avatar">PD</div><div><b>Paublo Díaz</b><small>compumat2009@hotmail.com</small><div style="margin-top:6px">${roleBadge('Anciano')}</div></div></div><div class="profile-menu"><button class="ctx-item" onclick="closeProfile();openMiPerfil()">${svg('user')}Mi perfil</button><button class="ctx-item" onclick="closeProfile();openUserConfig()">${svg('settings')}Configuración</button><button class="ctx-item" onclick="closeProfile();openIdioma()">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" onclick="closeProfile();toast('Sesión cerrada')">${svg('logout')}Cerrar sesión</button></div>`;
+  const u=CURRENT_USER||{name:'Paublo Díaz',email:'demo@lasflores.org',level:1,role:ACCESS_LEVELS[1]};
+  pop.innerHTML=`<div class="profile-card"><div class="avatar">${initials(u.name)}</div><div><b>${u.name}</b><small>${u.email}</small><div style="margin-top:6px"><span class="badge ${u.level===1?'violet':u.level===2?'blue':'cyan'}">${svg('shield')}Nivel ${u.level} · ${u.role}</span></div></div></div><div class="profile-menu"><button class="ctx-item" onclick="closeProfile();openMiPerfil()">${svg('user')}Mi perfil</button><button class="ctx-item" onclick="closeProfile();openUserConfig()">${svg('settings')}Configuración</button><button class="ctx-item" onclick="closeProfile();openIdioma()">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" onclick="closeProfile();signOut()">${svg('logout')}Cerrar sesión</button></div>`;
   document.body.appendChild(pop);setTimeout(()=>document.addEventListener('click',closeProfileOnce),0);}
 function closeProfileOnce(e){const p=document.getElementById('profilePop');if(p&&!p.contains(e.target)&&!document.getElementById('profileBtn').contains(e.target)){p.remove();document.removeEventListener('click',closeProfileOnce)}}
 function closeProfile(){const p=document.getElementById('profilePop');if(p)p.remove()}
@@ -2950,7 +2955,108 @@ function __confirmRun(){const cb=__confirmCb;__confirmCb=null;closeModal();if(cb
 /* Notificación generada por acciones del usuario (alimenta Actividad + campana) */
 function notify(type,msg){const t=NOTIF_TYPES.find(x=>x.type===type)||{type:type,ico:'bell',tint:'t-brand'};NOTIFS.unshift({type:t.type,ico:t.ico,tint:t.tint,msg:msg,time:'Ahora',read:false,date:new Date(TODAY)});renderNav();persistAll();}
 
-hydrateAll();renderNav();go('dashboard');updateThemeToggle();
+/* ================= AUTENTICACIÓN + ROLES (Supabase-ready) =================
+   Para activar el BACKEND REAL pega aquí las credenciales de tu proyecto Supabase.
+   (Supabase → Project Settings → API). Usa la anon/public key, NUNCA la service_role.
+   Si quedan vacías, la app corre en MODO DEMO: login local por rol, datos en este navegador. */
+const SUPABASE_URL='';        // ej: https://abcdxyz.supabase.co
+const SUPABASE_ANON_KEY='';   // anon public key (empieza por eyJ...)
+const SB_ENABLED=/^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL)&&SUPABASE_ANON_KEY.length>20;
+
+const ACCESS_LEVELS={1:'Administrador Global',2:'Administrador de Datos',3:'Usuario Estándar'};
+let CURRENT_USER=null; // {id,email,name,level,role,demo}
+
+/* Capacidades por nivel (número MENOR = más permisos). can(cap)=nivel del usuario <= mínimo requerido */
+const CAP_MIN={
+  'data.create':2,'data.edit':2,'data.delete':2,'assign.manage':2,'territory.manage':2,
+  'comm.send':2,'anuncio.manage':2,'report.send':2,'config.general':2,
+  'config.admin':1,'users.manage':1,'billing':1,'legal.edit':1,
+  'attendance.register':3,'informe.register':3,'report.generate':3,'view':3
+};
+function userLevel(){return (CURRENT_USER&&CURRENT_USER.level)||1;}
+function can(cap){const m=CAP_MIN[cap];return m==null?true:userLevel()<=m;}
+function requireCap(cap){if(can(cap))return true;toast('No tienes permisos para realizar esta acción');return false;}
+
+/* ---- sesión (localStorage) ---- */
+const SESSION_KEY='msp_session';
+function saveSession(s){try{localStorage.setItem(SESSION_KEY,JSON.stringify(s))}catch(e){}}
+function loadSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}}
+function clearSession(){try{localStorage.removeItem(SESSION_KEY)}catch(e){}}
+
+/* ---- Supabase sin librerías: fetch a GoTrue (/auth) y PostgREST (/rest) ---- */
+async function sbAuth(grant,payload){
+  const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/auth/v1/token?grant_type='+grant,{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error_description||j.msg||j.error||('Error '+r.status));
+  return j;
+}
+async function sbRest(path,opts){opts=opts||{};const s=loadSession();
+  const headers=Object.assign({'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},opts.headers||{});
+  if(s&&s.access_token)headers['Authorization']='Bearer '+s.access_token;
+  const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+path,{method:opts.method||'GET',headers,body:opts.body?JSON.stringify(opts.body):undefined});
+  if(!r.ok){throw new Error('REST '+r.status+': '+(await r.text().catch(()=>'')))}
+  return r.status===204?null:r.json();
+}
+function profileToUser(authUser,prof){const level=(prof&&prof.access_level)||3;
+  return {id:authUser.id,email:authUser.email,name:(prof&&prof.full_name)||(authUser.email||'').split('@')[0]||'Usuario',level:level,role:ACCESS_LEVELS[level]};}
+async function doLogin(email,password){
+  const tok=await sbAuth('password',{email:email,password:password});
+  saveSession({access_token:tok.access_token,refresh_token:tok.refresh_token,expires_at:Date.now()+(tok.expires_in||3600)*1000,user:tok.user});
+  let prof=null;try{const rows=await sbRest('profiles?select=*&id=eq.'+tok.user.id);prof=rows&&rows[0]}catch(e){}
+  CURRENT_USER=profileToUser(tok.user,prof);return CURRENT_USER;
+}
+async function refreshIfNeeded(){const s=loadSession();if(!s||!s.access_token)return null;
+  if(s.expires_at&&s.expires_at>Date.now()+60000)return s;
+  try{const tok=await sbAuth('refresh_token',{refresh_token:s.refresh_token});const ns={access_token:tok.access_token,refresh_token:tok.refresh_token,expires_at:Date.now()+(tok.expires_in||3600)*1000,user:tok.user||s.user};saveSession(ns);return ns;}
+  catch(e){clearSession();return null;}
+}
+function demoLogin(level){CURRENT_USER={id:'demo',email:'demo@lasflores.org',name:'Paublo Díaz',level:level,role:ACCESS_LEVELS[level],demo:true};saveSession({demo:true,level:level,name:CURRENT_USER.name,email:CURRENT_USER.email});startApp();}
+async function signOut(){const s=loadSession();if(SB_ENABLED&&s&&s.access_token){try{await fetch(SUPABASE_URL.replace(/\/$/,'')+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token}})}catch(e){}}clearSession();CURRENT_USER=null;location.reload();}
+
+/* ---- pantalla de login ---- */
+function authOverlay(){let o=document.getElementById('authOverlay');if(o)return o;o=document.createElement('div');o.id='authOverlay';
+  o.style.cssText='position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#312E81,#5B21B6 55%,#8B5CF6);overflow:auto';document.body.appendChild(o);return o;}
+function removeAuthOverlay(){const o=document.getElementById('authOverlay');if(o)o.remove();document.getElementById('app')&&(document.getElementById('app').style.visibility='visible');}
+function showLogin(){document.querySelector('.app')&&(document.querySelector('.app').style.visibility='hidden');
+  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%"><span class="kpi-ico ${l===1?'t-violet':l===2?'t-brand':'t-cyan'}" style="width:34px;height:34px;flex-shrink:0">${svg(l===1?'shield':l===2?'db':'user')}</span><span><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="color:var(--ink-500);font-size:11.5px">${l===1?'Acceso total: usuarios, configuración y datos':l===2?'Gestión de datos: publicadores, territorios, programación':'Consulta y registro básico'}</small></span></span></button>`).join('')}</div>`;
+  const realForm=`<form id="loginForm" onsubmit="submitLogin(event)" style="display:grid;gap:13px">
+      <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Correo electrónico</label><input class="input" id="lg_email" type="email" autocomplete="username" placeholder="tucorreo@congregacion.org" required/></div>
+      <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Contraseña</label><input class="input" id="lg_pw" type="password" autocomplete="current-password" placeholder="••••••••" required/></div>
+      <div id="lg_err" style="display:none;font-size:12.5px;color:var(--red);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:9px 11px"></div>
+      <button class="btn primary" id="lg_submit" type="submit" style="width:100%;height:44px;margin-top:2px">${svg('logout')}Iniciar sesión</button>
+    </form>`;
+  const body=SB_ENABLED
+    ? `${realForm}<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" onclick="toggleDemoPanel()" id="demoToggle">o entrar en modo demostración</button></div><div id="demoPanel" hidden style="margin-top:12px">${demoBtns}</div>`
+    : `<div style="font-size:12.5px;color:var(--ink-500);background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:16px;line-height:1.5">${svg('shield')} Backend Supabase no configurado. Entra en <b>modo demostración</b> eligiendo un rol para probar el control de accesos.</div>${demoBtns}`;
+  authOverlay().innerHTML=`<div style="width:100%;max-width:410px">
+    <div style="text-align:center;margin-bottom:20px;color:#fff"><div style="font-size:30px;font-weight:800;letter-spacing:-.5px">MS <span style="font-weight:400;opacity:.85">PLANNER</span></div><div style="font-size:13px;opacity:.85;margin-top:4px">Administración de la congregación Las Flores</div></div>
+    <div class="card" style="padding:26px 24px"><h3 style="font-size:17px;font-weight:750;margin-bottom:4px">Iniciar sesión</h3><p style="font-size:12.5px;color:var(--ink-500);margin-bottom:18px">${SB_ENABLED?'Ingresa con tu correo y contraseña.':'Selecciona un rol para continuar.'}</p>${body}</div>
+    <div style="text-align:center;margin-top:16px;font-size:11.5px;color:rgba(255,255,255,.7)">© 2026 MS Planner · Las Flores</div>
+  </div>`;
+  const em=document.getElementById('lg_email');if(em)setTimeout(()=>em.focus(),40);
+}
+function toggleDemoPanel(){const p=document.getElementById('demoPanel');if(p)p.hidden=!p.hidden;}
+async function submitLogin(e){e.preventDefault();const btn=document.getElementById('lg_submit');const err=document.getElementById('lg_err');
+  const email=document.getElementById('lg_email').value.trim();const pw=document.getElementById('lg_pw').value;
+  if(!email||!pw)return;err.style.display='none';btn.disabled=true;btn.classList.add('loading');btn.innerHTML='<span class="spinner"></span>Ingresando…';
+  try{await doLogin(email,pw);startApp();}
+  catch(ex){err.textContent=/invalid|credentials|grant/i.test(String(ex.message))?'Correo o contraseña incorrectos.':('No se pudo iniciar sesión: '+ex.message);err.style.display='block';btn.disabled=false;btn.classList.remove('loading');btn.innerHTML=svg('logout')+'Iniciar sesión';}
+}
+function applyUserToChrome(){if(!CURRENT_USER)return;const u=CURRENT_USER;
+  const chip=document.getElementById('profileBtn');
+  if(chip)chip.innerHTML=`<div class="avatar">${initials(u.name)}</div><div class="profile-meta"><b>${u.name}</b><small>${u.role}${u.demo?' · demo':''}</small></div><div class="chev">${svg('chevD')}</div>`;
+  document.body.setAttribute('data-level',String(u.level));
+}
+function startApp(){removeAuthOverlay();document.querySelector('.app')&&(document.querySelector('.app').style.visibility='visible');
+  applyUserToChrome();hydrateAll();renderNav();go('dashboard');updateThemeToggle();
+  if(CURRENT_USER)toast(`Bienvenido, ${CURRENT_USER.name.split(' ')[0]} · ${CURRENT_USER.role}`);
+}
+async function initAuth(){const s=loadSession();
+  if(s&&s.demo){CURRENT_USER={id:'demo',email:s.email,name:s.name,level:s.level,role:ACCESS_LEVELS[s.level],demo:true};return startApp();}
+  if(SB_ENABLED&&s&&s.access_token){const ns=await refreshIfNeeded();if(ns){try{const rows=await sbRest('profiles?select=*&id=eq.'+ns.user.id);CURRENT_USER=profileToUser(ns.user,rows&&rows[0]);return startApp();}catch(e){clearSession();}}}
+  showLogin();
+}
+initAuth();
 </script>
 </body>
 </html>

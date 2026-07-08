@@ -25,6 +25,16 @@ Todo funciona localmente: los datos de demostración se generan al cargar y **tu
 - **Configuración**: datos de la congregación, anuncios y eventos (CRUD), grupos, legal y seguridad, soporte, suscripción.
 - **Extras**: búsqueda global (⌘K), modo oscuro, accesibilidad (ARIA, foco visible, badges con icono), es-CO en toda la UI.
 
+## 🔐 Autenticación y roles (Supabase)
+
+La app incluye **login con control de acceso por roles**, listo para conectar con un backend real de Supabase:
+
+- **3 niveles:** Nivel 1 (Administrador Global), Nivel 2 (Administrador de Datos), Nivel 3 (Usuario Estándar). La interfaz se adapta al rol (oculta y bloquea acciones no permitidas).
+- **Modo demostración** (sin configurar nada): al abrir la app eliges un rol y pruebas el sistema de permisos al instante.
+- **Backend real:** sigue [`SETUP_SUPABASE.md`](SETUP_SUPABASE.md) para conectar tu proyecto Supabase (login por correo y contraseña, perfiles con nivel de acceso y seguridad a nivel de fila). El esquema completo está en [`supabase_schema.sql`](supabase_schema.sql).
+
+> El login por correo/contraseña funciona incluso abriendo el HTML directamente. Los métodos con redirección (Google, magic links) requieren hospedar la app.
+
 ## 🧱 Arquitectura
 
 - **Un solo archivo HTML autocontenido** (~350 KB): HTML + CSS + JavaScript vanilla, sin frameworks ni build.
