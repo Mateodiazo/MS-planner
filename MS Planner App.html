@@ -534,7 +534,8 @@ const I={
   moon:'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 };
-function svg(n,cls=''){return `<svg class="ico${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[n]||''}</svg>`}
+function svg(n,cls=''){return `<svg class="ico${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-${n}" xlink:href="#ico-${n}"/></svg>`}
+(function(){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden');s.innerHTML=Object.keys(I).map(k=>`<symbol id="ico-${k}" viewBox="0 0 24 24">${I[k]}</symbol>`).join('');document.body.appendChild(s);})();
 
 /* LOGO (MS Planner) */
 function logoSVG(){return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="msg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#4c1d95"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#msg)"/><circle cx="24" cy="24" r="15" fill="none" stroke="#a78bfa" stroke-width="2" opacity=".55"/><path d="M14 16c4 2 16 2 20 0" fill="none" stroke="#a78bfa" stroke-width="1.6" opacity=".4"/><path d="M14 32c4-2 16-2 20 0" fill="none" stroke="#a78bfa" stroke-width="1.6" opacity=".4"/><text x="24" y="30" font-family="Inter,Arial" font-size="17" font-weight="800" fill="#fff" text-anchor="middle">MS</text></svg>`}
@@ -1114,6 +1115,7 @@ function sortBy(col){if(dbState.sortCol===col){dbState.sortDir=dbState.sortDir==
 function sortIco(col){const rot=dbState.sortCol===col&&dbState.sortDir==='asc'?-90:90;return `<span class="sort-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${rot}deg)"><path d="m9 18 6-6-6-6"/></svg></span>`}
 function th(col,label){return `<th class="sortable ${dbState.sortCol===col?'sorted':''}" onclick="sortBy('${col}')">${label}${sortIco(col)}</th>`}
 function renderDbTable(){
+  saveUiState();
   const all=filteredDB();const total=all.length;const pages=Math.max(1,Math.ceil(total/dbState.pageSize));
   if(dbState.page>pages)dbState.page=pages;const start=(dbState.page-1)*dbState.pageSize;const rows=all.slice(start,start+dbState.pageSize);
   const sel=dbState.sel;const allIds=all.map(p=>p.id);const allSelected=total>0&&allIds.every(id=>sel.has(id));
@@ -1473,7 +1475,7 @@ VIEWS.territorios=()=>{
     <div id="terrContent"></div></div>`;
   renderTerr();
 };
-function setTerrTab(t){terrTab=t;VIEWS.territorios()}
+function setTerrTab(t){terrTab=t;saveUiState();VIEWS.territorios()}
 function openAsignTerr(num){if(!requireCap('territory.manage'))return;const t=num?TERR.find(x=>x.num===num):null;
   openModalCustom({icon:'calendar',tint:'t-green',title:'Reasignar territorio',sub:t?`Territorio #${t.num} · ${t.barrio} (${t.localidad})`:'Programa una salida de predicación',
     body:`<div class="form-grid">
@@ -1512,6 +1514,7 @@ function diaSemana(iso){return new Date(iso+'T00:00:00').toLocaleDateString('es-
 function confBadgeAsign(c){if(c==='conf')return `<span class="badge green">${svg('check')}Confirmado</span>`;if(c==='rech')return `<span class="badge red">${svg('x')}Rechazado</span>`;return `<span class="badge amber">${svg('clock')}Pendiente</span>`;}
 function setAsignConf(id,val){const a=TERR_ASIGN.find(x=>x.id===id);if(a){a.conf=val;persistAll();renderTerrAsign();toast('Confirmación actualizada ✓');}}
 function renderTerrAsign(){
+  saveUiState();
   const el=document.getElementById('terrContent');
   const months=Array.from(new Set(TERR_ASIGN.map(a=>a.date.slice(0,7)))).sort().reverse();
   const encs=Array.from(new Set(TERR_ASIGN.map(a=>String(a.encargadoId))));
@@ -2112,7 +2115,7 @@ function vaciarExhibTurn(){const key=__extKey();if(!key)return;
 /* -------- INFORMES (filtros corregidos) -------- */
 let informeFilter='todos';
 let infState={sortCol:'nombre',sortDir:'asc',page:1,pageSize:10};
-function setInformeFilter(f){informeFilter=f;infState.page=1;VIEWS.informes()}
+function setInformeFilter(f){informeFilter=f;infState.page=1;saveUiState();VIEWS.informes()}
 VIEWS.informes=()=>{
   const base=INFORMES.filter(r=>{
     if(informeFilter==='entregados')return r.entregado;
@@ -2238,8 +2241,12 @@ function repPreview(type){
   else if(type==='pred'){title='Predicación · vista previa';body=tablePreview(['Grupo','Superintendente','Publicadores'],REAL_GROUPS.map((g,i)=>[g.n,g.sup,String(DB.filter(p=>p.grupoIdx===i).length)]),6)}
   else if(type==='campo'){title='Resumen de servicio de campo · vista previa';body=tablePreview(['Publicador','Tipo','Estado','PR'],DB.slice(0,10).map(p=>[p.fullName,p.role==='Anciano'?'ANC':p.role==='Siervo Ministerial'?'SM':p.role==='Publicador no bautizado'?'PNB':'PUB',p.estado,p.role==='Precursor Regular'?'PR':'']),DB.length)}
   else if(type==='s1'){title='Servicio de campo y asistencia (S-1) · vista previa';body=tablePreview(['Indicador','Valor'],[['Publicadores activos',String(DB.filter(p=>p.estado!=='Inactivo').length)],['Promedio asistencia fin de semana',String(ATT_WE[TODAY.getMonth()])],['Publicadores · N.º informes','—'],['Precursores auxiliares · Horas','—'],['Precursores regulares · Horas','—']],5)}
-  openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" onclick="closeModal()">Cerrar</button><button class="btn primary" onclick="closeModal();toast('Generando descarga…')">${svg('download')}Descargar</button>`});
+  const dlAction=type==='terr'
+    ? `<button class="btn" onclick="closeModal();exportTerrDocx()">${svg('download')}Word</button><button class="btn primary" onclick="closeModal();exportTerrPdf()">${svg('download')}PDF</button>`
+    : `<button class="btn primary" onclick="closeModal();${REPORT_DL[type]||''}()">${svg('download')}Descargar</button>`;
+  openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" onclick="closeModal()">Cerrar</button>${dlAction}`});
 }
+const REPORT_DL={bd:'repBaseDatos',pub:'repBaseDatos',prec:'repPrecursores',inf6:'repInformes6m',cards:'downloadAllCards',asist:'openAsistYearSelect',pred:'repPredicacion',campo:'openFieldSummarySelect',s1:'openS1Select'};
 function tablePreview(head,rows,total){return `<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="muted" style="font-size:12px;margin-top:10px">Mostrando ${rows.length} de ${total} registros.</p>`}
 function cardPreviewHTML(p){return `<div style="width:300px;border-radius:16px;overflow:hidden;box-shadow:var(--sh-md);border:1px solid var(--border)"><div style="background:linear-gradient(135deg,#8B5CF6,#5B21B6);padding:18px 18px 40px;color:#fff"><div style="font-size:11px;font-weight:700;letter-spacing:1px">MS PLANNER</div><div style="font-size:10px;opacity:.85">Congregación Las Flores</div></div><div style="padding:0 18px 18px;margin-top:-28px"><div class="avatar" style="width:60px;height:60px;font-size:20px;border:3px solid #fff;background:${avColor(p.fullName)}">${initials(p.fullName)}</div><div style="font-size:17px;font-weight:750;margin-top:10px">${p.fullName}</div><div style="font-size:12px;color:var(--ink-500);margin-bottom:12px">${p.role} · ${p.grupo}</div>${[['Fecha de nacimiento',fmtFecha(p.nacimiento)],['Sexo',p.sex==='M'?'Hombre':'Mujer'],['Fecha de bautismo',fmtFecha(p.bautismo)],['Esperanza','Otras ovejas'],['Nombramiento',p.role]].map(([l,v])=>`<div style="font-size:11px;color:var(--ink-400);text-transform:uppercase;margin-top:8px">${l}</div><div style="font-size:12.5px;font-weight:600">${v}</div>`).join('')}</div></div>`}
 function donut(data){
@@ -2274,7 +2281,7 @@ VIEWS.actividad=()=>{
     </div></div>`;
   renderActList();
 };
-function setActFilter(f){actFilter=f;VIEWS.actividad();}
+function setActFilter(f){actFilter=f;saveUiState();VIEWS.actividad();}
 function renderActList(){
   const el=document.getElementById('actList');if(!el)return;
   let items=actItems();if(actFilter!=='all')items=items.filter(i=>i.kind===actFilter);
@@ -2377,7 +2384,7 @@ VIEWS.config=()=>{
     <div id="configContent"></div></div>`;
   renderConfig();
 };
-function setConfigTab(t){configTab=t;VIEWS.config()}
+function setConfigTab(t){configTab=t;saveUiState();VIEWS.config()}
 /* --- Administración de grupos (Nuevo / Configurar) --- */
 function grpMembersChips(){return Array.from(window.__grpSel).map(id=>{const p=DB.find(x=>String(x.id)===String(id));return p?`<span style="display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:20px;background:var(--surface-3);border:1px solid var(--border);font-size:12.5px;font-weight:600">${p.fullName}<button type="button" onclick="grpRemoveMember('${id}')" style="background:none;color:var(--ink-400);font-weight:800;font-size:15px;line-height:1;cursor:pointer">×</button></span>`:'';}).join('')||'<span class="muted" style="font-size:12.5px">Sin integrantes aún.</span>';}
 function grpRefresh(){const m=document.getElementById('grp_members');if(m)m.innerHTML=grpMembersChips();const c=document.getElementById('grp_count');if(c)c.textContent='('+window.__grpSel.size+')';}
@@ -2591,7 +2598,7 @@ function renderConfig(){
   }
   el.innerHTML=h;
 }
-function setLegalTab(t){legalTab=t;renderConfig()}
+function setLegalTab(t){legalTab=t;saveUiState();renderConfig()}
 function enviarSoporte(btn){
   const g=id=>document.getElementById(id);
   const nombre=(g('sop_nombre').value||'').trim(),correo=(g('sop_correo').value||'').trim(),tel=(g('sop_tel').value||'').trim();
@@ -2940,10 +2947,35 @@ function saveUserConfig(){const g=id=>document.getElementById(id);
   closeModal();toast('Configuración guardada correctamente ✓');
 }
 
+/* -------- PERSISTENCIA DE ESTADO DE UI (sidebar, pestañas, filtros) -------- */
+const UI_STATE_KEY='msp_ui_state_v1';
+let __uiSaveTimer=null;
+function saveUiState(){
+  if(__uiSaveTimer)clearTimeout(__uiSaveTimer);
+  __uiSaveTimer=setTimeout(()=>{try{localStorage.setItem(UI_STATE_KEY,JSON.stringify({
+    sidebarCollapsed:!!document.getElementById('sidebar')?.classList.contains('collapsed'),
+    configTab,legalTab,terrTab,informeFilter,actFilter,
+    dbFilters:{q:dbState.q,grupo:dbState.grupo,privilegio:dbState.privilegio,estado:dbState.estado,sortCol:dbState.sortCol,sortDir:dbState.sortDir},
+    terrAsignFilter:{month:terrAsignFilter.month,encargado:terrAsignFilter.encargado}
+  }));}catch(e){}},300);
+}
+function loadUiState(){
+  let s;try{s=JSON.parse(localStorage.getItem(UI_STATE_KEY)||'null');}catch(e){s=null;}
+  if(!s)return;
+  if(s.sidebarCollapsed)document.getElementById('sidebar')?.classList.add('collapsed');
+  if(s.configTab)configTab=s.configTab;
+  if(s.legalTab)legalTab=s.legalTab;
+  if(s.terrTab)terrTab=s.terrTab;
+  if(s.informeFilter)informeFilter=s.informeFilter;
+  if(s.actFilter)actFilter=s.actFilter;
+  if(s.dbFilters)Object.assign(dbState,s.dbFilters);
+  if(s.terrAsignFilter)Object.assign(terrAsignFilter,s.terrAsignFilter);
+}
+
 /* -------- UI HELPERS -------- */
 function toggleTheme(){const d=document.documentElement;const dark=d.getAttribute('data-theme')==='dark';if(dark)d.removeAttribute('data-theme');else d.setAttribute('data-theme','dark');try{localStorage.setItem('msp_theme',dark?'light':'dark')}catch(e){}updateThemeToggle()}
 function updateThemeToggle(){const dark=document.documentElement.getAttribute('data-theme')==='dark';const b=document.getElementById('themeToggle');if(b){b.innerHTML=svg(dark?'sun':'moon');b.setAttribute('data-tip',dark?'Modo claro':'Modo oscuro');b.setAttribute('aria-label',dark?'Cambiar a modo claro':'Cambiar a modo oscuro')}}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed')}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed');saveUiState();}
 function openMobileNav(){document.getElementById('sidebar').classList.add('mobile-open');document.getElementById('scrim').classList.add('show')}
 function closeMobileNav(){document.getElementById('sidebar').classList.remove('mobile-open');document.getElementById('scrim').classList.remove('show')}
 function toast(msg){const t=document.createElement('div');t.className='toast';t.innerHTML=`${svg('check')}<span>${msg}</span>`;document.getElementById('toastWrap').appendChild(t);setTimeout(()=>{t.style.transition='.3s';t.style.opacity='0';t.style.transform='translateX(50px)';setTimeout(()=>t.remove(),300)},2600)}
@@ -3382,6 +3414,7 @@ async function initAuth(){const s=loadSession();
   if(SB_ENABLED&&s&&s.access_token){const ns=await refreshIfNeeded();if(ns){try{const rows=await sbRest('profiles?select=*&id=eq.'+ns.user.id);CURRENT_USER=profileToUser(ns.user,rows&&rows[0]);return startApp();}catch(e){clearSession();}}}
   showLogin();
 }
+loadUiState();
 initAuth();
 </script>
 </body>
