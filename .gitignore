@@ -10,6 +10,7 @@
 !SETUP_SUPABASE.md
 !supabase_schema.sql
 !supabase_migration_roles.sql
+!supabase_migration_storage.sql
 !ROLES.md
 !supabase_edge_admin_users.ts
 !SETUP_USERS.md

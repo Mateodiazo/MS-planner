@@ -1575,7 +1575,23 @@ let terrEditImg=null;
 function terrImgFieldHTML(img,wrapId){const acc='image/jpeg,image/jpg,image/png,image/webp';
   if(img)return `<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap"><img src="${img}" alt="Imagen del territorio" style="width:250px;max-width:100%;height:158px;object-fit:cover;border-radius:12px;border:1px solid var(--border)"/><div style="display:flex;flex-direction:column;gap:8px"><label class="btn sm" style="cursor:pointer">${svg('edit')}Reemplazar<input type="file" accept="${acc}" style="display:none" onchange="terrImgPick(this,'${wrapId}')"/></label><button type="button" class="btn sm danger" onclick="terrImgRemove('${wrapId}')">${svg('trash')}Quitar</button></div></div>`;
   return `<label class="terr-drop">${svg('map')}<div><b>Subir imagen del territorio</b><small>JPG, JPEG, PNG o WEBP</small></div><input type="file" accept="${acc}" style="display:none" onchange="terrImgPick(this,'${wrapId}')"/></label>`;}
-function terrImgPick(input,wrapId){const f=input.files&&input.files[0];if(!f)return;if(!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)){toast('Formato no válido · usa JPG, PNG o WEBP');return;}const r=new FileReader();r.onload=e=>{terrEditImg=e.target.result;const w=document.getElementById(wrapId);if(w)w.innerHTML=terrImgFieldHTML(terrEditImg,wrapId);toast('Imagen cargada · recuerda guardar');};r.readAsDataURL(f);}
+function terrImgPick(input,wrapId){const f=input.files&&input.files[0];if(!f)return;if(!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)){toast('Formato no válido · usa JPG, PNG o WEBP');return;}
+  const r=new FileReader();r.onload=e=>{terrEditImg=e.target.result;const w=document.getElementById(wrapId);if(w)w.innerHTML=terrImgFieldHTML(terrEditImg,wrapId);
+    if(dataBackend()==='supabase'){
+      const localPreview=terrEditImg;
+      sbUploadTerrImage(f).then(url=>{if(terrEditImg!==localPreview)return;terrEditImg=url;const w2=document.getElementById(wrapId);if(w2)w2.innerHTML=terrImgFieldHTML(terrEditImg,wrapId);toast('Imagen subida a la nube ✓');})
+        .catch(()=>{toast('No se pudo subir la imagen a la nube · se guardará localmente');});
+    }else{toast('Imagen cargada · recuerda guardar');}
+  };r.readAsDataURL(f);}
+/* Sube la imagen a Supabase Storage (bucket público "territorios") y devuelve su URL pública */
+async function sbUploadTerrImage(file){
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  const path='terr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+  const s=loadSession();
+  const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/territorios/'+path,{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+((s&&s.access_token)||SUPABASE_ANON_KEY),'Content-Type':file.type},body:file});
+  if(!r.ok)throw new Error('Storage '+r.status+': '+(await r.text().catch(()=>'')));
+  return SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/public/territorios/'+path;
+}
 function terrImgRemove(wrapId){terrEditImg=null;const w=document.getElementById(wrapId);if(w)w.innerHTML=terrImgFieldHTML(null,wrapId);}
 function isValidMaps(v){v=(v||'').trim();return /^https?:\/\/\S+$/.test(v)&&/(google\.[a-z.]+\/maps|maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.)/i.test(v);}
 function validateMapsUrl(el){const v=el.value.trim();const ok=!v||isValidMaps(v);el.classList.toggle('valid',!!v&&ok);el.classList.toggle('invalid',!!v&&!ok);el.setAttribute('aria-invalid',(!!v&&!ok)?'true':'false');const h=fieldHintEl(el);if(h){h.textContent=v?(ok?'✓ Enlace válido':'Ingresa un enlace de Google Maps válido'):'';h.className='field-hint '+(ok?(v?'ok':''):'err');}}
