@@ -449,6 +449,8 @@ table.data tbody tr.clickable{cursor:pointer}
   .bigcal-grid{font-size:11px}.bigcal-cell{min-height:64px;padding:4px}.cal-event{padding:4px 5px;font-size:9.5px}
   .card-head{flex-wrap:wrap;padding:15px 16px;gap:11px}.card-head .actions{flex-wrap:wrap}
   .card-pad{padding:16px}.page-head .actions{width:100%}.tabs{gap:2px}}
+:focus-visible{outline:2px solid var(--brand-400);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -2832,21 +2834,37 @@ function savePublisher(){
   dbState.page=1;if(currentView==='database')VIEWS.database();
   toast(`${fullName} registrado correctamente ✓`);
 }
+function focusablesIn(container){return Array.from(container.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetParent!==null);}
+let __modalReturnFocus=null;
 function openModalCustom({icon,tint,title,sub,body,footer,size=''}){
-  closeModal();const ov=document.createElement('div');ov.className='modal-overlay';ov.id='modalOverlay';ov.onclick=e=>{if(e.target===ov)closeModal()};
-  ov.innerHTML=`<div class="modal ${size}"><div class="modal-head">${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3>${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()">${svg('x')}</button></div><div class="modal-body">${body}</div><div class="modal-foot">${footer||`<button class="btn" onclick="closeModal()">Cerrar</button>`}</div></div>`;
-  document.body.appendChild(ov);document.body.classList.add('modal-lock');document.addEventListener('keydown',escClose);
+  closeModal();__modalReturnFocus=document.activeElement;
+  const ov=document.createElement('div');ov.className='modal-overlay';ov.id='modalOverlay';ov.onclick=e=>{if(e.target===ov)closeModal()};
+  ov.innerHTML=`<div class="modal ${size}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modal-head">${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()" aria-label="Cerrar">${svg('x')}</button></div><div class="modal-body">${body}</div><div class="modal-foot">${footer||`<button class="btn" onclick="closeModal()">Cerrar</button>`}</div></div>`;
+  document.body.appendChild(ov);document.body.classList.add('modal-lock');document.addEventListener('keydown',modalKeydown);
+  const modal=ov.querySelector('.modal');const f=focusablesIn(modal);(f[0]||modal).focus();
 }
 function swapModalContent({icon,tint,title,sub,body,footer,size}){
   const ov=document.getElementById('modalOverlay');if(!ov)return openModalCustom({icon,tint,title,sub,body,footer,size});
   const m=ov.querySelector('.modal');if(!m)return;
   if(size!==undefined)m.className='modal '+size;
-  m.querySelector('.modal-head').innerHTML=`${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3>${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()">${svg('x')}</button>`;
+  m.querySelector('.modal-head').innerHTML=`${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()" aria-label="Cerrar">${svg('x')}</button>`;
   const b=m.querySelector('.modal-body');b.innerHTML=body;b.scrollTop=0;
   m.querySelector('.modal-foot').innerHTML=footer||`<button class="btn" onclick="closeModal()">Cerrar</button>`;
 }
-function escClose(e){if(e.key==='Escape')closeModal()}
-function closeModal(){const ov=document.getElementById('modalOverlay');if(!ov)return;ov.classList.add('closing');document.body.classList.remove('modal-lock');document.removeEventListener('keydown',escClose);setTimeout(()=>ov.remove(),190)}
+function modalKeydown(e){
+  if(e.key==='Escape'){closeModal();return;}
+  if(e.key==='Tab'){
+    const ov=document.getElementById('modalOverlay');if(!ov)return;
+    const modal=ov.querySelector('.modal');if(!modal)return;
+    const f=focusablesIn(modal);if(!f.length)return;
+    const first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+}
+function closeModal(){const ov=document.getElementById('modalOverlay');if(!ov)return;ov.classList.add('closing');document.body.classList.remove('modal-lock');document.removeEventListener('keydown',modalKeydown);
+  const returnTo=__modalReturnFocus;__modalReturnFocus=null;
+  setTimeout(()=>{ov.remove();if(returnTo&&returnTo.isConnected)returnTo.focus();},190)}
 
 /* -------- POPOVERS -------- */
 function toggleNotif(e){e.stopPropagation();const ex=document.getElementById('notifPop');if(ex){ex.remove();return}closeProfile();
@@ -2946,6 +2964,29 @@ function saveUserConfig(){const g=id=>document.getElementById(id);
   try{localStorage.setItem('msp_userprefs',JSON.stringify(USER_PREFS))}catch(e){}
   closeModal();toast('Configuración guardada correctamente ✓');
 }
+
+/* -------- ACCESIBILIDAD: role/tabindex para clicables no nativos + aria-label desde data-tip -------- */
+const A11Y_NATIVE=['BUTTON','A','SELECT','INPUT','TEXTAREA','LABEL'];
+function a11yEnhance(root){
+  if(!root||root.nodeType!==1)return;
+  const list=[];
+  if(root.matches&&root.matches('[onclick],[data-tip]'))list.push(root);
+  if(root.querySelectorAll)list.push(...root.querySelectorAll('[onclick],[data-tip]'));
+  list.forEach(el=>{
+    if(el.hasAttribute('onclick')&&!A11Y_NATIVE.includes(el.tagName)){
+      if(!el.hasAttribute('role'))el.setAttribute('role','button');
+      if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');
+    }
+    if(el.hasAttribute('data-tip')&&!el.hasAttribute('aria-label')&&!el.textContent.trim())el.setAttribute('aria-label',el.getAttribute('data-tip'));
+  });
+}
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.getAttribute&&e.target.getAttribute('role')==='button'&&!e.target.hasAttribute('onkeydown')){
+    e.preventDefault();e.target.click();
+  }
+});
+new MutationObserver(muts=>muts.forEach(m=>m.addedNodes.forEach(n=>a11yEnhance(n)))).observe(document.body,{childList:true,subtree:true});
+a11yEnhance(document.body);
 
 /* -------- PERSISTENCIA DE ESTADO DE UI (sidebar, pestañas, filtros) -------- */
 const UI_STATE_KEY='msp_ui_state_v1';
