@@ -3079,11 +3079,87 @@ function scheduleSbSync(){if(!__sbReady)return;if(__sbTimer)clearTimeout(__sbTim
 async function runSbSync(){if(__sbSyncing){__sbPending=true;return;}__sbSyncing=true;try{await sbSyncNow()}catch(e){}__sbSyncing=false;if(__sbPending){__sbPending=false;runSbSync();}}
 function setSyncState(state,err){__syncState={state:state,at:Date.now(),msg:err?String(err.message||err):''};const el=document.getElementById('syncStatusBox');if(el)el.innerHTML=syncStatusHTML();}
 
+/* ============ REALTIME (multi-usuario en vivo, sin librerías) ============
+   WebSocket directo al canal Realtime de Supabase (protocolo Phoenix, el mismo
+   que usa supabase-js por debajo). Se une a UN canal con postgres_changes para
+   todas las tablas de SB_ARRAYS + app_state (+ publisher_private si el rol ve
+   datos sensibles). Ante CUALQUIER cambio remoto, en vez de mergear cada tabla
+   a mano (9 formas distintas + fechas + sensibles = mucho riesgo), se agenda
+   una re-hidratación completa vía hydrateFromSupabase() ya probada (debounce
+   corto) — más simple y reutiliza toda la reconciliación de applySnapshot. */
+let __rtSocket=null,__rtRef=0,__rtHeartbeat=null,__rtJoined=false,__rtRetry=0,__rtRetryTimer=null,__rtPullTimer=null,__rtManualClose=false,__rtState='idle';
+function rtProjectRef(){const m=/^https:\/\/([^.]+)\.supabase\.co/.exec(SUPABASE_URL);return m?m[1]:null;}
+function rtNextRef(){return String(++__rtRef);}
+function rtSend(msg){if(__rtSocket&&__rtSocket.readyState===1)__rtSocket.send(JSON.stringify(msg));}
+function sbRealtimeConnect(){
+  if(!SB_ENABLED||!CURRENT_USER||CURRENT_USER.demo)return; // solo backend real, no en modo demo
+  if(__rtSocket)return; // ya conectado/conectando
+  const ref=rtProjectRef();if(!ref)return;
+  __rtManualClose=false;
+  let ws;
+  try{ws=new WebSocket('wss://'+ref+'.supabase.co/realtime/v1/websocket?apikey='+encodeURIComponent(SUPABASE_ANON_KEY)+'&vsn=1.0.0');}
+  catch(e){return;}
+  __rtSocket=ws;
+  ws.onopen=function(){
+    __rtRetry=0;setRtState('connecting');
+    if(__rtHeartbeat)clearInterval(__rtHeartbeat);
+    __rtHeartbeat=setInterval(function(){rtSend({topic:'phoenix',event:'heartbeat',payload:{},ref:rtNextRef()})},25000);
+    rtJoinChannel();
+  };
+  ws.onmessage=function(ev){try{rtHandleMessage(JSON.parse(ev.data));}catch(e){}};
+  ws.onclose=function(){__rtJoined=false;__rtSocket=null;if(__rtHeartbeat){clearInterval(__rtHeartbeat);__rtHeartbeat=null;}
+    if(__rtManualClose){setRtState('idle');}else{setRtState('error');rtScheduleReconnect();}};
+  ws.onerror=function(){/* el cierre lo maneja onclose */};
+}
+function rtJoinChannel(){
+  const tables=SB_ARRAYS.map(e=>e.t).concat(['app_state']);
+  if(can('personal.view'))tables.push('publisher_private');
+  const changes=tables.map(t=>({event:'*',schema:'public',table:t}));
+  rtSend({topic:'realtime:msplanner-sync',event:'phx_join',payload:{config:{broadcast:{self:false},presence:{key:''},postgres_changes:changes}},ref:rtNextRef()});
+}
+function rtHandleMessage(msg){
+  if(!msg||!msg.event)return;
+  if(msg.event==='phx_reply'){
+    if(msg.topic==='realtime:msplanner-sync'&&msg.payload){
+      if(msg.payload.status==='ok'){__rtJoined=true;setRtState('live');}
+      else{setRtState('error');}
+    }
+    return;
+  }
+  if(msg.event==='postgres_changes'){rtScheduleRemotePull();return;}
+  if(msg.event==='phx_close'||msg.event==='phx_error'){__rtJoined=false;setRtState('error');}
+}
+function rtScheduleRemotePull(){if(__rtPullTimer)clearTimeout(__rtPullTimer);__rtPullTimer=setTimeout(rtPullNow,900);}
+async function rtPullNow(){
+  if(__sbSyncing||__hydrating){rtScheduleRemotePull();return;} // no pisar un push/hydrate en curso
+  try{await hydrateFromSupabase();renderNav();if(typeof currentView==='string'&&VIEWS[currentView])VIEWS[currentView]();}catch(e){}
+}
+function sbRealtimeDisconnect(){
+  __rtManualClose=true;
+  if(__rtRetryTimer){clearTimeout(__rtRetryTimer);__rtRetryTimer=null;}
+  if(__rtPullTimer){clearTimeout(__rtPullTimer);__rtPullTimer=null;}
+  if(__rtHeartbeat){clearInterval(__rtHeartbeat);__rtHeartbeat=null;}
+  if(__rtSocket){try{__rtSocket.close();}catch(e){}__rtSocket=null;}
+  __rtJoined=false;setRtState('idle');
+}
+function rtScheduleReconnect(){
+  __rtRetry=Math.min(__rtRetry+1,6);
+  const wait=Math.min(30000,1000*Math.pow(2,__rtRetry));
+  if(__rtRetryTimer)clearTimeout(__rtRetryTimer);
+  __rtRetryTimer=setTimeout(sbRealtimeConnect,wait);
+}
+function setRtState(s){__rtState=s;const el=document.getElementById('syncStatusBox');if(el)el.innerHTML=syncStatusHTML();}
+function rtStateBadge(){
+  const map={idle:['gray','Sin tiempo real'],connecting:['amber','Conectando…'],live:['green','En vivo'],error:['amber','Reconectando…']};
+  const st=map[__rtState]||map.idle;
+  return `<span class="badge ${st[0]}"><span class="bdot"></span>${st[1]}</span>`;
+}
+
 /* ---- Panel de sincronización (Config → Sincronización) ---- */
 function syncStatusHTML(){const s=__syncState;const back=dataBackend();
   const map={idle:['gray','Inactivo'],ok:['green','Sincronizado'],seeded:['green','Datos iniciales enviados'],error:['red','Error de sincronización']};
   const st=map[s.state]||map.idle;
-  return `<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="badge ${back==='supabase'?'green':'gray'}">${svg(back==='supabase'?'db':'home')}${back==='supabase'?'Supabase (nube)':'Local (este navegador)'}</span><span class="badge ${st[0]}"><span class="bdot"></span>${st[1]}</span>${s.msg?`<small class="muted" style="font-size:11px">${s.msg}</small>`:''}</div>`;}
+  return `<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="badge ${back==='supabase'?'green':'gray'}">${svg(back==='supabase'?'db':'home')}${back==='supabase'?'Supabase (nube)':'Local (este navegador)'}</span><span class="badge ${st[0]}"><span class="bdot"></span>${st[1]}</span>${back==='supabase'?rtStateBadge():''}${s.msg?`<small class="muted" style="font-size:11px">${s.msg}</small>`:''}</div>`;}
 function syncPanelHTML(){const back=dataBackend();
   const counts=[['Publicadores',DB.length],['Territorios',TERR.length],['Tareas',TASKS.length],['Informes',INFORMES.length],['Asignaciones',TERR_ASIGN.length],['Notificaciones',NOTIFS.length]];
   return `<div class="card"><div class="card-pad">
@@ -3091,7 +3167,7 @@ function syncPanelHTML(){const back=dataBackend();
     <div id="syncStatusBox" style="margin-bottom:16px">${syncStatusHTML()}</div>
     ${SB_ENABLED?`<div class="lst" style="border:1px solid var(--border);border-radius:12px;margin-bottom:16px">${counts.map(c=>`<div class="lst-item"><div class="lst-body"><b>${c[0]}</b></div><span class="tag">${c[1]}</span></div>`).join('')}</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="testSbConnection()">${svg('refresh')}Probar conexión</button><button class="btn" onclick="manualPull()">${svg('download')}Recargar desde Supabase</button><button class="btn primary" onclick="manualPush()">${svg('send')}Enviar datos a Supabase</button></div>
-    <p class="muted" style="font-size:12px;margin-top:14px;line-height:1.6">La sincronización con la nube es automática tras cada cambio cuando inicias sesión con una cuenta real. Usa <b>Enviar</b> para forzar una copia y <b>Recargar</b> para traer la versión del servidor.</p>`
+    <p class="muted" style="font-size:12px;margin-top:14px;line-height:1.6">La sincronización con la nube es automática tras cada cambio cuando inicias sesión con una cuenta real, y los cambios de <b>otros usuarios conectados</b> llegan solos (tiempo real) sin recargar la página. Usa <b>Enviar</b> para forzar una copia y <b>Recargar</b> para traer la versión del servidor.</p>`
     :`<div style="font-size:13px;color:var(--ink-500);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;line-height:1.6">${svg('shield')} Estás en <b>modo local</b>: los datos se guardan solo en este navegador. Para activar el respaldo en la nube y compartir datos entre dispositivos, configura Supabase siguiendo <b>SETUP_SUPABASE.md</b> (pega tu URL y anon key en el archivo).</div>`}
   </div></div>`;}
 async function testSbConnection(){if(!SB_ENABLED){toast('Supabase no está configurado');return;}toast('Probando conexión…');try{await sbRest('profiles?select=id&limit=1');setSyncState('ok');toast('Conexión con Supabase correcta ✓');}catch(e){setSyncState('error',e);toast('No se pudo conectar: '+(e.message||e));}}
@@ -3238,7 +3314,7 @@ async function refreshIfNeeded(){const s=loadSession();if(!s||!s.access_token)re
   catch(e){clearSession();return null;}
 }
 function demoLogin(level){CURRENT_USER={id:'demo',email:'demo@lasflores.org',name:'Paublo Díaz',level:level,role:ACCESS_LEVELS[level],demo:true};saveSession({demo:true,level:level,name:CURRENT_USER.name,email:CURRENT_USER.email});startApp();}
-async function signOut(){const s=loadSession();if(SB_ENABLED&&s&&s.access_token){try{await fetch(SUPABASE_URL.replace(/\/$/,'')+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token}})}catch(e){}}clearSession();CURRENT_USER=null;location.reload();}
+async function signOut(){sbRealtimeDisconnect();const s=loadSession();if(SB_ENABLED&&s&&s.access_token){try{await fetch(SUPABASE_URL.replace(/\/$/,'')+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token}})}catch(e){}}clearSession();CURRENT_USER=null;location.reload();}
 
 /* ---- pantalla de login ---- */
 function authOverlay(){let o=document.getElementById('authOverlay');if(o)return o;o=document.createElement('div');o.id='authOverlay';
@@ -3281,6 +3357,7 @@ async function startApp(){removeAuthOverlay();document.querySelector('.app')&&(d
   if(dataBackend()==='supabase')showDataLoading(true);
   try{await hydrateAll();}catch(e){}
   showDataLoading(false);
+  if(dataBackend()==='supabase')sbRealtimeConnect();
   renderNav();go('dashboard');updateThemeToggle();
   if(CURRENT_USER)toast(`Bienvenido, ${CURRENT_USER.name.split(' ')[0]} · ${CURRENT_USER.role}`);
 }
