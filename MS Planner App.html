@@ -451,66 +451,70 @@ table.data tbody tr.clickable{cursor:pointer}
   .card-pad{padding:16px}.page-head .actions{width:100%}.tabs{gap:2px}}
 :focus-visible{outline:2px solid var(--brand-400);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
-/* ===== App del Publicador (Nivel 4) — interfaz móvil aparte ===== */
-#pubApp{display:none;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;background:var(--bg);position:relative;box-shadow:var(--sh-lg)}
-.pub-head{background:linear-gradient(135deg,var(--brand-400),var(--brand-500) 60%,var(--brand-700));color:#fff;padding:24px 20px 22px;border-radius:0 0 24px 24px;position:relative}
-.pub-head .pub-hi{font-size:22px;font-weight:750;margin:0;letter-spacing:-.3px}
-.pub-head .pub-sub{font-size:13px;opacity:.9;margin:4px 0 0}
-.pub-head .pub-av{position:absolute;top:22px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-weight:700;font-size:15px;border:2px solid rgba(255,255,255,.35)}
-.pub-main{flex:1;padding:16px 15px 96px;display:flex;flex-direction:column;gap:13px}
-.pub-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:15px 16px;box-shadow:var(--sh-sm)}
-.pub-card h3{font-size:14.5px;font-weight:700;margin:0 0 3px;color:var(--ink-900);display:flex;align-items:center;gap:8px}
-.pub-card h3 .ico{width:18px;height:18px;color:var(--brand-400)}
-.pub-sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-400);margin:6px 2px 0}
+/* ===== App del Publicador (Nivel 4) — estilo JW Library · claro/oscuro ===== */
+#pubApp{--pa-bg:#F4F3F8;--pa-surf:#fff;--pa-surf2:#F7F6FB;--pa-border:#E8E7F0;--pa-ink:#1A1A22;--pa-ink2:#6A6A78;--pa-ink3:#A0A0AE;--pa-accent:#6B5CA5;--pa-accent-soft:#EDEAF7;
+  display:none;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;background:var(--pa-bg);position:relative;box-shadow:var(--sh-lg);color:var(--pa-ink)}
+[data-theme="dark"] #pubApp{--pa-bg:#0F0F13;--pa-surf:#1B1B20;--pa-surf2:#24242A;--pa-border:#2C2C34;--pa-ink:#ECECF1;--pa-ink2:#9C9CAA;--pa-ink3:#66666F;--pa-accent:#B7A8E0;--pa-accent-soft:rgba(183,168,224,.15)}
+.pub-head{background:var(--pa-surf);border-bottom:1px solid var(--pa-border);padding:18px 18px 15px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px}
+.pub-head-txt{flex:1;min-width:0}
+.pub-head .pub-hi{font-size:20px;font-weight:750;margin:0;letter-spacing:-.3px;color:var(--pa-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pub-head .pub-sub{font-size:12.5px;margin:3px 0 0;color:var(--pa-ink2)}
+.pub-iconbtn{width:38px;height:38px;border-radius:11px;border:1px solid var(--pa-border);background:var(--pa-surf2);color:var(--pa-ink2);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+.pub-iconbtn .ico{width:19px;height:19px}
+.pub-head .pub-av{width:40px;height:40px;border-radius:50%;background:var(--pa-accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+.pub-main{flex:1;padding:16px 15px 102px;display:flex;flex-direction:column;gap:13px}
+.pub-card{background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:16px;padding:15px 16px}
+.pub-card h3{font-size:14.5px;font-weight:700;margin:0 0 3px;color:var(--pa-ink);display:flex;align-items:center;gap:8px}
+.pub-card h3 .ico{width:18px;height:18px;color:var(--pa-accent)}
+.pub-sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--pa-ink3);margin:8px 2px 0}
 .pub-stat-row{display:flex;gap:11px}
-.pub-stat{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:14px;box-shadow:var(--sh-sm);text-align:center}
-.pub-stat .v{font-size:24px;font-weight:800;color:var(--ink-900);line-height:1}
-.pub-stat .l{font-size:11px;color:var(--ink-500);margin-top:5px;font-weight:600}
-.pub-asg{border:1px solid var(--border);border-radius:15px;padding:14px;background:var(--surface);box-shadow:var(--sh-sm);display:flex;flex-direction:column;gap:10px}
+.pub-stat{flex:1;background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:16px;padding:15px;text-align:center}
+.pub-stat .v{font-size:26px;font-weight:800;color:var(--pa-accent);line-height:1}
+.pub-stat .l{font-size:11px;color:var(--pa-ink2);margin-top:6px;font-weight:600}
+.pub-asg{border:1px solid var(--pa-border);border-radius:16px;padding:15px;background:var(--pa-surf);display:flex;flex-direction:column;gap:11px}
 .pub-asg .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.pub-asg .date{font-size:15px;font-weight:700;color:var(--ink-900)}
-.pub-asg .terr-chips{display:flex;flex-wrap:wrap;gap:5px}
-.pub-asg .obs{font-size:12.5px;color:var(--ink-500);line-height:1.5}
+.pub-asg .date{font-size:15px;font-weight:700;color:var(--pa-ink)}
+.pub-asg .terr-chips{display:flex;flex-wrap:wrap;gap:6px}
+.pub-asg .obs{font-size:12.5px;color:var(--pa-ink2);line-height:1.5}
 .pub-asg .acts{display:flex;gap:9px}
 .pub-asg .acts .pub-btn{flex:1;width:auto}
-.pub-btn{width:100%;height:46px;border-radius:12px;border:none;font-size:14px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.pub-btn{width:100%;height:48px;border-radius:13px;border:none;font-size:14.5px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s;font-family:var(--font)}
 .pub-btn .ico{width:18px;height:18px}
-.pub-btn.accept{background:var(--green);color:#fff}
-.pub-btn.reject{background:var(--surface-3);color:var(--ink-700)}
-.pub-btn.primary{background:linear-gradient(135deg,var(--brand-400),var(--brand-500));color:#fff;box-shadow:var(--sh-purple)}
-.pub-btn.ghost{background:var(--surface-3);color:var(--ink-700)}
-.pub-btn:active{transform:scale(.97)}
+.pub-btn.accept,.pub-btn.primary{background:var(--pa-accent);color:#fff}
+.pub-btn.reject,.pub-btn.ghost{background:var(--pa-surf2);color:var(--pa-ink2);border:1px solid var(--pa-border)}
+.pub-btn:active{transform:scale(.98)}
 .pub-btn:disabled{opacity:.5;cursor:default}
-.pub-field{margin-bottom:13px}
-.pub-field label{display:block;font-size:12.5px;font-weight:650;color:var(--ink-700);margin-bottom:6px}
-.pub-field input,.pub-field textarea{width:100%;border:1.5px solid var(--border-strong);border-radius:12px;padding:12px 14px;font-size:15px;background:var(--surface);color:var(--ink-900);outline:none;font-family:var(--font)}
-.pub-field input:focus,.pub-field textarea:focus{border-color:var(--brand-400)}
-.pub-step{display:flex;align-items:center;gap:14px;padding:6px 0}
-.pub-step .lab{flex:1;font-size:14px;font-weight:600;color:var(--ink-900)}
-.pub-num{display:flex;align-items:center;gap:0;border:1.5px solid var(--border-strong);border-radius:12px;overflow:hidden}
-.pub-num button{width:42px;height:42px;border:none;background:var(--surface-3);font-size:20px;color:var(--ink-700);cursor:pointer}
-.pub-num button:active{background:var(--border)}
-.pub-num input{width:52px;height:42px;border:none;text-align:center;font-size:16px;font-weight:700;color:var(--ink-900);background:var(--surface);outline:none}
-.pub-toggle{position:relative;width:52px;height:30px;border-radius:16px;background:var(--border-strong);border:none;cursor:pointer;transition:.2s;flex-shrink:0}
-.pub-toggle.on{background:var(--green)}
-.pub-toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:var(--sh-sm)}
+.pub-field{margin-bottom:14px}
+.pub-field label{display:block;font-size:12.5px;font-weight:650;color:var(--pa-ink2);margin-bottom:6px}
+.pub-field input,.pub-field textarea{width:100%;border:1px solid var(--pa-border);border-radius:12px;padding:13px 14px;font-size:15px;background:var(--pa-surf2);color:var(--pa-ink);outline:none;font-family:var(--font)}
+.pub-field input:focus,.pub-field textarea:focus{border-color:var(--pa-accent)}
+.pub-step{display:flex;align-items:center;gap:14px;padding:10px 0;border-top:1px solid var(--pa-border)}
+.pub-step.first{border-top:none;padding-top:4px}
+.pub-step .lab{flex:1;font-size:14px;font-weight:600;color:var(--pa-ink)}
+.pub-num{display:flex;align-items:center;border:1px solid var(--pa-border);border-radius:12px;overflow:hidden}
+.pub-num button{width:42px;height:42px;border:none;background:var(--pa-surf2);font-size:20px;color:var(--pa-accent);cursor:pointer}
+.pub-num button:active{background:var(--pa-border)}
+.pub-num input{width:52px;height:42px;border:none;text-align:center;font-size:16px;font-weight:700;color:var(--pa-ink);background:var(--pa-surf);outline:none}
+.pub-toggle{position:relative;width:52px;height:30px;border-radius:16px;background:var(--pa-border);border:none;cursor:pointer;transition:.2s;flex-shrink:0}
+.pub-toggle.on{background:var(--pa-accent)}
+.pub-toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .pub-toggle.on::after{left:25px}
 .pub-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:650;padding:4px 10px;border-radius:999px}
+.pub-badge .ico{width:13px;height:13px}
 .pub-badge.green{background:var(--green-50);color:var(--green-700)}
 .pub-badge.amber{background:var(--amber-50);color:var(--amber-700)}
 .pub-badge.red{background:var(--red-50);color:var(--red-700)}
-.pub-badge.violet{background:var(--violet-50);color:var(--violet)}
-.pub-empty{text-align:center;padding:34px 18px;color:var(--ink-400);font-size:13.5px}
-.pub-empty .ico{width:38px;height:38px;margin:0 auto 10px;color:var(--ink-300)}
-.pub-tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:7px 6px;padding-bottom:calc(7px + env(safe-area-inset-bottom));z-index:30;box-shadow:0 -2px 12px rgba(30,41,59,.06)}
-.pub-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:none;background:none;color:var(--ink-400);font-size:10.5px;font-weight:600;cursor:pointer;border-radius:12px}
+.pub-badge.violet{background:var(--pa-accent-soft);color:var(--pa-accent)}
+.pub-empty{text-align:center;padding:34px 18px;color:var(--pa-ink3);font-size:13.5px}
+.pub-empty .ico{width:38px;height:38px;margin:0 auto 10px;color:var(--pa-ink3);opacity:.6}
+.pub-tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--pa-surf);border-top:1px solid var(--pa-border);padding:8px 6px;padding-bottom:calc(8px + env(safe-area-inset-bottom));z-index:30}
+.pub-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border:none;background:none;color:var(--pa-ink3);font-size:10.5px;font-weight:600;cursor:pointer;border-radius:12px}
 .pub-tab .ico{width:23px;height:23px;transition:.15s}
-.pub-tab.active{color:var(--brand-400)}
-.pub-tab.active .ico{transform:translateY(-1px)}
-.pub-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.pub-tab.active{color:var(--pa-accent)}
+.pub-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--pa-border)}
 .pub-row:last-child{border-bottom:none}
-.pub-row .k{font-size:12.5px;color:var(--ink-500);font-weight:600}
-.pub-row .val{font-size:14px;color:var(--ink-900);font-weight:600;text-align:right}
+.pub-row .k{font-size:12.5px;color:var(--pa-ink2);font-weight:600}
+.pub-row .val{font-size:14px;color:var(--pa-ink);font-weight:600;text-align:right}
 </style>
 </head>
 <body>
@@ -3477,7 +3481,7 @@ function removeAuthOverlay(){const o=document.getElementById('authOverlay');if(o
 function showLogin(){document.querySelector('.app')&&(document.querySelector('.app').style.visibility='hidden');
   const demoDesc={1:'Acceso total: todas las congregaciones, usuarios, configuración y datos',2:'Su congregación: publicadores (info completa), territorios, programa, reportes',3:'Operativo: programa, asignaciones y territorios · sin datos personales ni reportes',4:'Su app móvil: sus salidas, informe de predicación y perfil'};
   const demoIco={1:'shield',2:'db',3:'map',4:'user'};const demoTint={1:'t-violet',2:'t-brand',3:'t-cyan',4:'t-indigo'};
-  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3,4].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="color:var(--ink-500);font-size:11.5px">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
+  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3,4].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left;width:100%;white-space:normal" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%;min-width:0"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span style="min-width:0"><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="display:block;color:var(--ink-500);font-size:11.5px;line-height:1.4">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
   const realForm=`<form id="loginForm" onsubmit="submitLogin(event)" style="display:grid;gap:13px">
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Correo electrónico</label><input class="input" id="lg_email" type="email" autocomplete="username" placeholder="tucorreo@congregacion.org" required/></div>
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Contraseña</label><input class="input" id="lg_pw" type="password" autocomplete="current-password" placeholder="••••••••" required/></div>
@@ -3545,7 +3549,7 @@ function pubGo(v){if(v==='informe'){const r=myReport();pubRep={h:r&&r.entregado?
 function pubTabbar(){const tabs=[['inicio','Inicio','dashboard'],['asign','Salidas','map'],['informe','Informe','report'],['perfil','Perfil','user']];
   return `<nav class="pub-tabbar">${tabs.map(([id,l,ic])=>`<button class="pub-tab ${pubView===id?'active':''}" onclick="pubGo('${id}')" aria-label="${l}">${svg(ic)}<span>${l}</span></button>`).join('')}</nav>`;}
 function renderPubApp(){const host=document.getElementById('pubApp');if(!host)return;const me=myPub();
-  if(!me){host.innerHTML=`<div class="pub-head"><div class="pub-hi">Hola 👋</div><div class="pub-sub">MS Planner</div></div><div class="pub-main"><div class="pub-card"><div class="pub-empty">${svg('shield')}<b style="display:block;color:var(--ink-700);font-size:14.5px;margin-bottom:4px">Cuenta sin vincular</b>Tu cuenta todavía no está enlazada a tu ficha de publicador. Pídele al administrador que te vincule desde la sección Usuarios.</div><button class="pub-btn ghost" onclick="signOut()">${svg('logout')}Cerrar sesión</button></div></div>`;return;}
+  if(!me){host.innerHTML=`<div class="pub-head"><div class="pub-head-txt"><div class="pub-hi">Hola 👋</div><div class="pub-sub">MS Planner</div></div></div><div class="pub-main"><div class="pub-card"><div class="pub-empty">${svg('shield')}<b style="display:block;color:var(--pa-ink);font-size:14.5px;margin-bottom:4px">Cuenta sin vincular</b>Tu cuenta todavía no está enlazada a tu ficha de publicador. Pídele al administrador que te vincule desde la sección Usuarios.</div><button class="pub-btn ghost" onclick="signOut()">${svg('logout')}Cerrar sesión</button></div></div>`;return;}
   let body='';
   if(pubView==='asign')body=pubAsign(me);
   else if(pubView==='informe')body=pubInforme(me);
@@ -3554,30 +3558,32 @@ function renderPubApp(){const host=document.getElementById('pubApp');if(!host)re
   const first=(me.nombre||me.fullName).split(' ')[0];
   const titles={inicio:['Hola, '+first+' 👋',dstr(TODAY)],asign:['Mis salidas','Territorios asignados'],informe:['Mi informe','Servicio del campo · Junio 2026'],perfil:['Mi perfil','Tus datos personales']};
   const t=titles[pubView]||titles.inicio;
-  host.innerHTML=`<div class="pub-head"><div class="pub-av">${initials(me.fullName)}</div><div class="pub-hi">${t[0]}</div><div class="pub-sub">${t[1]}</div></div><div class="pub-main">${body}</div>${pubTabbar()}`;}
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  host.innerHTML=`<div class="pub-head"><div class="pub-head-txt"><div class="pub-hi">${t[0]}</div><div class="pub-sub">${t[1]}</div></div><button class="pub-iconbtn" onclick="pubToggleTheme()" aria-label="${dark?'Modo claro':'Modo oscuro'}">${svg(dark?'sun':'moon')}</button><div class="pub-av">${initials(me.fullName)}</div></div><div class="pub-main">${body}</div>${pubTabbar()}`;}
+function pubToggleTheme(){toggleTheme();renderPubApp();}
 function pubConfBadge(c){return c==='conf'?`<span class="pub-badge green">${svg('check')}Confirmada</span>`:c==='rech'?`<span class="pub-badge red">${svg('x')}Rechazada</span>`:`<span class="pub-badge amber">${svg('clock')}Por confirmar</span>`;}
 function pubAsgCard(a){const d=new Date(a.date+'T00:00:00');
   const chips=a.territorios.map(n=>`<span class="pub-badge violet">#${n}</span>`).join('')||'<span class="pub-badge violet">—</span>';
-  return `<div class="pub-asg"><div class="top"><div><div class="date">${dstr(d)}</div><div style="font-size:12px;color:var(--ink-400);text-transform:capitalize">${diaSemana(a.date)}</div></div>${pubConfBadge(a.conf)}</div>
+  return `<div class="pub-asg"><div class="top"><div><div class="date">${dstr(d)}</div><div style="font-size:12px;color:var(--pa-ink3);text-transform:capitalize">${diaSemana(a.date)}</div></div>${pubConfBadge(a.conf)}</div>
     <div class="terr-chips">${chips}</div>
     ${a.obs?`<div class="obs">${a.obs}</div>`:''}
     ${a.conf==='pend'?`<div class="acts"><button class="pub-btn accept" onclick="pubSetConf('${a.id}','conf')">${svg('check')}Aceptar</button><button class="pub-btn reject" onclick="pubSetConf('${a.id}','rech')">${svg('x')}Rechazar</button></div>`:`<button class="pub-btn ghost" onclick="pubSetConf('${a.id}','pend')">${svg('refresh')}Cambiar respuesta</button>`}</div>`;}
 function pubInicio(me){const asg=myAssignments();const pend=asg.filter(a=>a.conf==='pend').length;const upcoming=asg.filter(a=>a.date>=diso(TODAY));const rep=myReport();const done=rep&&rep.entregado;
   return `<div class="pub-stat-row"><div class="pub-stat"><div class="v">${asg.length}</div><div class="l">Salidas asignadas</div></div><div class="pub-stat"><div class="v">${pend}</div><div class="l">Por confirmar</div></div></div>
-    <div class="pub-card"><h3>${svg('report')} Informe de Junio</h3>${done?`<div style="margin-top:6px"><span class="pub-badge green">${svg('check')}Entregado</span></div><p style="font-size:13px;color:var(--ink-500);margin:9px 0 0">${rep.horas} h · ${rep.estudios} curso(s) bíblico(s)</p>`:`<p style="font-size:13px;color:var(--ink-500);margin:6px 0 12px">Aún no has enviado tu informe de este mes.</p><button class="pub-btn primary" onclick="pubGo('informe')">${svg('send')}Enviar informe</button>`}</div>
+    <div class="pub-card"><h3>${svg('report')} Informe de Junio</h3>${done?`<div style="margin-top:6px"><span class="pub-badge green">${svg('check')}Entregado</span></div><p style="font-size:13px;color:var(--pa-ink2);margin:9px 0 0">${rep.horas} h · ${rep.estudios} curso(s) bíblico(s)</p>`:`<p style="font-size:13px;color:var(--pa-ink2);margin:6px 0 12px">Aún no has enviado tu informe de este mes.</p><button class="pub-btn primary" onclick="pubGo('informe')">${svg('send')}Enviar informe</button>`}</div>
     <div class="pub-sec-title">Próximas salidas</div>
     ${upcoming.length?upcoming.slice(0,3).map(a=>pubAsgCard(a)).join(''):`<div class="pub-card"><div class="pub-empty">${svg('map')}No tienes salidas próximas.</div></div>`}`;}
 function pubAsign(me){const asg=myAssignments();
-  if(!asg.length)return `<div class="pub-card"><div class="pub-empty">${svg('map')}<b style="display:block;color:var(--ink-700);margin-bottom:3px">Sin salidas asignadas</b>Cuando el administrador te asigne un territorio, aparecerá aquí.</div></div>`;
+  if(!asg.length)return `<div class="pub-card"><div class="pub-empty">${svg('map')}<b style="display:block;color:var(--pa-ink);margin-bottom:3px">Sin salidas asignadas</b>Cuando el administrador te asigne un territorio, aparecerá aquí.</div></div>`;
   const pend=asg.filter(a=>a.conf==='pend');const rest=asg.filter(a=>a.conf!=='pend');
   return `${pend.length?`<div class="pub-sec-title">Por confirmar (${pend.length})</div>${pend.map(a=>pubAsgCard(a)).join('')}`:''}${rest.length?`<div class="pub-sec-title">Historial</div>${rest.map(a=>pubAsgCard(a)).join('')}`:''}`;}
 function pubSetConf(id,val){const a=TERR_ASIGN.find(x=>x.id===id);if(!a)return;a.conf=val;persistAll();renderPubApp();toast(val==='conf'?'Salida aceptada ✓':val==='rech'?'Salida rechazada':'Respuesta actualizada');}
 function pubInforme(me){const rep=myReport();const done=rep&&rep.entregado;
-  return `${done?`<div class="pub-card" style="border-color:var(--green);background:var(--green-50)"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pub-badge green">${svg('check')}Entregado</span><span style="font-size:12.5px;color:var(--ink-500)">Puedes actualizarlo abajo.</span></div></div>`:''}
+  return `${done?`<div class="pub-card" style="border-color:var(--green);background:var(--green-50)"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pub-badge green">${svg('check')}Entregado</span><span style="font-size:12.5px;color:var(--pa-ink2)">Puedes actualizarlo abajo.</span></div></div>`:''}
     <div class="pub-card"><h3>${svg('report')} Servicio del campo · Junio 2026</h3>
-      <div class="pub-step"><div class="lab">¿Participaste en la predicación?</div><button class="pub-toggle ${pubRep.part?'on':''}" onclick="pubRep.part=!pubRep.part;renderPubApp()" aria-label="Participé en la predicación"></button></div>
+      <div class="pub-step first"><div class="lab">¿Participaste en la predicación?</div><button class="pub-toggle ${pubRep.part?'on':''}" onclick="pubRep.part=!pubRep.part;renderPubApp()" aria-label="Participé en la predicación"></button></div>
       ${pubRep.part?`<div class="pub-step"><div class="lab">Horas</div><div class="pub-num"><button onclick="pubRepAdj('h',-1)" aria-label="Menos">−</button><input id="pub_h" type="number" inputmode="numeric" value="${pubRep.h}" onchange="pubRep.h=Math.max(0,parseInt(this.value)||0)"><button onclick="pubRepAdj('h',1)" aria-label="Más">+</button></div></div>
-      <div class="pub-step"><div class="lab">Cursos bíblicos</div><div class="pub-num"><button onclick="pubRepAdj('e',-1)" aria-label="Menos">−</button><input id="pub_e" type="number" inputmode="numeric" value="${pubRep.e}" onchange="pubRep.e=Math.max(0,parseInt(this.value)||0)"><button onclick="pubRepAdj('e',1)" aria-label="Más">+</button></div></div>`:`<p style="font-size:13px;color:var(--ink-500);margin:6px 0 0">Se registrará que este mes no participaste. Cámbialo si es un error.</p>`}
+      <div class="pub-step"><div class="lab">Cursos bíblicos</div><div class="pub-num"><button onclick="pubRepAdj('e',-1)" aria-label="Menos">−</button><input id="pub_e" type="number" inputmode="numeric" value="${pubRep.e}" onchange="pubRep.e=Math.max(0,parseInt(this.value)||0)"><button onclick="pubRepAdj('e',1)" aria-label="Más">+</button></div></div>`:`<p style="font-size:13px;color:var(--pa-ink2);margin:6px 0 0">Se registrará que este mes no participaste. Cámbialo si es un error.</p>`}
     </div>
     <button class="pub-btn primary" onclick="pubSubmitReport()">${svg('send')}${done?'Actualizar informe':'Enviar informe'}</button>`;}
 function pubRepAdj(k,d){const el=document.getElementById(k==='h'?'pub_h':'pub_e');if(el)pubRep[k]=Math.max(0,parseInt(el.value)||0);pubRep[k]=Math.max(0,(pubRep[k]||0)+d);renderPubApp();}
@@ -3589,7 +3595,7 @@ function pubSubmitReport(){const me=myPub();if(!me)return;
   rep.entregado=true;rep.horas=pubRep.part?pubRep.h:0;rep.estudios=pubRep.part?pubRep.e:0;
   persistAll();toast('Informe enviado ✓');pubGo('inicio');}
 function pubPerfil(me){
-  return `<div class="pub-card" style="text-align:center"><div style="width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--brand-400),var(--brand-500));color:#fff;display:grid;place-items:center;font-size:24px;font-weight:750;margin:2px auto 10px">${initials(me.fullName)}</div><div style="font-size:17px;font-weight:750;color:var(--ink-900)">${me.fullName}</div><div style="font-size:13px;color:var(--ink-500);margin-top:2px">${me.role} · ${me.grupo}</div></div>
+  return `<div class="pub-card" style="text-align:center"><div style="width:66px;height:66px;border-radius:50%;background:var(--pa-accent);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:750;margin:2px auto 10px">${initials(me.fullName)}</div><div style="font-size:17px;font-weight:750;color:var(--pa-ink)">${me.fullName}</div><div style="font-size:13px;color:var(--pa-ink2);margin-top:2px">${me.role} · ${me.grupo}</div></div>
     <div class="pub-card"><h3>${svg('user')} Mis datos de contacto</h3>
       <div class="pub-field"><label>Teléfono</label><input id="pf_tel" value="${me.tel||''}" inputmode="tel"></div>
       <div class="pub-field"><label>Correo</label><input id="pf_email" value="${me.email||''}" inputmode="email"></div>
