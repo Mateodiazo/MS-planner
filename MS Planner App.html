@@ -629,6 +629,76 @@ table.data tbody tr.clickable{cursor:pointer}
 .pub-terr .ttxt span{font-size:13px;color:var(--pa-accent);font-weight:600}
 .pub-terr .tchev{width:20px;height:20px;color:var(--pa-ink3);flex-shrink:0}
 .pub-send{margin-top:2px}
+/* --- Fase 2: Informe, Calendario, Territorios, Wallet, Ajustes iOS --- */
+.pub-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pub-tile{background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:20px;padding:16px 17px;box-shadow:var(--pa-shadow)}
+.pub-tile .tv{font-size:27px;font-weight:700;color:var(--pa-ink);letter-spacing:-.6px;line-height:1}
+.pub-tile .tl{font-size:12.5px;color:var(--pa-ink2);margin-top:7px;display:flex;align-items:center;gap:6px;font-weight:500}
+.pub-tile .tl .ico{width:15px;height:15px;color:var(--pa-accent)}
+.pub-goalcard{display:flex;align-items:center;gap:18px}
+.pub-goalcard .gtxt{flex:1;min-width:0}
+.pub-goalcard .gtxt b{font-size:15px;color:var(--pa-ink);font-weight:650;display:block;margin-bottom:2px}
+.pub-goalcard .gtxt span{font-size:13px;color:var(--pa-ink2)}
+.pub-goalcard .gbig{font-size:20px;font-weight:700;color:var(--pa-accent);margin-top:8px}
+.pub-month{background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:20px;overflow:hidden;box-shadow:var(--pa-shadow)}
+.pub-month .mh{display:flex;align-items:center;gap:11px;padding:16px 18px;cursor:pointer}
+.pub-month .mh .mm{flex:1;font-size:15.5px;font-weight:650;color:var(--pa-ink)}
+.pub-month .mh .mhrs{font-size:13.5px;color:var(--pa-accent);font-weight:700}
+.pub-month .mh .mdot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.pub-month .mh .mdot.pend{background:var(--amber)}
+.pub-month .mh .mchev{width:18px;height:18px;color:var(--pa-ink3);transition:transform .28s}
+.pub-month.open .mh .mchev{transform:rotate(180deg)}
+.pub-month .mbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.pub-month.open .mbody{grid-template-rows:1fr}
+.pub-month .mbody-w{overflow:hidden}
+.pub-month .mbody-in{padding:2px 18px 16px}
+.pub-mrow2{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--pa-border);font-size:13.5px}
+.pub-mrow2 .k{color:var(--pa-ink2)}
+.pub-mrow2 .v{color:var(--pa-ink);font-weight:600}
+.pub-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pub-cal-head b{font-size:17px;font-weight:700;color:var(--pa-ink)}
+.pub-cal-nav{display:flex;gap:8px}
+.pub-cal-nav button{width:34px;height:34px;border-radius:10px;border:1px solid var(--pa-border);background:var(--pa-surf2);color:var(--pa-ink2);cursor:pointer;display:grid;place-items:center}
+.pub-cal-nav button .ico{width:16px;height:16px}
+.pub-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:4px}
+.pub-cal-dow{text-align:center;font-size:10.5px;font-weight:600;color:var(--pa-ink3);padding:6px 0}
+.pub-cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;font-size:14px;font-weight:500;color:var(--pa-ink);position:relative}
+.pub-cal-cell.out{color:var(--pa-ink3);opacity:.5}
+.pub-cal-cell.today{background:var(--pa-grad);color:#fff;font-weight:700;box-shadow:var(--pa-shadow-btn)}
+.pub-cal-cell .cdot{width:5px;height:5px;border-radius:50%;background:var(--pa-accent)}
+.pub-cal-cell.today .cdot{background:#fff}
+.pub-agenda{display:flex;gap:13px;align-items:center;padding:13px 0;border-top:1px solid var(--pa-border)}
+.pub-agenda:first-child{border-top:none}
+.pub-agenda .adate{width:46px;text-align:center;flex-shrink:0}
+.pub-agenda .adate .ad{font-size:18px;font-weight:700;color:var(--pa-accent);line-height:1}
+.pub-agenda .adate .am{font-size:9.5px;text-transform:uppercase;color:var(--pa-ink3);font-weight:700}
+.pub-agenda .ainfo{flex:1;min-width:0}
+.pub-agenda .ainfo b{font-size:14px;color:var(--pa-ink);font-weight:600;display:block}
+.pub-agenda .ainfo span{font-size:12.5px;color:var(--pa-ink2)}
+/* Wallet-style assignment card */
+.pub-wallet{border-radius:22px;overflow:hidden;background:var(--pa-surf);border:1px solid var(--pa-border);box-shadow:var(--pa-shadow);cursor:pointer}
+.pub-wallet .wtop{background:var(--pa-grad);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.pub-wallet .wtop .wty{font-size:15.5px;font-weight:700}
+.pub-wallet .wtop .wst{font-size:11.5px;font-weight:600;background:rgba(255,255,255,.22);padding:4px 10px;border-radius:999px}
+.pub-wallet .wbody{padding:15px 18px;display:flex;align-items:center;gap:16px}
+.pub-wallet .wcol .wk{font-size:11px;color:var(--pa-ink3);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
+.pub-wallet .wcol .wv{font-size:14.5px;color:var(--pa-ink);font-weight:650;margin-top:2px}
+.pub-wallet .wmore{margin-left:auto;font-size:12.5px;color:var(--pa-accent);font-weight:600;display:flex;align-items:center;gap:4px}
+.pub-wallet .wmore .ico{width:15px;height:15px}
+/* iOS grouped settings */
+.pub-set-group{background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:20px;overflow:hidden;box-shadow:var(--pa-shadow)}
+.pub-set-row{display:flex;align-items:center;gap:13px;padding:13px 16px;border-top:1px solid var(--pa-border);cursor:pointer;min-height:52px}
+.pub-set-row:first-child{border-top:none}
+.pub-set-row .si2{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.pub-set-row .si2 .ico{width:18px;height:18px}
+.pub-set-row .sl{flex:1;font-size:15px;color:var(--pa-ink);font-weight:500;min-width:0}
+.pub-set-row .sv{font-size:14px;color:var(--pa-ink3);margin-right:2px}
+.pub-set-row .schev{width:17px;height:17px;color:var(--pa-ink3);flex-shrink:0}
+.pub-profile-card{display:flex;align-items:center;gap:15px;cursor:pointer}
+.pub-profile-card .pav{width:60px;height:60px;border-radius:50%;background:var(--pa-grad);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700;flex-shrink:0;box-shadow:var(--pa-shadow-btn)}
+.pub-profile-card .pinfo{flex:1;min-width:0}
+.pub-profile-card .pinfo b{font-size:18px;font-weight:700;color:var(--pa-ink);display:block}
+.pub-profile-card .pinfo span{font-size:13px;color:var(--pa-ink2)}
 </style>
 </head>
 <body>
@@ -3665,6 +3735,15 @@ const PUB_MEET=(function(){const off=[2,4,6,9,11,-3];
   const HR=['7:30 p.m.','7:45 p.m.','7:15 p.m.','10:00 a.m.','7:00 p.m.','7:00 p.m.'];
   const DS=['Lees el pasaje semanal de la Biblia (4 min).','Presentas una demostración de casa en casa con tu auxiliar (3 min).','Análisis "Tesoros de la Biblia" (10 min).','Discurso público N.º 42: "La verdadera paz, ¿es posible?".','Encargado de los micrófonos durante toda la reunión.','Encargado del audio y el video de la reunión.'];
   return off.map((o,i)=>{const d=new Date(TODAY);d.setDate(d.getDate()+o);return {id:'m'+i,date:diso(d),time:HR[i],meeting:MT[i],type:T[i],status:i%3===2?'Pendiente':'Confirmada',desc:DS[i]};}).sort((a,b)=>a.date<b.date?-1:1);})();
+/* Historial mensual — datos de EJEMPLO (Fase B: del backend) */
+const PUB_MONTHS=[
+  {m:'Junio 2026',horas:16,estudios:3,revisitas:12,pubs:9,videos:4,obs:'Buen mes, dos personas nuevas interesadas.',sent:false,cur:true},
+  {m:'Mayo 2026',horas:22,estudios:4,revisitas:15,pubs:11,videos:6,obs:'Campaña especial de invitación.',sent:true,sentD:'02/06/2026'},
+  {m:'Abril 2026',horas:18,estudios:3,revisitas:10,pubs:8,videos:3,obs:'',sent:true,sentD:'01/05/2026'},
+  {m:'Marzo 2026',horas:20,estudios:3,revisitas:13,pubs:10,videos:5,obs:'Semana de la Conmemoración.',sent:true,sentD:'02/04/2026'},
+  {m:'Febrero 2026',horas:15,estudios:2,revisitas:9,pubs:7,videos:2,obs:'',sent:true,sentD:'01/03/2026'},
+  {m:'Enero 2026',horas:19,estudios:3,revisitas:11,pubs:9,videos:4,obs:'',sent:true,sentD:'02/02/2026'}
+];
 /* efecto ripple al tocar botones (delegado, respeta prefers-reduced-motion vía CSS global) */
 document.addEventListener('pointerdown',function(e){const b=e.target.closest&&e.target.closest('#pubApp .pub-btn');if(!b||b.disabled)return;
   const r=document.createElement('span');r.className='pub-ripple';const rect=b.getBoundingClientRect();const size=Math.max(rect.width,rect.height);
@@ -3767,9 +3846,16 @@ function pubShowSuccess(){const o=document.createElement('div');o.className='pub
 /* ---- ASIGNACIONES de reunión ---- */
 function pubAsign(me){if(!PUB_MEET.length)return `<div class="pub-card"><div class="pub-empty">${svg('meeting')}Sin asignaciones por ahora.</div></div>`;
   const todayISO=diso(TODAY);const up=PUB_MEET.filter(m=>m.date>=todayISO);const past=PUB_MEET.filter(m=>m.date<todayISO);
-  const card=m=>{const d=new Date(m.date+'T00:00:00');const badge=m.status==='Pendiente'?`<span class="pub-badge amber">${svg('clock')}Pendiente</span>`:`<span class="pub-badge green">${svg('check')}Confirmada</span>`;
-    return `<div class="pub-card" role="button" tabindex="0" onclick="pubMeetDetail('${m.id}')" style="cursor:pointer"><div class="pub-mrow"><div class="mt"><div class="d">${d.getDate()}</div><div class="m">${d.toLocaleDateString('es-CO',{month:'short'}).replace('.','')}</div></div><div class="mb"><div class="ty">${m.type}</div><div class="me">${m.meeting} · ${m.time}</div><div class="ti">${svg('eye')} Ver detalles</div></div>${badge}</div></div>`;};
-  return `${up.length?`<div class="pub-sec-title">Próximas</div>${up.map(card).join('')}`:''}${past.length?`<div class="pub-sec-title">Anteriores</div>${past.map(card).join('')}`:''}`;}
+  const card=m=>{const d=new Date(m.date+'T00:00:00');
+    return `<div class="pub-wallet" role="button" tabindex="0" onclick="pubMeetDetail('${m.id}')">
+      <div class="wtop"><span class="wty">${m.type}</span><span class="wst">${m.status}</span></div>
+      <div class="wbody">
+        <div class="wcol"><div class="wk">Fecha</div><div class="wv">${d.getDate()} ${d.toLocaleDateString('es-CO',{month:'short'}).replace('.','')}</div></div>
+        <div class="wcol"><div class="wk">Hora</div><div class="wv">${m.time}</div></div>
+        <div class="wcol"><div class="wk">Reunión</div><div class="wv">${m.meeting}</div></div>
+        <span class="wmore">Ver ${svg('chevR')}</span>
+      </div></div>`;};
+  return `${up.length?`<div class="pub-sec-title">Próximas</div><div style="display:flex;flex-direction:column;gap:14px">${up.map(card).join('')}</div>`:''}${past.length?`<div class="pub-sec-title">Anteriores</div><div style="display:flex;flex-direction:column;gap:14px">${past.map(card).join('')}</div>`:''}`;}
 function pubMeetDetail(id){const m=PUB_MEET.find(x=>x.id===id);if(!m)return;const d=new Date(m.date+'T00:00:00');
   const badge=m.status==='Pendiente'?`<span class="pub-badge amber">${svg('clock')}Pendiente</span>`:`<span class="pub-badge green">${svg('check')}Confirmada</span>`;
   pubSheet(m.type,`<div style="margin-bottom:4px">${badge}</div>
@@ -3792,16 +3878,61 @@ function pubTerritorios(me){const asg=myAssignments();
   return `${pend.length?`<div class="pub-sec-title">Por confirmar (${pend.length})</div>${pend.map(a=>pubAsgCard(a)).join('')}`:''}${rest.length?`<div class="pub-sec-title">Historial</div>${rest.map(a=>pubAsgCard(a)).join('')}`:''}`;}
 function pubSetConf(id,val){const a=TERR_ASIGN.find(x=>x.id===id);if(!a)return;a.conf=val;persistAll();renderPubApp();toast(val==='conf'?'Salida aceptada ✓':val==='rech'?'Salida rechazada':'Respuesta actualizada');}
 /* ---- CALENDARIO (Fase 2) ---- */
-function pubCalendario(me){return `<div class="pub-card"><div class="pub-soon"><div class="si">${svg('calendar')}</div><h2>Calendario</h2><p>Aquí verás en un solo lugar tus reuniones, asignaciones y actividad del mes. Llega en la próxima fase.</p></div></div>`;}
+let pubCalMonth={y:TODAY.getFullYear(),m:TODAY.getMonth()};
+function pubCalNav(d){let m=pubCalMonth.m+d,y=pubCalMonth.y;if(m>11){m=0;y++}if(m<0){m=11;y--}pubCalMonth={y,m};renderPubApp();}
+function pubCalendario(me){const {y,m}=pubCalMonth;
+  const first=new Date(y,m,1);const startDow=first.getDay();const dim=new Date(y,m+1,0).getDate();
+  const monName=first.toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+  const monName2=monName.charAt(0).toUpperCase()+monName.slice(1);
+  const dows=['D','L','M','M','J','V','S'];
+  const evDates={};PUB_MEET.forEach(a=>{const d=new Date(a.date+'T00:00:00');if(d.getFullYear()===y&&d.getMonth()===m)evDates[d.getDate()]=true;});
+  const todayISO=diso(TODAY);
+  let cells='';
+  for(let i=0;i<startDow;i++){const pd=new Date(y,m,1-startDow+i);cells+=`<div class="pub-cal-cell out">${pd.getDate()}</div>`;}
+  for(let day=1;day<=dim;day++){const iso=diso(new Date(y,m,day));const isToday=iso===todayISO;
+    cells+=`<div class="pub-cal-cell ${isToday?'today':''}">${day}${evDates[day]?'<span class="cdot"></span>':''}</div>`;}
+  const upcoming=PUB_MEET.filter(a=>a.date>=todayISO).slice(0,4);
+  return `
+  <div class="pub-card">
+    <div class="pub-cal-head"><b>${monName2}</b><div class="pub-cal-nav"><button onclick="pubCalNav(-1)" aria-label="Mes anterior">${svg('chevL')}</button><button onclick="pubCalNav(1)" aria-label="Mes siguiente">${svg('chevR')}</button></div></div>
+    <div class="pub-cal-grid">${dows.map(d=>`<div class="pub-cal-dow">${d}</div>`).join('')}${cells}</div>
+  </div>
+  <div class="pub-sec-title">Próximos eventos</div>
+  <div class="pub-card">
+    ${upcoming.length?upcoming.map(a=>{const d=new Date(a.date+'T00:00:00');return `<div class="pub-agenda"><div class="adate"><div class="ad">${d.getDate()}</div><div class="am">${d.toLocaleDateString('es-CO',{month:'short'}).replace('.','')}</div></div><div class="ainfo"><b>${a.type}</b><span>${a.meeting} · ${a.time}</span></div>${svg('chevR','mchev')}</div>`;}).join(''):`<div class="pub-empty">${svg('calendar')}Sin eventos próximos.</div>`}
+  </div>`;}
 /* ---- INFORME (editor mensual) ---- */
-function pubInforme(me){const rep=myReport();const done=rep&&rep.entregado;
-  return `${done?`<div class="pub-card" style="border-color:var(--green);background:var(--green-50)"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pub-badge green">${svg('check')}Entregado</span><span style="font-size:12.5px;color:var(--pa-ink2)">Puedes actualizarlo abajo.</span></div></div>`:''}
-    <div class="pub-card"><h3>${svg('report')} Servicio del campo · Junio 2026</h3>
-      <div class="pub-step first"><div class="lab">¿Participaste en la predicación?</div><button class="pub-toggle ${pubRep.part?'on':''}" onclick="pubRep.part=!pubRep.part;renderPubApp()" aria-label="Participé en la predicación"></button></div>
-      ${pubRep.part?`<div class="pub-step"><div class="lab">Horas</div><div class="pub-num"><button onclick="pubRepAdj('h',-1)" aria-label="Menos">−</button><input id="pub_h" type="number" inputmode="numeric" value="${pubRep.h}" onchange="pubRep.h=Math.max(0,parseInt(this.value)||0)"><button onclick="pubRepAdj('h',1)" aria-label="Más">+</button></div></div>
-      <div class="pub-step"><div class="lab">Cursos bíblicos</div><div class="pub-num"><button onclick="pubRepAdj('e',-1)" aria-label="Menos">−</button><input id="pub_e" type="number" inputmode="numeric" value="${pubRep.e}" onchange="pubRep.e=Math.max(0,parseInt(this.value)||0)"><button onclick="pubRepAdj('e',1)" aria-label="Más">+</button></div></div>`:`<p style="font-size:13px;color:var(--pa-ink2);margin:6px 0 0">Se registrará que este mes no participaste. Cámbialo si es un error.</p>`}
-    </div>
-    <button class="pub-btn primary" onclick="pubSubmitReport()">${svg('send')}${done?'Actualizar informe':'Enviar informe'}</button>`;}
+let pubOpenMonth=0;
+function pubInforme(me){
+  const yr=PUB_MONTHS.reduce((a,m)=>({h:a.h+m.horas,e:a.e+m.estudios,r:a.r+m.revisitas,p:a.p+m.pubs}),{h:0,e:0,r:0,p:0});
+  const monthGoal=30;const cur=PUB_MONTHS[0];const pct=Math.min(100,Math.round(cur.horas/monthGoal*100));
+  const tile=(v,label,ic)=>`<div class="pub-tile"><div class="tv">${v}</div><div class="tl">${svg(ic)}${label}</div></div>`;
+  const month=(m,i)=>{const open=i===pubOpenMonth;
+    return `<div class="pub-month ${open?'open':''}"><div class="mh" onclick="pubToggleMonth(${i})"><span class="mdot ${m.sent?'':'pend'}"></span><span class="mm">${m.m}</span><span class="mhrs">${m.horas} h</span>${svg('chevD','mchev')}</div>
+      <div class="mbody"><div class="mbody-w"><div class="mbody-in">
+        <div class="pub-mrow2"><span class="k">Horas</span><span class="v">${m.horas} h</span></div>
+        <div class="pub-mrow2"><span class="k">Estudios bíblicos</span><span class="v">${m.estudios}</span></div>
+        <div class="pub-mrow2"><span class="k">Revisitas</span><span class="v">${m.revisitas}</span></div>
+        <div class="pub-mrow2"><span class="k">Publicaciones</span><span class="v">${m.pubs}</span></div>
+        <div class="pub-mrow2"><span class="k">Videos</span><span class="v">${m.videos}</span></div>
+        ${m.obs?`<div class="pub-mrow2" style="flex-direction:column;align-items:flex-start;gap:4px"><span class="k">Observaciones</span><span class="v" style="font-weight:500;line-height:1.5">${m.obs}</span></div>`:''}
+        <div style="margin-top:14px">${m.sent?`<span class="pub-badge green">${svg('check')}Enviado · ${m.sentD}</span>`:`<button class="pub-btn primary" onclick="event.stopPropagation();pubGo('inicio')">${svg('send')}Enviar ahora</button>`}</div>
+      </div></div></div></div>`;};
+  return `
+  <div class="pub-card pub-goalcard">
+    <div class="gtxt"><b>Meta de este mes</b><span>${cur.horas} de ${monthGoal} horas · ${cur.m}</span><div class="gbig">${pct}%</div></div>
+    ${pubRing(pct)}
+  </div>
+  <div class="pub-sec-title">Resumen del año</div>
+  <div class="pub-tiles">
+    ${tile(yr.h+' h','Horas acumuladas','clock')}
+    ${tile(yr.e,'Estudios bíblicos','doc')}
+    ${tile(yr.r,'Revisitas','refresh')}
+    ${tile(yr.p,'Publicaciones','report')}
+  </div>
+  <div class="pub-sec-title">Historial de informes</div>
+  ${PUB_MONTHS.map(month).join('')}`;}
+function pubToggleMonth(i){pubOpenMonth=(pubOpenMonth===i?-1:i);renderPubApp();}
 function pubRepAdj(k,d){const el=document.getElementById(k==='h'?'pub_h':'pub_e');if(el)pubRep[k]=Math.max(0,parseInt(el.value)||0);pubRep[k]=Math.max(0,(pubRep[k]||0)+d);renderPubApp();}
 function pubSubmitReport(){const me=myPub();if(!me)return;
   const hEl=document.getElementById('pub_h'),eEl=document.getElementById('pub_e');
@@ -3812,29 +3943,34 @@ function pubSubmitReport(){const me=myPub();if(!me)return;
   persistAll();pubShowSuccess();}
 /* ---- CONFIGURACIÓN (perfil + notificaciones + apariencia + sync) ---- */
 function pubConfig(me){const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  const tgl=(k,label)=>`<div class="pub-step"><div class="lab">${label}</div><button class="pub-toggle ${pubSettings[k]?'on':''}" onclick="pubSettings.${k}=!pubSettings.${k};renderPubApp()" aria-label="${label}"></button></div>`;
+  const tgl=(k,label,ic,col)=>`<div class="pub-set-row"><div class="si2" style="background:${col}">${svg(ic)}</div><span class="sl">${label}</span><button class="pub-toggle ${pubSettings[k]?'on':''}" onclick="event.stopPropagation();pubSettings.${k}=!pubSettings.${k};renderPubApp()" aria-label="${label}"></button></div>`;
+  const row=(ic,col,label,val,onclick)=>`<div class="pub-set-row" ${onclick?`role="button" tabindex="0" onclick="${onclick}"`:''}><div class="si2" style="background:${col}">${svg(ic)}</div><span class="sl">${label}</span>${val?`<span class="sv">${val}</span>`:''}${svg('chevR','schev')}</div>`;
   return `
-  <div class="pub-card">
-    <div style="display:flex;align-items:center;gap:14px">
-      <div style="width:58px;height:58px;border-radius:18px;background:var(--pa-accent);color:#fff;display:grid;place-items:center;font-size:21px;font-weight:750;flex-shrink:0">${initials(me.fullName)}</div>
-      <div style="min-width:0"><div style="font-size:17px;font-weight:750;color:var(--pa-ink)">${me.fullName}</div><div style="font-size:12.5px;color:var(--pa-ink2)">${me.role} · ${me.grupo}</div></div>
-    </div>
-    <div style="height:1px;background:var(--pa-border);margin:15px 0"></div>
-    <div class="pub-row"><span class="k">Congregación</span><span class="val">Las Flores</span></div>
-    <div class="pub-row"><span class="k">Correo</span><span class="val">${me.email||'—'}</span></div>
-    <div class="pub-row"><span class="k">Teléfono</span><span class="val">${me.tel||'—'}</span></div>
-    <div class="pub-row"><span class="k">Bautismo</span><span class="val">${me.bautismo?dstr(new Date(me.bautismo+'T00:00:00')):'—'}</span></div>
-    <button class="pub-btn ghost" style="margin-top:14px" onclick="pubEditProfile()">${svg('edit')}Editar perfil</button>
+  <div class="pub-card pub-profile-card" role="button" tabindex="0" onclick="pubEditProfile()">
+    <div class="pav">${initials(me.fullName)}</div>
+    <div class="pinfo"><b>${me.fullName}</b><span>${me.role} · Congregación Las Flores</span></div>
+    ${svg('chevR','schev')}
   </div>
   <div class="pub-sec-title">Notificaciones</div>
-  <div class="pub-card">${tgl('nInforme','Recordatorio de informe')}${tgl('nRevisitas','Recordatorio de revisitas')}${tgl('nAnuncios','Nuevos anuncios')}${tgl('nAsign','Cambios en asignaciones')}${tgl('nEventos','Eventos de la congregación')}</div>
+  <div class="pub-set-group">
+    ${tgl('nInforme','Recordatorio de informe','report','#6C4CF5')}
+    ${tgl('nRevisitas','Recordatorio de revisitas','refresh','#8B6FFF')}
+    ${tgl('nAnuncios','Nuevos anuncios','bell','#EF4444')}
+    ${tgl('nAsign','Cambios en asignaciones','meeting','#F59E0B')}
+    ${tgl('nEventos','Eventos de la congregación','calendar','#22C55E')}
+  </div>
+  <div class="pub-sec-title">General</div>
+  <div class="pub-set-group">
+    ${row('user','#6C4CF5','Cuenta','',"pubEditProfile()")}
+    ${row('refresh','#22C55E','Sincronización','Activada','')}
+    ${row('report','#F59E0B','Mis informes','',"pubGo('informe')")}
+  </div>
   <div class="pub-sec-title">Apariencia</div>
-  <div class="pub-card"><div class="pub-step"><div class="lab">Tema oscuro</div><button class="pub-toggle ${dark?'on':''}" onclick="pubToggleTheme()" aria-label="Tema oscuro"></button></div></div>
-  <div class="pub-sec-title">Sincronización</div>
-  <div class="pub-card">
-    <div class="pub-row"><span class="k">Estado de la cuenta</span><span class="val" style="color:var(--pa-accent)">Demostración</span></div>
-    <div class="pub-row"><span class="k">Última sincronización</span><span class="val">Hace un momento</span></div>
-    <div class="pub-row"><span class="k">Sincronización automática</span><span class="val">Activada</span></div>
+  <div class="pub-set-group"><div class="pub-set-row"><div class="si2" style="background:#1E1E24;border:1px solid var(--pa-border)">${svg(dark?'moon':'sun')}</div><span class="sl">Tema oscuro</span><button class="pub-toggle ${dark?'on':''}" onclick="event.stopPropagation();pubToggleTheme()" aria-label="Tema oscuro"></button></div></div>
+  <div class="pub-sec-title">Información</div>
+  <div class="pub-set-group">
+    ${row('shield','#71717A','Estado de la cuenta','Demostración','')}
+    ${row('doc','#8B6FFF','Acerca de MS Planner','v2.0','')}
   </div>
   <button class="pub-btn ghost" onclick="signOut()">${svg('logout')}Cerrar sesión</button>`;}
 function pubEditProfile(){const me=myPub();if(!me)return;const roles=['Publicador','Precursor Auxiliar','Precursor Regular','Siervo Ministerial','Anciano'];
