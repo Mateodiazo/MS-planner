@@ -452,12 +452,12 @@ table.data tbody tr.clickable{cursor:pointer}
 :focus-visible{outline:2px solid var(--brand-400);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 /* ===== App del Publicador (Nivel 4) — UI premium iOS · paleta lila · claro/oscuro ===== */
-#pubApp{--pa-bg:#F4F3F8;--pa-surf:#fff;--pa-surf2:#F5F4FA;--pa-border:#EAE9F1;--pa-ink:#191921;--pa-ink2:#6A6A78;--pa-ink3:#A6A6B3;--pa-accent:#6B5CA5;--pa-accent-soft:#EDEAF7;--pa-glass:rgba(248,247,251,.12);--pa-glass-line:rgba(0,0,0,.06);--pa-tabbar:#FFFFFF;--pa-tabsel:#EFEDF6;--pa-taboff:#55555F;--pa-tabline:rgba(0,0,0,.07);
-  --pa-shadow:0 1px 2px rgba(24,20,48,.04),0 12px 30px rgba(24,20,48,.05);--pa-shadow-btn:0 8px 20px rgba(107,92,165,.26);--pa-shadow-bar:0 8px 30px rgba(24,20,48,.14);
-  --pa-display:'New York',ui-serif,Georgia,'Times New Roman',serif;
+#pubApp{--pa-bg:#F4F3F8;--pa-bg2:#ECEBF2;--pa-surf:#fff;--pa-surf2:#F4F3F9;--pa-surf3:#FFFFFF;--pa-border:#E7E6EF;--pa-ink:#0F0F14;--pa-ink2:#6A6A78;--pa-ink3:#9A9AA6;--pa-accent:#6C4CF5;--pa-accent2:#8B6FFF;--pa-accent-soft:rgba(108,76,245,.10);--pa-grad:linear-gradient(180deg,#8B6FFF 0%,#6C4CF5 55%,#4A2ED8 100%);--pa-glass:rgba(249,248,252,.7);--pa-glass-line:rgba(0,0,0,.06);--pa-tabbar:#FFFFFF;--pa-tabsel:rgba(108,76,245,.13);--pa-taboff:#55555F;--pa-tabline:rgba(0,0,0,.07);
+  --pa-shadow:0 1px 2px rgba(24,20,48,.04),0 12px 30px rgba(24,20,48,.05);--pa-shadow-btn:0 10px 24px rgba(108,76,245,.28);--pa-shadow-bar:0 8px 30px rgba(24,20,48,.14);
+  --pa-display:-apple-system,'SF Pro Display','SF Pro',var(--font);
   display:none;flex-direction:column;min-height:100vh;max-width:480px;margin:0 auto;background:var(--pa-bg);position:relative;box-shadow:var(--sh-lg);color:var(--pa-ink);-webkit-tap-highlight-color:transparent}
-[data-theme="dark"] #pubApp{--pa-bg:#0E0E12;--pa-surf:#1A1A20;--pa-surf2:#23232A;--pa-border:#2B2B33;--pa-ink:#ECECF1;--pa-ink2:#9C9CAA;--pa-ink3:#63636D;--pa-accent:#B7A8E0;--pa-accent-soft:rgba(183,168,224,.15);--pa-glass:rgba(22,22,28,.12);--pa-glass-line:rgba(255,255,255,.07);--pa-tabbar:#1C1C22;--pa-tabsel:#33333C;--pa-taboff:#D6D6DD;--pa-tabline:rgba(255,255,255,.08);
-  --pa-shadow:0 2px 10px rgba(0,0,0,.4);--pa-shadow-btn:0 8px 20px rgba(0,0,0,.45);--pa-shadow-bar:0 10px 34px rgba(0,0,0,.55)}
+[data-theme="dark"] #pubApp{--pa-bg:#09090B;--pa-bg2:#111114;--pa-surf:#17171C;--pa-surf2:#1E1E24;--pa-surf3:#212129;--pa-border:#2B2B35;--pa-ink:#FFFFFF;--pa-ink2:#A1A1AA;--pa-ink3:#71717A;--pa-accent:#8B6FFF;--pa-accent2:#8B6FFF;--pa-accent-soft:rgba(139,111,255,.15);--pa-grad:linear-gradient(180deg,#8B6FFF 0%,#6C4CF5 55%,#4A2ED8 100%);--pa-glass:rgba(20,20,25,.62);--pa-glass-line:rgba(255,255,255,.08);--pa-tabbar:#17171C;--pa-tabsel:rgba(108,76,245,.30);--pa-taboff:#8A8A94;--pa-tabline:rgba(255,255,255,.08);
+  --pa-shadow:0 2px 12px rgba(0,0,0,.5);--pa-shadow-btn:0 12px 28px rgba(74,46,216,.5);--pa-shadow-bar:0 12px 40px rgba(0,0,0,.6)}
 .pub-head{background:var(--pa-bg);border-bottom:1px solid var(--pa-border);padding:calc(22px + env(safe-area-inset-top)) 20px 16px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:13px}
 .pub-head-txt{flex:1;min-width:0}
 .pub-head .pub-hi{font-family:var(--pa-display);font-size:23px;font-weight:600;margin:0;letter-spacing:-.2px;color:var(--pa-ink);line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -491,10 +491,11 @@ table.data tbody tr.clickable{cursor:pointer}
 .pub-asg .obs{font-size:12.5px;color:var(--pa-ink2);line-height:1.55}
 .pub-asg .acts{display:flex;gap:10px}
 .pub-asg .acts .pub-btn{flex:1;width:auto}
-.pub-btn{width:100%;height:54px;border-radius:16px;border:none;font-size:15.5px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .14s ease,box-shadow .2s,filter .15s;font-family:var(--font);position:relative;overflow:hidden}
+.pub-btn{width:100%;height:56px;border-radius:28px;border:none;font-size:15.5px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .14s ease,box-shadow .2s,filter .15s;font-family:var(--font);position:relative;overflow:hidden}
 .pub-btn .ico{width:19px;height:19px}
-.pub-btn.accept,.pub-btn.primary{background:var(--pa-accent);color:#fff;box-shadow:var(--pa-shadow-btn)}
-.pub-btn.reject,.pub-btn.ghost{background:var(--pa-surf2);color:var(--pa-ink2);border:1px solid var(--pa-border)}
+.pub-btn.accept,.pub-btn.primary{background:var(--pa-grad);color:#fff;box-shadow:var(--pa-shadow-btn)}
+.pub-btn.primary:active{filter:brightness(1.08)}
+.pub-btn.reject,.pub-btn.ghost{background:var(--pa-surf2);color:var(--pa-ink);border:1px solid var(--pa-border)}
 .pub-btn:active{transform:scale(.97)}
 .pub-btn:disabled{opacity:.5;cursor:default;box-shadow:none}
 .pub-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:pubRipple .55s ease-out;pointer-events:none}
@@ -591,6 +592,43 @@ table.data tbody tr.clickable{cursor:pointer}
 .pub-soon .si .ico{width:30px;height:30px}
 .pub-soon h2{font-family:var(--pa-display);font-size:22px;font-weight:600;color:var(--pa-ink);margin:0 0 6px}
 .pub-soon p{font-size:13.5px;color:var(--pa-ink2);line-height:1.55;max-width:280px;margin:0 auto}
+/* --- Rediseño v2: Inicio tipo Apple Health --- */
+.pub-card{border-radius:24px;padding:20px}
+.pub-hero .hero-head{display:flex;justify-content:space-between;align-items:center;font-size:14.5px;font-weight:600;color:var(--pa-ink2);margin-bottom:14px}
+.pub-hero .hero-head .ico{width:19px;height:19px;color:var(--pa-ink3)}
+.pub-hero .hero-row{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.hero-time{display:flex;align-items:baseline;gap:3px;color:var(--pa-ink);flex-wrap:wrap}
+.hero-time b{font-size:42px;font-weight:700;line-height:1;letter-spacing:-1px}
+.hero-time small{font-size:16px;font-weight:600;color:var(--pa-ink2);margin-right:8px}
+.hero-time .hero-of{font-size:14px;color:var(--pa-ink3);font-weight:500;align-self:flex-end;margin-bottom:3px}
+.pub-prog{height:9px;border-radius:6px;background:var(--pa-surf2);overflow:hidden;margin:16px 0 11px}
+[data-theme="dark"] .pub-prog{background:rgba(255,255,255,.07)}
+.pub-prog span{display:block;height:100%;border-radius:6px;background:var(--pa-grad);transition:width .5s cubic-bezier(.22,.61,.36,1)}
+.hero-goal{font-size:13px;color:var(--pa-ink2);font-weight:500;margin-bottom:18px}
+.hero-goal b{color:var(--pa-accent);font-weight:700}
+.pub-ringwrap{position:relative;width:66px;height:66px;flex-shrink:0}
+.pub-ringwrap .rs{position:absolute;inset:12px;border-radius:50%;background:var(--pa-grad);display:grid;place-items:center;box-shadow:var(--pa-shadow-btn)}
+.pub-ringwrap .rs .ico{width:22px;height:22px;color:#fff}
+.pub-grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.pub-mini{background:var(--pa-surf);border:1px solid var(--pa-border);border-radius:22px;padding:16px;box-shadow:var(--pa-shadow)}
+.pub-mini .mtop{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.pub-mini .mic{width:36px;height:36px;border-radius:11px;background:var(--pa-accent-soft);color:var(--pa-accent);display:grid;place-items:center;flex-shrink:0}
+.pub-mini .mic .ico{width:18px;height:18px}
+.pub-mini .mlab{flex:1;font-size:14px;font-weight:600;color:var(--pa-ink);min-width:0}
+.pub-mini .mchev{width:16px;height:16px;color:var(--pa-ink3)}
+.pub-mini .mval{font-size:32px;font-weight:700;color:var(--pa-ink);line-height:1;letter-spacing:-.5px}
+.pub-mini .msub{font-size:12px;color:var(--pa-ink3);margin-top:3px}
+.pub-mini .mstep{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.pub-mini .mstep button{width:42px;height:36px;border-radius:11px;border:1px solid var(--pa-border);background:var(--pa-surf2);color:var(--pa-accent);font-size:18px;cursor:pointer;transition:background .12s}
+.pub-mini .mstep button:active{background:var(--pa-accent-soft)}
+.pub-terr{display:flex;align-items:center;gap:14px;cursor:pointer;position:relative;overflow:hidden}
+.pub-terr .tic{width:44px;height:44px;border-radius:13px;background:var(--pa-accent-soft);color:var(--pa-accent);display:grid;place-items:center;flex-shrink:0}
+.pub-terr .tic .ico{width:22px;height:22px}
+.pub-terr .ttxt{flex:1;min-width:0}
+.pub-terr .ttxt b{font-size:15px;font-weight:650;color:var(--pa-ink);display:block}
+.pub-terr .ttxt span{font-size:13px;color:var(--pa-accent);font-weight:600}
+.pub-terr .tchev{width:20px;height:20px;color:var(--pa-ink3);flex-shrink:0}
+.pub-send{margin-top:2px}
 </style>
 </head>
 <body>
@@ -3652,7 +3690,7 @@ function renderPubApp(){const host=document.getElementById('pubApp');if(!host)re
   else body=pubInicio(me);
   const first=(me.nombre||me.fullName).split(' ')[0];
   const hr=new Date().getHours();const greet=hr<12?'Buenos días':(hr<19?'Buenas tardes':'Buenas noches');
-  const titles={inicio:[greet+', '+first,'Registra tu actividad de hoy.'],informe:['Mi informe','Servicio del campo · Junio 2026'],calendario:['Calendario','Reuniones y actividades'],territorios:['Territorios','Tus salidas de predicación'],asign:['Asignaciones','Reuniones de la congregación'],config:['Configuración','Perfil y preferencias']};
+  const titles={inicio:[greet+', <span style="color:var(--pa-accent)">'+first+'</span> 👋','Congregación Las Flores'],informe:['Mi informe','Servicio del campo · Junio 2026'],calendario:['Calendario','Reuniones y actividades'],territorios:['Territorios','Tus salidas de predicación'],asign:['Asignaciones','Reuniones de la congregación'],config:['Configuración','Perfil y preferencias']};
   const t=titles[pubView]||titles.inicio;
   const annNew=pubAnnNew();
   host.innerHTML=`<div class="pub-head"><div class="pub-head-txt"><div class="pub-hi">${t[0]}</div><div class="pub-sub">${t[1]}</div></div><button class="pub-iconbtn pub-bell" onclick="pubAnnounce()" aria-label="Anuncios">${svg('bell')}${annNew>0?'<span class="dot"></span>':''}</button><div class="pub-av">${initials(me.fullName)}</div></div><div class="pub-main${pubAnimate?' pub-anim':''}">${body}</div>${pubTabbar()}`;
@@ -3675,25 +3713,48 @@ function pubReadNotes(){const el=document.getElementById('pub_notas');if(el)pubA
 function pubTimeAdj(k,d){pubReadNotes();if(k==='h'){pubActivity.h=Math.max(0,Math.min(99,pubActivity.h+d));}
   else{let m=pubActivity.m+d,h=pubActivity.h;if(m>=60){m-=60;h++;}if(m<0){if(h>0){h--;m+=60;}else m=0;}pubActivity.h=Math.max(0,Math.min(99,h));pubActivity.m=m;}renderPubApp();}
 function pubActAdj(f,d){pubReadNotes();pubActivity[f]=Math.max(0,(pubActivity[f]||0)+d);renderPubApp();}
+function pubRing(pct){const R=27,C=2*Math.PI*R,off=C*(1-Math.min(100,pct)/100);
+  return `<div class="pub-ringwrap"><svg width="66" height="66" viewBox="0 0 66 66"><circle cx="33" cy="33" r="${R}" fill="none" stroke="var(--pa-border)" stroke-width="4"/><circle cx="33" cy="33" r="${R}" fill="none" stroke="url(#pRingG)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 33 33)"/><defs><linearGradient id="pRingG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B6FFF"/><stop offset="1" stop-color="#4A2ED8"/></linearGradient></defs></svg><div class="rs">${svg('star')}</div></div>`;}
 function pubInicio(me){const a=pubActivity;
-  const cnt=(f,ic,t,s,fst)=>`<div class="pub-count${fst?' first':''}"><div class="ci">${svg(ic)}</div><div class="ctxt"><b>${t}</b>${s?`<small>${s}</small>`:''}</div><div class="cnum"><button onclick="pubActAdj('${f}',-1)" aria-label="Menos">−</button><span>${a[f]}</span><button onclick="pubActAdj('${f}',1)" aria-label="Más">+</button></div></div>`;
+  const dayMin=a.h*60+a.m;const dayGoal=180;const dayPct=Math.min(100,Math.round(dayMin/dayGoal*100));
+  const rep=myReport();const monthDone=rep?rep.horas:0;const monthGoal=30;const monthPct=Math.round(monthDone/monthGoal*100);
+  const mini=(f,ic,label)=>`<div class="pub-mini"><div class="mtop"><div class="mic">${svg(ic)}</div><span class="mlab">${label}</span>${svg('chevR','mchev')}</div><div class="mval">${a[f]}</div><div class="msub">Este mes</div><div class="mstep"><button onclick="pubActAdj('${f}',-1)" aria-label="Menos">−</button><button onclick="pubActAdj('${f}',1)" aria-label="Más">+</button></div></div>`;
   return `
-  <div class="pub-card"><h3>${svg('clock')} Tiempo de predicación</h3>
-    <div class="pub-timepick">
-      <div class="pub-seg"><div class="num">${a.h}</div><div class="lab">Horas</div><div class="mini"><button onclick="pubTimeAdj('h',-1)" aria-label="Menos">−</button><button onclick="pubTimeAdj('h',1)" aria-label="Más">+</button></div></div>
-      <div class="pub-seg"><div class="num">${String(a.m).padStart(2,'0')}</div><div class="lab">Minutos</div><div class="mini"><button onclick="pubTimeAdj('m',-15)" aria-label="Menos">−</button><button onclick="pubTimeAdj('m',15)" aria-label="Más">+</button></div></div>
+  <div class="pub-card pub-hero">
+    <div class="hero-head"><span>Actividad de hoy</span>${svg('calendar')}</div>
+    <div class="hero-row">
+      <div style="min-width:0">
+        <div class="hero-time"><b>${a.h}</b><small>h</small><b>${String(a.m).padStart(2,'0')}</b><small>min</small><span class="hero-of">de 3 h</span></div>
+      </div>
+      ${pubRing(monthPct)}
     </div>
+    <div class="pub-prog"><span style="width:${dayPct}%"></span></div>
+    <div class="hero-goal">Meta mensual: <b>${monthDone}</b> / ${monthGoal} horas</div>
+    <button class="pub-btn primary" onclick="pubRegisterTime()">${svg('plus')}Registrar tiempo</button>
   </div>
-  <div class="pub-card"><h3>${svg('people')} Actividad</h3>
-    ${cnt('estudios','people','Estudios bíblicos','Cursos que diriges',true)}
-    ${cnt('revisitas','refresh','Revisitas','Visitas de regreso')}
-    ${cnt('pubs','doc','Publicaciones','Colocaciones')}
-    ${cnt('videos','display','Videos mostrados','')}
+  <div class="pub-grid2">
+    ${mini('estudios','doc','Estudios')}
+    ${mini('revisitas','refresh','Revisitas')}
+    ${mini('pubs','report','Publicaciones')}
+    ${mini('videos','display','Videos')}
   </div>
-  <div class="pub-card"><h3>${svg('edit')} Notas del día</h3>
-    <div class="pub-field" style="margin:2px 0 0"><textarea id="pub_notas" rows="3" placeholder="Personas interesadas, direcciones, conversaciones, pendientes…" onchange="pubActivity.notas=this.value">${a.notas||''}</textarea></div>
+  <div class="pub-card pub-terr" role="button" tabindex="0" onclick="pubGo('territorios')">
+    <div class="tic">${svg('map')}</div>
+    <div class="ttxt"><b>Territorios asignados</b><span>${myAssignments().length} activos</span></div>
+    ${svg('chevR','tchev')}
   </div>
-  <button class="pub-btn primary" onclick="pubSendReport()">${svg('send')}Enviar informe</button>`;}
+  <div class="pub-card"><h3>${svg('edit')} Notas rápidas</h3>
+    <div class="pub-field" style="margin:2px 0 0"><textarea id="pub_notas" rows="2" placeholder="Escribe tus notas del día…" onchange="pubActivity.notas=this.value">${a.notas||''}</textarea></div>
+  </div>
+  <button class="pub-btn primary pub-send" onclick="pubSendReport()">${svg('send')}Enviar informe</button>`;}
+function pubRegisterTime(){pubReadNotes();
+  pubSheet('Registrar tiempo del día',`<div class="pub-timepick" id="rtPick">${pubTimePickHTML()}</div><button class="pub-btn primary" style="margin-top:18px" onclick="pubCloseSheet();pubGo('inicio')">${svg('check')}Guardar tiempo</button>`);}
+function pubTimePickHTML(){const a=pubActivity;
+  return `<div class="pub-seg"><div class="num">${a.h}</div><div class="lab">Horas</div><div class="mini"><button onclick="pubRtAdj('h',-1)" aria-label="Menos">−</button><button onclick="pubRtAdj('h',1)" aria-label="Más">+</button></div></div>
+  <div class="pub-seg"><div class="num">${String(a.m).padStart(2,'0')}</div><div class="lab">Minutos</div><div class="mini"><button onclick="pubRtAdj('m',-15)" aria-label="Menos">−</button><button onclick="pubRtAdj('m',15)" aria-label="Más">+</button></div></div>`;}
+function pubRtAdj(k,d){if(k==='h')pubActivity.h=Math.max(0,Math.min(99,pubActivity.h+d));
+  else{let m=pubActivity.m+d,h=pubActivity.h;if(m>=60){m-=60;h++;}if(m<0){if(h>0){h--;m+=60;}else m=0;}pubActivity.h=Math.max(0,Math.min(99,h));pubActivity.m=m;}
+  const el=document.getElementById('rtPick');if(el)el.innerHTML=pubTimePickHTML();}
 function pubSendReport(){const me=myPub();if(!me)return;pubReadNotes();const a=pubActivity;
   let rep=INFORMES.find(r=>r.pub&&String(r.pub.id)===String(me.id));
   if(!rep){rep={pub:me,entregado:false,horas:0,estudios:0,auxiliar:false};INFORMES.push(rep);}
