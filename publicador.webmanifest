@@ -1,0 +1,15 @@
+{
+  "name": "Publicador · MS Planner",
+  "short_name": "Publicador",
+  "description": "App del Publicador — Congregación Las Flores",
+  "start_url": "./publicador.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#6C4CF5",
+  "theme_color": "#6C4CF5",
+  "lang": "es-CO",
+  "icons": [
+    { "src": "publicador-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
