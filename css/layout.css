@@ -1,0 +1,71 @@
+/* MS Planner · Layout: app, sidebar, nav, header, main, content  (extraído de MS Planner App.html — Fase 1)
+   NO reordenar entre archivos: el orden variables→base→layout→components preserva la cascada. */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar-grad);display:flex;flex-direction:column;position:relative;z-index:40;transition:width .26s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(49,46,129,.18)}
+.sidebar::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 60% at 100% 0%,rgba(255,255,255,.10),transparent 60%);pointer-events:none}
+.sidebar.collapsed{width:var(--sidebar-w-collapsed)}
+.brand{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0 18px;flex-shrink:0;position:relative;z-index:1}
+.brand-logo{width:40px;height:40px;flex-shrink:0;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.brand-logo svg{width:100%;height:100%}
+.brand-name{font-weight:700;font-size:16px;letter-spacing:-.3px;white-space:nowrap;color:#fff;line-height:1.1}
+.brand-name span{color:#c4b5fd;font-weight:500;display:block;font-size:11px;letter-spacing:2px}
+.sidebar.collapsed .brand-name,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-section-title,.sidebar.collapsed .cong-text,.sidebar.collapsed .cong-cog,.sidebar.collapsed .nav-badge{display:none}
+.sidebar.collapsed .brand{justify-content:center;padding:0}
+.nav{flex:1;overflow-y:auto;padding:10px 14px 8px;overflow-x:hidden;position:relative;z-index:1}
+.nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);background-clip:content-box}
+.nav-section-title{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.5);padding:16px 12px 7px}
+.nav-item{display:flex;align-items:center;gap:13px;padding:10px 12px;border-radius:11px;color:rgba(255,255,255,.82);font-weight:500;font-size:13.5px;cursor:pointer;position:relative;margin-bottom:3px;white-space:nowrap;transition:background .16s,color .16s,transform .12s}
+.nav-item:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-item:active{transform:scale(.98)}
+.nav-item.active{background:rgba(255,255,255,.18);color:#fff;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.nav-item.active::before{content:"";position:absolute;left:-14px;top:50%;transform:translateY(-50%);width:4px;height:22px;border-radius:0 4px 4px 0;background:#fff}
+.nav-item svg{width:20px;height:20px;flex-shrink:0;stroke-width:1.9}
+.nav-badge{margin-left:auto;background:#fff;color:var(--brand-500);font-size:10.5px;font-weight:800;min-width:19px;height:19px;padding:0 6px;border-radius:10px;display:grid;place-items:center}
+.nav-badge.muted{background:rgba(255,255,255,.2);color:#fff}
+.sidebar.collapsed .nav-item{justify-content:center;padding:11px}
+.sidebar-foot{padding:12px 14px 16px;position:relative;z-index:1}
+.cong-switch{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;cursor:pointer;transition:background .16s;background:rgba(255,255,255,.08)}
+.cong-switch:hover{background:rgba(255,255,255,.16)}
+.cong-switch:focus-visible{outline:2px solid rgba(255,255,255,.85);outline-offset:2px}
+.cong-cog{margin-left:auto;flex-shrink:0;width:26px;height:26px;display:grid;place-items:center;border-radius:8px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.06);transition:.2s}
+.cong-cog svg{width:16px;height:16px;stroke-width:1.9}
+.cong-switch:hover .cong-cog{color:#fff;background:rgba(255,255,255,.2);transform:rotate(35deg)}
+.cong-avatar{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;background:rgba(255,255,255,.95);color:var(--brand-600);font-weight:800;font-size:13px}
+.cong-text{overflow:hidden}
+.cong-text b{display:block;font-size:13px;font-weight:600;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;color:#fff}
+.cong-text small{color:rgba(255,255,255,.6);font-size:11px}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.header{height:var(--header-h);flex-shrink:0;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 22px;z-index:30}
+.icon-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:var(--ink-500);transition:background .16s,color .16s,transform .12s;position:relative}
+.icon-btn:hover{background:var(--surface-3);color:var(--ink-900)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px;stroke-width:1.9}
+.icon-btn .dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--surface)}
+.breadcrumbs{display:flex;align-items:center;gap:8px;color:var(--ink-400);font-size:13px;font-weight:500}
+.breadcrumbs b{color:var(--ink-900);font-weight:650}
+.breadcrumbs .sep svg{width:15px;height:15px}
+.search{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--surface-3);border:1.5px solid transparent;border-radius:11px;padding:0 13px;height:40px;width:320px;transition:.18s;cursor:text}
+.search:focus-within{background:var(--surface);border-color:var(--brand-300);box-shadow:0 0 0 4px var(--brand-50)}
+.search svg{width:17px;height:17px;color:var(--ink-400);flex-shrink:0}
+.search input{border:none;background:none;outline:none;flex:1;font-size:13.5px}
+.search kbd{font-size:10.5px;font-weight:600;color:var(--ink-400);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-family:var(--font)}
+.header-divider{width:1px;height:28px;background:var(--border)}
+.profile-chip{display:flex;align-items:center;gap:10px;padding:5px 8px 5px 5px;border-radius:12px;transition:background .16s;cursor:pointer}
+.profile-chip:hover{background:var(--surface-3)}
+.profile-chip .chev{color:var(--ink-400)}
+.profile-chip .chev svg{width:15px;height:15px}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:linear-gradient(135deg,var(--violet),var(--brand-600));color:#fff;font-weight:650;font-size:13px}
+.profile-meta{line-height:1.25}
+.profile-meta b{font-size:13px;font-weight:650;display:block}
+.profile-meta small{font-size:11px;color:var(--ink-400)}
+
+.content{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.page{padding:28px 32px 64px;max-width:1520px;margin:0 auto;animation:fadeUp .34s cubic-bezier(.16,1,.3,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.page-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:26px;flex-wrap:wrap}
+.page-title{font-size:26px;font-weight:750;letter-spacing:-.6px}
+.page-sub{color:var(--ink-500);font-size:14px;margin-top:4px}
+.page-head .actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+

@@ -1,0 +1,25 @@
+/* MS Planner · Variables y tema (light/dark)  (extraído de MS Planner App.html — Fase 1)
+   NO reordenar entre archivos: el orden variables→base→layout→components preserva la cascada. */
+:root{
+  --indigo:#4F46E5;
+  --brand-50:#f3f0ff;--brand-100:#e9e3ff;--brand-200:#d4c7ff;--brand-300:#b49eff;--brand-400:#8B5CF6;--brand-500:#5B21B6;--brand-600:#4c1d95;--brand-700:#312E81;
+  --blue:#3B82F6;--blue-50:#eff6ff;--green:#22C55E;--green-50:#f0fdf4;--green-700:#15803d;--amber:#F59E0B;--amber-50:#fffbeb;--amber-700:#b45309;--red:#EF4444;--red-50:#fef2f2;--red-700:#b91c1c;--violet:#8B5CF6;--violet-50:#f5f3ff;--cyan:#06b6d4;--cyan-50:#ecfeff;--pink:#ec4899;--pink-50:#fdf2f8;
+  --bg:#F5F7FB;--surface:#fff;--surface-2:#fafbfd;--surface-3:#f1f4f9;--border:#E2E8F0;--border-strong:#cbd5e1;--ink-900:#1E293B;--ink-700:#334155;--ink-500:#64748B;--ink-400:#94a3b8;--ink-300:#cbd5e1;
+  --sidebar-grad:linear-gradient(180deg,#4F46E5 0%,#5B21B6 45%,#312E81 100%);
+  --r-sm:10px;--r-md:14px;--r-lg:18px;
+  --sh-xs:0 1px 2px rgba(30,41,59,.06);--sh-sm:0 1px 3px rgba(30,41,59,.08),0 1px 2px rgba(30,41,59,.04);--sh-md:0 6px 18px rgba(30,41,59,.09),0 2px 6px rgba(30,41,59,.05);--sh-lg:0 24px 60px rgba(30,41,59,.18),0 8px 20px rgba(30,41,59,.08);--sh-pop:0 16px 48px rgba(30,41,59,.16);--sh-purple:0 8px 24px rgba(91,33,182,.32);
+  --sidebar-w:266px;--sidebar-w-collapsed:78px;--header-h:64px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0e1420;--surface:#161d2b;--surface-2:#1b2333;--surface-3:#222c40;--border:#2a3446;--border-strong:#3b485f;
+  --ink-900:#e9eef6;--ink-700:#c7d1e0;--ink-500:#93a1b8;--ink-400:#6f7d94;--ink-300:#4a5670;
+  --brand-50:rgba(139,92,246,.18);--brand-200:#6d4bd0;
+  --blue-50:rgba(59,130,246,.16);--green-50:rgba(34,197,94,.16);--green-700:#4ade80;--amber-50:rgba(245,158,11,.16);--amber-700:#fbbf24;--red-50:rgba(239,68,68,.16);--red-700:#f87171;--violet-50:rgba(139,92,246,.16);--cyan-50:rgba(6,182,212,.16);--pink-50:rgba(236,72,153,.16);
+  --sh-xs:0 1px 2px rgba(0,0,0,.4);--sh-sm:0 1px 3px rgba(0,0,0,.45),0 1px 2px rgba(0,0,0,.3);--sh-md:0 6px 18px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.3);--sh-lg:0 24px 60px rgba(0,0,0,.62),0 8px 20px rgba(0,0,0,.4);--sh-pop:0 16px 48px rgba(0,0,0,.55);
+}
+[data-theme="dark"] .header{background:rgba(20,27,41,.82)}
+[data-theme="dark"] .toast{background:#0a1018;color:#e9eef6;border:1px solid var(--border)}
+[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#3b485f;background-clip:content-box}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#556074;background-clip:content-box}
+[data-theme="dark"] .select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2393a1b8' stroke-width='2'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E")}

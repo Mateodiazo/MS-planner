@@ -21,3 +21,6 @@
 # Docker + servidor estático endurecido
 !docker/
 !docker/*
+# CSS modular (Fase 1 del refactor)
+!css/
+!css/*
