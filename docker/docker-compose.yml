@@ -1,0 +1,22 @@
+services:
+  ms-planner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"          # imagen unprivileged sirve en 8080 dentro del contenedor
+    restart: unless-stopped
+    read_only: true          # contenedor inmutable
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=America/Bogota
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
