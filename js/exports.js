@@ -427,3 +427,52 @@ function exportS1Pdf(y,m){
   toast('Reporte S-1 descargado · '+monthLabel);
 }
 function repPredicacion(){const rows=[['Grupo','Superintendente','Publicadores','Horas (mes)','Cursos bíblicos','Participación']];REAL_GROUPS.forEach((g,i)=>{const m=DB.filter(p=>p.grupoIdx===i);const horas=m.length*rint(6,14);const part=78+hashStr('gp'+i)%20;rows.push([g.n,g.sup,String(m.length),String(horas),String(rint(8,30)),part+'%'])});downloadBlob('Predicacion_Las_Flores.xlsx',buildXlsx(rows,'Predicacion'),XMIME);toast('Reporte de predicación exportado')}
+
+/* --- puente a window (Fase b.1): expone símbolos como globales para
+   compatibilidad con onclick inline y referencias entre módulos.
+   getter=valor vivo; setter=permite `x=...` desde handlers inline. --- */
+try{Object.defineProperties(window,{
+  CAL_FY:{get(){return CAL_FY},configurable:true},
+  CARD_W:{get(){return CARD_W},configurable:true},
+  CURRENT_SY:{get(){return CURRENT_SY},configurable:true},
+  MESES_CAL:{get(){return MESES_CAL},configurable:true},
+  MESES_FY:{get(){return MESES_FY},configurable:true},
+  XMIME:{get(){return XMIME},configurable:true},
+  ascii:{get(){return ascii},configurable:true},
+  attFilled:{get(){return attFilled},configurable:true},
+  attMonth:{get(){return attMonth},configurable:true},
+  attMonthlyAvg:{get(){return attMonthlyAvg},configurable:true},
+  buildMultiPagePDF:{get(){return buildMultiPagePDF},configurable:true},
+  buildXlsx:{get(){return buildXlsx},configurable:true},
+  buildZip:{get(){return buildZip},configurable:true},
+  calYear:{get(){return calYear},configurable:true},
+  cardContent:{get(){return cardContent},configurable:true},
+  cardS21Content:{get(){return cardS21Content},configurable:true},
+  colL:{get(){return colL},configurable:true},
+  crc32:{get(){return crc32},configurable:true},
+  crcTable:{get(){return crcTable},configurable:true},
+  downloadAllCards:{get(){return downloadAllCards},configurable:true},
+  downloadBlob:{get(){return downloadBlob},configurable:true},
+  downloadCard:{get(){return downloadCard},configurable:true},
+  exportAsistPdf:{get(){return exportAsistPdf},configurable:true},
+  exportDbFiltered:{get(){return exportDbFiltered},configurable:true},
+  exportFieldSummaryPdf:{get(){return exportFieldSummaryPdf},configurable:true},
+  exportS1Pdf:{get(){return exportS1Pdf},configurable:true},
+  exportTerrDocx:{get(){return exportTerrDocx},configurable:true},
+  exportTerrPdf:{get(){return exportTerrPdf},configurable:true},
+  exportTerrXlsx:{get(){return exportTerrXlsx},configurable:true},
+  fsRow:{get(){return fsRow},configurable:true},
+  hex2rg:{get(){return hex2rg},configurable:true},
+  openAsistYearSelect:{get(){return openAsistYearSelect},configurable:true},
+  openFieldSummarySelect:{get(){return openFieldSummarySelect},configurable:true},
+  openS1Select:{get(){return openS1Select},configurable:true},
+  repAsistencia:{get(){return repAsistencia},configurable:true},
+  repBaseDatos:{get(){return repBaseDatos},configurable:true},
+  repInformes6m:{get(){return repInformes6m},configurable:true},
+  repPrecursores:{get(){return repPrecursores},configurable:true},
+  repPredicacion:{get(){return repPredicacion},configurable:true},
+  repPublicadores:{get(){return repPublicadores},configurable:true},
+  s2b:{get(){return s2b},configurable:true},
+  xesc:{get(){return xesc},configurable:true}
+})}catch(e){console.error('bridge',e)}
+export {CAL_FY, CARD_W, CURRENT_SY, MESES_CAL, MESES_FY, XMIME, ascii, attFilled, attMonth, attMonthlyAvg, buildMultiPagePDF, buildXlsx, buildZip, calYear, cardContent, cardS21Content, colL, crc32, crcTable, downloadAllCards, downloadBlob, downloadCard, exportAsistPdf, exportDbFiltered, exportFieldSummaryPdf, exportS1Pdf, exportTerrDocx, exportTerrPdf, exportTerrXlsx, fsRow, hex2rg, openAsistYearSelect, openFieldSummarySelect, openS1Select, repAsistencia, repBaseDatos, repInformes6m, repPrecursores, repPredicacion, repPublicadores, s2b, xesc};

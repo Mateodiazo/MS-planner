@@ -123,3 +123,45 @@ function refreshStats(){STATS={total:DB.length,ancianos:DB.filter(p=>p.role==='A
 refreshStats();
 function refreshDerived(){males.length=0;DB.filter(p=>p.sex==='M'&&p.estado!=='Inactivo').forEach(p=>males.push(p));elders.length=0;DB.filter(p=>p.role==='Anciano').forEach(p=>elders.push(p));pubsActive.length=0;DB.filter(p=>p.estado!=='Inactivo').forEach(p=>pubsActive.push(p));refreshStats();}
 
+/* --- puente a window (Fase b.1): expone símbolos como globales para
+   compatibilidad con onclick inline y referencias entre módulos.
+   getter=valor vivo; setter=permite `x=...` desde handlers inline. --- */
+try{Object.defineProperties(window,{
+  ANUNCIOS:{get(){return ANUNCIOS},configurable:true},
+  DB:{get(){return DB},configurable:true},
+  DOW_ABBR:{get(){return DOW_ABBR},configurable:true},
+  DOW_FULL:{get(){return DOW_FULL},configurable:true},
+  EVENTS:{get(){return EVENTS},configurable:true},
+  EXHIB_NAMES:{get(){return EXHIB_NAMES},configurable:true},
+  INFORMES:{get(){return INFORMES},configurable:true},
+  NOTIFS:{get(){return NOTIFS},configurable:true},
+  NOTIF_TYPES:{get(){return NOTIF_TYPES},configurable:true},
+  NO_PREDICA:{get(){return NO_PREDICA},configurable:true},
+  OTHER_ROLES:{get(){return OTHER_ROLES},configurable:true},
+  TASKS:{get(){return TASKS},configurable:true},
+  TASK_TITLES:{get(){return TASK_TITLES},configurable:true},
+  TERR:{get(){return TERR},configurable:true},
+  TURN_SLOTS:{get(){return TURN_SLOTS},configurable:true},
+  elders:{get(){return elders},configurable:true},
+  eldersM:{get(){return eldersM},configurable:true},
+  exhibTurn:{get(){return exhibTurn},configurable:true},
+  males:{get(){return males},configurable:true},
+  meetingMeta:{get(){return meetingMeta},configurable:true},
+  mkParts:{get(){return mkParts},configurable:true},
+  pickMale:{get(){return pickMale},configurable:true},
+  pubsActive:{get(){return pubsActive},configurable:true},
+  refreshDerived:{get(){return refreshDerived},configurable:true},
+  refreshStats:{get(){return refreshStats},configurable:true},
+  terrForDate:{get(){return terrForDate},configurable:true},
+  terrStateQueue:{get(){return terrStateQueue},configurable:true},
+  unconfirmedCount:{get(){return unconfirmedCount},configurable:true},
+  upcomingMeetings:{get(){return upcomingMeetings},configurable:true},
+  weekDates:{get(){return weekDates},configurable:true},
+  CONG_CFG:{get(){return CONG_CFG},set(v){CONG_CFG=v},configurable:true},
+  DISC_OVR:{get(){return DISC_OVR},set(v){DISC_OVR=v},configurable:true},
+  EXHIB_OVR:{get(){return EXHIB_OVR},set(v){EXHIB_OVR=v},configurable:true},
+  MEET_OVR:{get(){return MEET_OVR},set(v){MEET_OVR=v},configurable:true},
+  STATS:{get(){return STATS},set(v){STATS=v},configurable:true},
+  _id:{get(){return _id},set(v){_id=v},configurable:true}
+})}catch(e){console.error('bridge',e)}
+export {ANUNCIOS, CONG_CFG, DB, DISC_OVR, DOW_ABBR, DOW_FULL, EVENTS, EXHIB_NAMES, EXHIB_OVR, INFORMES, MEET_OVR, NOTIFS, NOTIF_TYPES, NO_PREDICA, OTHER_ROLES, STATS, TASKS, TASK_TITLES, TERR, TURN_SLOTS, _id, elders, eldersM, exhibTurn, males, meetingMeta, mkParts, pickMale, pubsActive, refreshDerived, refreshStats, terrForDate, terrStateQueue, unconfirmedCount, upcomingMeetings, weekDates};

@@ -45,3 +45,38 @@ const BARRIOS_BOG={
 const LOCALIDADES=Object.keys(BARRIOS_BOG);
 const VIAS=['Calle','Carrera','Avenida','Transversal','Diagonal'];
 function dirBogota(){return `${pick(VIAS)} ${rint(100,160)} #${rint(90,130)}-${String(rint(1,99)).padStart(2,'0')}`}
+
+/* --- puente a window (Fase b.1): expone símbolos como globales para
+   compatibilidad con onclick inline y referencias entre módulos.
+   getter=valor vivo; setter=permite `x=...` desde handlers inline. --- */
+try{Object.defineProperties(window,{
+  ACCESS_ROLES:{get(){return ACCESS_ROLES},configurable:true},
+  APELLIDOS:{get(){return APELLIDOS},configurable:true},
+  AV_COLORS:{get(){return AV_COLORS},configurable:true},
+  BARRIOS_BOG:{get(){return BARRIOS_BOG},configurable:true},
+  DEMO_DATE:{get(){return DEMO_DATE},configurable:true},
+  DISCURSOS:{get(){return DISCURSOS},configurable:true},
+  GRUPOS:{get(){return GRUPOS},configurable:true},
+  LOCALIDADES:{get(){return LOCALIDADES},configurable:true},
+  MALE_NAMES:{get(){return MALE_NAMES},configurable:true},
+  NOMBRES_H:{get(){return NOMBRES_H},configurable:true},
+  NOMBRES_M:{get(){return NOMBRES_M},configurable:true},
+  PRIVILEGIOS:{get(){return PRIVILEGIOS},configurable:true},
+  PRIV_RANK:{get(){return PRIV_RANK},configurable:true},
+  REAL_GROUPS:{get(){return REAL_GROUPS},configurable:true},
+  ROLES:{get(){return ROLES},configurable:true},
+  TODAY:{get(){return TODAY},configurable:true},
+  VIAS:{get(){return VIAS},configurable:true},
+  avColor:{get(){return avColor},configurable:true},
+  daysAgo:{get(){return daysAgo},configurable:true},
+  daysFwd:{get(){return daysFwd},configurable:true},
+  defaultAccessRole:{get(){return defaultAccessRole},configurable:true},
+  dirBogota:{get(){return dirBogota},configurable:true},
+  diso:{get(){return diso},configurable:true},
+  dlong:{get(){return dlong},configurable:true},
+  dshort:{get(){return dshort},configurable:true},
+  dstr:{get(){return dstr},configurable:true},
+  initials:{get(){return initials},configurable:true},
+  primaryPriv:{get(){return primaryPriv},configurable:true}
+})}catch(e){console.error('bridge',e)}
+export {ACCESS_ROLES, APELLIDOS, AV_COLORS, BARRIOS_BOG, DEMO_DATE, DISCURSOS, GRUPOS, LOCALIDADES, MALE_NAMES, NOMBRES_H, NOMBRES_M, PRIVILEGIOS, PRIV_RANK, REAL_GROUPS, ROLES, TODAY, VIAS, avColor, daysAgo, daysFwd, defaultAccessRole, dirBogota, diso, dlong, dshort, dstr, initials, primaryPriv};

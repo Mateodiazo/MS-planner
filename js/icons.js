@@ -51,3 +51,12 @@ const I={
 };
 function svg(n,cls=''){return `<svg class="ico${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-${n}" xlink:href="#ico-${n}"/></svg>`}
 (function(){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden');s.innerHTML=Object.keys(I).map(k=>`<symbol id="ico-${k}" viewBox="0 0 24 24">${I[k]}</symbol>`).join('');document.body.appendChild(s);})();
+
+/* --- puente a window (Fase b.1): expone símbolos como globales para
+   compatibilidad con onclick inline y referencias entre módulos.
+   getter=valor vivo; setter=permite `x=...` desde handlers inline. --- */
+try{Object.defineProperties(window,{
+  I:{get(){return I},configurable:true},
+  svg:{get(){return svg},configurable:true}
+})}catch(e){console.error('bridge',e)}
+export {I, svg};
