@@ -49,69 +49,9 @@
   </div>
 </div>
 <div class="toast-wrap" id="toastWrap"></div>
+<script src="js/icons.js"></script>
+<script src="js/dom.js"></script>
 <script>
-/* ICONS */
-const I={
-  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
-  calendar:'<rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-  meeting:'<rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M8 21h8M12 18v3"/>',
-  tasks:'<path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
-  people:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
-  map:'<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/>',
-  display:'<rect x="2" y="3" width="20" height="14" rx="2.5"/><path d="M8 21h8M12 17v4"/>',
-  report:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/>',
-  chart:'<path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6" rx="1"/><rect x="12" y="7" width="3" height="10" rx="1"/><rect x="17" y="13" width="3" height="4" rx="1"/>',
-  bell:'<path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
-  db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
-  filter:'<path d="M22 3H2l8 9.5V19l4 2v-8.5z"/>',check:'<path d="M20 6 9 17l-5-5"/>',
-  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',warn:'<path d="M10.3 3.9 1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
-  flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
-  edit:'<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/>',
-  trash:'<path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>',
-  copy:'<rect x="9" y="9" width="13" height="13" rx="2.5"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>',
-  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',dots:'<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>',
-  home:'<path d="M3 9.5 12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1z"/>',
-  doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
-  star:'<path d="M12 2l3 6.5 7 .9-5 4.8 1.3 7L12 18l-6.3 3.2L7 14.2 2 9.4l7-.9z"/>',
-  mic:'<rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 17v4"/>',
-  speak:'<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/>',
-  refresh:'<path d="M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 01-15 6.7L3 16M3 21v-5h5"/>',
-  download:'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
-  excel:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 5M15 13l-6 5"/>',
-  x:'<path d="M18 6 6 18M6 6l12 12"/>',chevR:'<path d="m9 18 6-6-6-6"/>',chevL:'<path d="m15 18-6-6 6-6"/>',chevD:'<path d="m6 9 6 6 6-6"/>',
-  phone:'<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3-8.6A2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>',
-  mail:'<rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="m22 7-10 6L2 7"/>',
-  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
-  shield:'<path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/><path d="m9 12 2 2 4-4"/>',
-  pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
-  cake:'<path d="M2 21h20M4 21v-7a2 2 0 012-2h12a2 2 0 012 2v7M3 12h18M12 8V5M12 5l-1.5-2M12 5l1.5-2"/>',
-  pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
-  grid:'<path d="M9 3v18M3 9h6M3 15h6"/><rect x="3" y="3" width="18" height="18" rx="2"/>',
-  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/>',
-  logout:'<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>',
-  ruler:'<path d="M3 8 8 3l13 13-5 5z"/><path d="M7 9l1.5 1.5M10 6l1.5 1.5M13 9l1.5 1.5M9 13l1.5 1.5"/>',
-  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7 1.1V21a2 2 0 01-4 0v-.2a1.6 1.6 0 00-2.7-1.1l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.6 1.6 0 004.6 15H4a2 2 0 010-4h.2a1.6 1.6 0 001.1-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1A1.6 1.6 0 0011 4.6V4a2 2 0 014 0v.2a1.6 1.6 0 002.7 1.1l.1-.1a2 2 0 112.8 2.8l-.1.1A1.6 1.6 0 0021 11h.2a2 2 0 010 4H21z"/>',
-  scale:'<path d="M12 3v18"/><path d="M6 21h12"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/><path d="m6 7-3 7a3 3 0 006 0z"/><path d="m18 7-3 7a3 3 0 006 0z"/>',
-  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>',
-  moon:'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
-  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  briefcase:'<rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M8 7V5.5A2.5 2.5 0 0110.5 3h3A2.5 2.5 0 0116 5.5V7M2.5 12.5h19"/>',
-  megaphone:'<path d="M3 11v2a1 1 0 001 1h2l3.5 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M13 7v10M17 5v14"/>',
-};
-function svg(n,cls=''){return `<svg class="ico${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-${n}" xlink:href="#ico-${n}"/></svg>`}
-/* --- Seguridad: escape de HTML para prevenir XSS almacenado ---
-   Úsalo en TODO dato que venga del usuario o de Supabase (nombres, obs, dir,
-   títulos, notas) antes de inyectarlo en innerHTML.  `esc` es el alias corto. */
-function escapeHTML(str){if(str==null)return '';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-const esc=escapeHTML;
-/* Sanea una URL para bloquear javascript:/data: en href/src de datos */
-function sanitizeURL(url){if(!url)return '';try{const p=new URL(url,location.origin);return ['http:','https:','mailto:','tel:'].includes(p.protocol)?p.href:''}catch(e){return ''}}
-/* --- Seguridad: límites de longitud de entrada (evita payloads gigantes) --- */
-const MAX_LENGTHS={nombre:50,apellidos:50,email:100,tel:20,dir:200,obs:500,anuncio_titulo:100,anuncio_desc:1000,evento_nombre:100,evento_detalle:200,tarea_titulo:100,tarea_desc:500,terr_num:10,terr_barrio:80,terr_localidad:80};
-/* overLimit({clave:[valor,'Etiqueta'], …}) → true (y avisa) si algún campo excede su tope. */
-function overLimit(fields){for(const k in fields){const v=fields[k][0],label=fields[k][1],max=MAX_LENGTHS[k];if(max&&v&&String(v).length>max){toast(`${label} no puede superar ${max} caracteres`);return true}}return false}
-(function(){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden');s.innerHTML=Object.keys(I).map(k=>`<symbol id="ico-${k}" viewBox="0 0 24 24">${I[k]}</symbol>`).join('');document.body.appendChild(s);})();
 
 /* LOGO (MS Planner) */
 function logoSVG(){return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="msg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#4c1d95"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#msg)"/><circle cx="24" cy="24" r="15" fill="none" stroke="#a78bfa" stroke-width="2" opacity=".55"/><path d="M14 16c4 2 16 2 20 0" fill="none" stroke="#a78bfa" stroke-width="1.6" opacity=".4"/><path d="M14 32c4-2 16-2 20 0" fill="none" stroke="#a78bfa" stroke-width="1.6" opacity=".4"/><text x="24" y="30" font-family="Inter,Arial" font-size="17" font-weight="800" fill="#fff" text-anchor="middle">MS</text></svg>`}

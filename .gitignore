@@ -24,3 +24,6 @@
 # CSS modular (Fase 1 del refactor)
 !css/
 !css/*
+# JS modular (Fase 2 del refactor)
+!js/
+!js/*
