@@ -61,12 +61,12 @@ function renderPublisherHome(){
     </div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
       ${[
-        {i:'calendar',t:'t-brand',n:'Mi programa',d:'Tus próximas reuniones y partes.',fn:"toast('Tu programa estará disponible próximamente')"},
-        {i:'check',t:'t-green',n:'Mis asignaciones',d:'Confirma o rechaza lo asignado.',fn:"toast('Tus asignaciones estarán disponibles próximamente')"},
-        {i:'report',t:'t-violet',n:'Reportar predicación',d:'Envía tu informe mensual.',fn:"toast('El reporte de predicación estará disponible próximamente')"},
-        {i:'bell',t:'t-amber',n:'Notificaciones',d:'Avisos y recordatorios.',fn:"go('actividad')"},
-        {i:'user',t:'t-cyan',n:'Mi perfil',d:'Edita tus datos y preferencias.',fn:"openUserConfig()"}
-      ].map(c=>`<button type="button" onclick="${c.fn}" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" data-mouseover="hoverTintOn" data-mouseout="hoverTintOff"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px;line-height:1.45">${c.d}</p></button>`).join('')}
+        {i:'calendar',t:'t-brand',n:'Mi programa',d:'Tus próximas reuniones y partes.',fn:`data-click="toast" data-click-args='["Tu programa estará disponible próximamente"]'`},
+        {i:'check',t:'t-green',n:'Mis asignaciones',d:'Confirma o rechaza lo asignado.',fn:`data-click="toast" data-click-args='["Tus asignaciones estarán disponibles próximamente"]'`},
+        {i:'report',t:'t-violet',n:'Reportar predicación',d:'Envía tu informe mensual.',fn:`data-click="toast" data-click-args='["El reporte de predicación estará disponible próximamente"]'`},
+        {i:'bell',t:'t-amber',n:'Notificaciones',d:'Avisos y recordatorios.',fn:`data-click="go" data-click-args='["actividad"]'`},
+        {i:'user',t:'t-cyan',n:'Mi perfil',d:'Edita tus datos y preferencias.',fn:`data-click="openUserConfig"`}
+      ].map(c=>`<button type="button" ${c.fn} style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" data-mouseover="hoverTintOn" data-mouseout="hoverTintOff"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px;line-height:1.45">${c.d}</p></button>`).join('')}
     </div>
     <p class="muted" style="font-size:12px;margin-top:22px;text-align:center">La experiencia completa del Publicador está en desarrollo. Por ahora puedes editar tu perfil y ver tus notificaciones.</p>
   </div>`;
@@ -396,7 +396,7 @@ VIEWS.database=()=>{
         <div class="field">${svg('filter')}<select data-change="applyFilter" data-fstate="dbState" data-fkey="grupo" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los grupos</option>${GRUPOS.map(g=>`<option ${dbState.grupo===g?'selected':''}>${g}</option>`).join('')}</select></div>
         <div class="field">${svg('shield')}<select data-change="applyFilter" data-fstate="dbState" data-fkey="privilegio" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los privilegios</option>${ROLES.map(r=>`<option ${dbState.privilegio===r?'selected':''}>${r}</option>`).join('')}</select></div>
         <div class="field"><select data-change="applyFilter" data-fstate="dbState" data-fkey="estado" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los estados</option>${['Activo','Irregular','Inactivo'].map(e=>`<option ${dbState.estado===e?'selected':''}>${e}</option>`).join('')}</select></div>
-        <button class="btn ghost sm" onclick="dbState={q:'',grupo:'',privilegio:'',estado:'',sortCol:'id',sortDir:'asc',page:1,pageSize:10,sel:new Set()};VIEWS.database()" style="margin-left:auto">${svg('refresh')}Limpiar</button>
+        <button class="btn ghost sm" data-click="resetDbFilter" style="margin-left:auto">${svg('refresh')}Limpiar</button>
       </div></div>
       <div class="table-wrap" id="dbTableWrap"></div>
     </div>
@@ -558,7 +558,7 @@ function fichaEditConfig(id,fromView){
         <div class="form-row"><label>Fecha de bautismo</label><input class="input" type="date" id="ec_baut" value="${p.bautismo}"/></div>
         <div class="form-row"><label>Fecha de nombramiento</label><input class="input" type="date" id="ec_nomb" value="${p.nombramiento}"/></div>
         <div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="ec_obs" placeholder="Notas internas…">${esc(p.obs)}</textarea></div></div>`,
-    footer:`<button class="btn" onclick="${fromView?`editFichaCancel(${id})`:'closeModal()'}">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveContact" data-save-args='[${id}, ${fromView?'true':'false'}]'>${svg('check')}Guardar cambios</button>`};
+    footer:`<button class="btn" data-click="${fromView?'editFichaCancel':'closeModal'}"${fromView?` data-click-args='[${id}]'`:''}>Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveContact" data-save-args='[${id}, ${fromView?'true':'false'}]'>${svg('check')}Guardar cambios</button>`};
 }
 function openEditContact(id){if(!requireCap('data.edit'))return;openModalCustom(fichaEditConfig(id,false))}
 function fieldHintEl(el){const hid=el.getAttribute('aria-describedby')||(el.id?el.id+'_hint':'');return hid?document.getElementById(hid):null}
@@ -722,7 +722,7 @@ function renderTerrAsign(){
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <div class="field" style="height:38px">${svg('calendar')}<select data-change="applyFilter" data-fstate="terrAsignFilter" data-fkey="month" data-frender="renderTerrAsign"><option value="">Todos los meses</option>${months.map(m=>`<option value="${m}"${terrAsignFilter.month===m?' selected':''} style="text-transform:capitalize">${mesLabel(m)}</option>`).join('')}</select></div>
       <div class="field" style="height:38px">${svg('user')}<select data-change="applyFilter" data-fstate="terrAsignFilter" data-fkey="encargado" data-frender="renderTerrAsign"><option value="">Todos los encargados</option>${encs.map(e=>`<option value="${e}"${terrAsignFilter.encargado===e?' selected':''}>${encName(e)}</option>`).join('')}</select></div>
-      <button class="btn ghost sm" style="margin-left:auto" onclick="terrAsignFilter={month:'',encargado:''};renderTerrAsign()">${svg('refresh')}Limpiar</button>
+      <button class="btn ghost sm" style="margin-left:auto" data-click="resetTerrAsignFilter">${svg('refresh')}Limpiar</button>
     </div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Encargado</th><th>Territorios</th><th>Confirmación</th><th>Observaciones</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
       ${list.map(a=>`<tr><td><b>${dstr(new Date(a.date+'T00:00:00'))}</b><br><small class="muted" style="text-transform:capitalize">${diaSemana(a.date)}</small></td><td><div class="cell-user">${avatarHTML(encName(a.encargadoId))}<b>${encName(a.encargadoId)}</b></div></td><td><div style="display:flex;flex-wrap:wrap;gap:5px">${a.territorios.map(n=>`<span class="badge violet">#${n}</span>`).join('')||'<span class="muted">—</span>'}</div></td><td>${confBadgeAsign(a.conf)}<div class="muted" style="font-size:10.5px;margin-top:4px;display:flex;align-items:center;gap:3px">${svg('phone')}<span>vía app del hermano</span></div></td><td class="muted">${esc(a.obs||'—')}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" data-click="openTerrAsignModal" data-click-args='["${a.id}"]'>${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" data-click="delTerrAsign" data-click-args='["${a.id}"]'>${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="6"><div class="empty">Sin asignaciones para los filtros aplicados.</div></td></tr>`}
@@ -736,7 +736,7 @@ function openTerrAsignModal(id){const a=id?TERR_ASIGN.find(x=>x.id===id):null;co
       <div class="form-row"><label>Encargado de la predicación *</label>${searchSelect('ta_enc',males.map(m=>({value:m.id,label:m.fullName})),a?a.encargadoId:'')}</div>
     </div>
     <div class="form-section-title">${svg('map')} Territorios asignados</div>
-    <div id="ta_terrs" style="display:flex;flex-wrap:wrap;gap:7px;max-height:220px;overflow:auto;padding:4px 2px">${TERR.map(t=>`<button type="button" class="chip-sel${sel.includes(t.num)?' on':''}" data-terr="${t.num}" onclick="this.classList.toggle('on')" title="${esc(t.barrio)} · ${esc(t.localidad)}">#${t.num}${usados[t.num]?' •':''}</button>`).join('')}</div>
+    <div id="ta_terrs" style="display:flex;flex-wrap:wrap;gap:7px;max-height:220px;overflow:auto;padding:4px 2px">${TERR.map(t=>`<button type="button" class="chip-sel${sel.includes(t.num)?' on':''}" data-terr="${t.num}" data-click="toggleOnClass" title="${esc(t.barrio)} · ${esc(t.localidad)}">#${t.num}${usados[t.num]?' •':''}</button>`).join('')}</div>
     <span class="field-hint" style="margin-top:8px">Puedes asignar uno o varios territorios para el mismo día. El punto (•) indica territorios ya asignados en otra fecha.</span>
     <div class="form-row full" style="margin-top:14px"><label>Observaciones (opcional)</label><textarea class="textarea" id="ta_obs" placeholder="Notas de la salida…">${a?a.obs||'':''}</textarea></div>`,
     footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveTerrAsign" data-save-args='["${id||''}"]'>${svg('check')}Guardar</button>`});
@@ -1169,8 +1169,8 @@ function renderActList(){
     const stateBadge=it.pending?`<span class="badge amber">${svg('clock')}${it.kind==='notif'?'Sin leer':'Pendiente'}</span>`:`<span class="badge green">${svg('check')}${it.kind==='notif'?'Leída':'Completada'}</span>`;
     const prioB=it.kind==='tarea'?prioBadge(it.prioridad):'';
     const action=it.pending?(it.kind==='notif'?`<button class="btn sm ghost" data-click="markNotifRead" data-click-args='[${it.idx}]' data-stop="1">${svg('check')}Marcar leída</button>`:`<button class="btn sm primary" data-click="completeActTask" data-click-args='[${it.idx}]' data-stop="1">${svg('check')}Completar</button>`):`<span class="muted" style="font-size:11.5px;display:inline-flex;align-items:center;gap:4px">${svg('check')}Resuelto</span>`;
-    const rowClick=it.kind==='tarea'?`openTaskDetail(${it.idx})`:(it.pending?`markNotifRead(${it.idx})`:'');
-    return `<div class="lst-item" ${rowClick?`onclick="${rowClick}" role="button" tabindex="0"`:''} style="${it.pending?'background:var(--brand-50);':''}align-items:flex-start;gap:12px;padding:14px 18px${rowClick?';cursor:pointer':''}">
+    const rowClick=it.kind==='tarea'?`data-click="openTaskDetail" data-click-args='[${it.idx}]'`:(it.pending?`data-click="markNotifRead" data-click-args='[${it.idx}]'`:'');
+    return `<div class="lst-item" ${rowClick?`${rowClick} role="button" tabindex="0"`:''} style="${it.pending?'background:var(--brand-50);':''}align-items:flex-start;gap:12px;padding:14px 18px${rowClick?';cursor:pointer':''}">
       <div class="lst-ico ${it.tint}">${svg(it.ico)}</div>
       <div class="lst-body" style="flex:1"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">${typeBadge}${prioB}${stateBadge}</div><b>${esc(it.title)}</b><p>${esc(it.desc)}</p></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0"><span class="lst-time">${actRelTime(it.date)}</span>${action}</div>
@@ -1346,7 +1346,7 @@ function openSubGestion(){if(!requireCap('billing'))return;
         <div class="lst-item"><div class="lst-ico t-green">${svg('check')}</div><div class="lst-body"><b>Suscripción activa</b><p>Renovación: 01 ene 2027 · USD 20,00/año</p></div></div>
         <div class="lst-item"><div class="lst-ico t-brand">${svg('people')}</div><div class="lst-body"><b>Publicadores ilimitados</b><p>Incluye todos los módulos y reportes oficiales</p></div></div>
       </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{CONG_CFG.plan=document.getElementById('sub_plan').value;persistAll();closeModal();toast('Suscripción actualizada ✓')})">${svg('check')}Guardar cambios</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" data-click="saveDelegated" data-save="saveSubPlan">${svg('check')}Guardar cambios</button>`});}
 function renderConfig(){
   const el=document.getElementById('configContent');let h='';
   if(['reuniones','eventos','circuitos'].includes(configTab))configTab='general';
@@ -1515,7 +1515,7 @@ VIEWS.asistencia=()=>{
   const avgMid=Math.round(FY_ORDER.reduce((a,ci)=>a+attVal(asistFY,ci,'mid'),0)/12);
   const avgWe=Math.round(FY_ORDER.reduce((a,ci)=>a+attVal(asistFY,ci,'we'),0)/12);
   const {reg:regList,pend:pendList}=attScanList();const reg=regList.length,pend=pendList.length;
-  const kpis=[{v:avgMid,l:'Promedio entre semana',t:'t-brand',i:'meeting',act:"openAttAvg('mid')"},{v:avgWe,l:'Promedio fin de semana',t:'t-violet',i:'meeting',act:"openAttAvg('we')"},{v:reg,l:'Reuniones registradas',t:'t-green',i:'check',act:'openRegistradas()'},{v:pend,l:'Pendientes de registrar',t:'t-amber',i:'clock',act:'openPendientes()'}];
+  const kpis=[{v:avgMid,l:'Promedio entre semana',t:'t-brand',i:'meeting',act:`data-click="openAttAvg" data-click-args='["mid"]'`},{v:avgWe,l:'Promedio fin de semana',t:'t-violet',i:'meeting',act:`data-click="openAttAvg" data-click-args='["we"]'`},{v:reg,l:'Reuniones registradas',t:'t-green',i:'check',act:`data-click="openRegistradas"`},{v:pend,l:'Pendientes de registrar',t:'t-amber',i:'clock',act:`data-click="openPendientes"`}];
   const yearSel=`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px" data-change="applyFilter" data-fkey="asistFY" data-fnum="1" data-frender="asistencia" aria-label="Año de servicio">${[CURRENT_SY,CURRENT_SY-1,CURRENT_SY-2].map(fy=>`<option value="${fy}"${fy===asistFY?' selected':''}>${fy-1}–${fy}</option>`).join('')}</select>`;
   const vistaSeg=`<div class="seg"><button class="${asistVista==='mensual'?'active':''}" data-click="setStateVal" data-skey="asistVista" data-sval="mensual" data-srender="asistencia">Mensual</button><button class="${asistVista==='semanal'?'active':''}" data-click="setStateVal" data-skey="asistVista" data-sval="semanal" data-srender="asistencia">Semanal</button></div>`;
   const monthSel=asistVista==='semanal'?`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px;text-transform:capitalize" data-change="applyFilter" data-fkey="asistWeekMonth" data-fnum="1" data-frender="asistencia" aria-label="Mes">${FY_ORDER.map(ci=>`<option value="${ci}"${asistWeekMonth===ci?' selected':''}>${new Date(2000,ci,1).toLocaleDateString('es-CO',{month:'long'})}</option>`).join('')}</select>`:'';
@@ -1524,7 +1524,7 @@ VIEWS.asistencia=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Asistencia','Registro de asistencia a las reuniones de la congregación',`<button class="btn primary" data-click="openRegAsist">${svg('plus')}Registrar asistencia</button>`)}
     <div class="kpi-grid" style="margin-bottom:20px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
-      ${kpis.map(k=>`<div class="kpi" style="cursor:pointer" role="button" tabindex="0" onclick="${k.act}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${k.act}}"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div><span class="kpi-chev">${svg('chevR')}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
+      ${kpis.map(k=>`<div class="kpi" style="cursor:pointer" role="button" tabindex="0" ${k.act} data-keydown="kbdActivate"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div><span class="kpi-chev">${svg('chevR')}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><b style="font-size:14px">Métricas de asistencia</b><div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">${vistaSeg}${monthSel}<span style="font-size:12.5px;color:var(--ink-500);font-weight:600">Año de servicio</span>${yearSel}</div></div>
     <div class="cols-2" style="margin-bottom:22px">
@@ -1614,7 +1614,7 @@ VIEWS.ia=()=>{
     {ico:'check',t:'t-green',titulo:'Equilibra la carga del programa',d:`Considera asignar partes a: ${sub.map(p=>p.fullName.split(' ')[0]).join(', ')||'—'}.`,cta:'Auto-balancear',action:'programaciones'},
   ];
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('AI Insights','Recomendaciones inteligentes basadas en informes, asistencia, territorios y programaciones',`<button class="btn primary" onclick="saveWithFeedback(this,()=>{if(currentView==='ia')VIEWS.ia();toast('Análisis actualizado con los datos más recientes ✓')})">${svg('refresh')}Re-analizar</button>`)}
+    ${pageHead('AI Insights','Recomendaciones inteligentes basadas en informes, asistencia, territorios y programaciones',`<button class="btn primary" data-click="saveDelegated" data-save="saveIaRefresh">${svg('refresh')}Re-analizar</button>`)}
     <div class="card" style="margin-bottom:22px;background:linear-gradient(120deg,var(--brand-50),var(--violet-50));border-color:var(--brand-200)"><div class="card-pad" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div class="kpi-ico t-brand" style="width:48px;height:48px;background:var(--brand-500);color:#fff">${svg('star')}</div>
       <div style="flex:1;min-width:200px"><b style="font-size:16px">Asistente de la congregación Las Flores</b><p style="color:var(--ink-500);font-size:13px;margin-top:3px">He analizado ${DB.length} publicadores, ${STATS.terrTotal} territorios y las próximas reuniones. Encontré <b>${recs.length} recomendaciones</b> para optimizar la operación.</p></div>
@@ -1749,7 +1749,7 @@ function closeModal(){const ov=document.getElementById('modalOverlay');if(!ov)re
 /* -------- POPOVERS -------- */
 function toggleNotif(e){e.stopPropagation();const ex=document.getElementById('notifPop');if(ex){ex.remove();return}closeProfile();
   const pop=document.createElement('div');pop.id='notifPop';pop.className='popover notif';
-  pop.innerHTML=`<div class="popover-head"><b>Notificaciones</b><button class="btn sm ghost" onclick="go('actividad');document.getElementById('notifPop')?.remove()">Ver todas</button></div><div class="popover-body">${NOTIFS.slice(0,7).map((n,i)=>`<div class="lst-item" ${!n.read?`role="button" style="background:var(--brand-50);cursor:pointer" onclick="markNotifRead(${i});document.getElementById('notifPop')?.remove()"`:''}><div class="lst-ico ${n.tint}">${svg(n.ico)}</div><div class="lst-body"><b>${esc(n.type)}</b><p>${esc(n.msg)}</p></div><span class="lst-time">${esc(n.time)}</span></div>`).join('')||`<div class="empty" style="padding:22px">Sin notificaciones</div>`}</div>`;
+  pop.innerHTML=`<div class="popover-head"><b>Notificaciones</b><button class="btn sm ghost" data-click="goActividadCloseNotif">Ver todas</button></div><div class="popover-body">${NOTIFS.slice(0,7).map((n,i)=>`<div class="lst-item" ${!n.read?`role="button" style="background:var(--brand-50);cursor:pointer" data-click="markNotifReadClose" data-click-args='[${i}]'`:''}><div class="lst-ico ${n.tint}">${svg(n.ico)}</div><div class="lst-body"><b>${esc(n.type)}</b><p>${esc(n.msg)}</p></div><span class="lst-time">${esc(n.time)}</span></div>`).join('')||`<div class="empty" style="padding:22px">Sin notificaciones</div>`}</div>`;
   document.body.appendChild(pop);setTimeout(()=>document.addEventListener('click',closeNotifOnce),0);}
 function closeNotifOnce(e){const p=document.getElementById('notifPop');if(p&&!p.contains(e.target)&&e.target.id!=='notifBtn'){p.remove();document.removeEventListener('click',closeNotifOnce)}}
 function toggleProfile(e){e.stopPropagation();const ex=document.getElementById('profilePop');if(ex){ex.remove();return}
@@ -1796,14 +1796,14 @@ function openMiPerfil(){
       <div class="form-grid">
         <div class="form-row full"><label>Contraseña</label><input class="input" type="password" value="********"/></div>
       </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{closeModal();toast('Perfil actualizado correctamente ✓')})">${svg('check')}Guardar cambios</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveMiPerfilBlock">${svg('check')}Guardar cambios</button>`});
 }
 /* --- Idioma --- */
 let APP_LANG='es';
 try{const l=localStorage.getItem('msp_lang');if(l)APP_LANG=l;}catch(e){}
 function openIdioma(){const LANGS=[['es','Español','🇪🇸'],['en','Inglés (English)','🇬🇧']];
   openModalCustom({icon:'refresh',tint:'t-brand',title:'Cambiar idioma',sub:'Selecciona el idioma de la plataforma',
-    body:`<div style="display:flex;flex-direction:column;gap:10px">${LANGS.map(([v,l,f])=>`<label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid ${v===APP_LANG?'var(--brand-500)':'var(--border)'};border-radius:12px;cursor:pointer" onclick="document.querySelectorAll('input[name=lang]').forEach(r=>r.parentElement.style.borderColor='var(--border)');this.style.borderColor='var(--brand-500)'"><input type="radio" name="lang" value="${v}" ${v===APP_LANG?'checked':''} style="accent-color:var(--brand-500);width:18px;height:18px"/><span style="font-size:20px">${f}</span><b style="font-size:14px">${l}</b></label>`).join('')}</div>`,
+    body:`<div style="display:flex;flex-direction:column;gap:10px">${LANGS.map(([v,l,f])=>`<label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid ${v===APP_LANG?'var(--brand-500)':'var(--border)'};border-radius:12px;cursor:pointer" data-click="selectLangHighlight"><input type="radio" name="lang" value="${v}" ${v===APP_LANG?'checked':''} style="accent-color:var(--brand-500);width:18px;height:18px"/><span style="font-size:20px">${f}</span><b style="font-size:14px">${l}</b></label>`).join('')}</div>`,
     footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveIdioma">${svg('check')}Guardar</button>`});
 }
 function saveIdioma(){const r=document.querySelector('input[name=lang]:checked');if(r){APP_LANG=r.value;try{localStorage.setItem('msp_lang',APP_LANG)}catch(e){}}closeModal();toast(APP_LANG==='en'?'Language set to English (demo)':'Idioma cambiado a Español');}
@@ -2805,6 +2805,17 @@ function __absorb(){}
 function applyFilter(){var el=this;var val=el.hasAttribute("data-fnum")?+el.value:(el.type==="checkbox"?el.checked:el.value);var st=el.getAttribute("data-fstate"),key=el.getAttribute("data-fkey");if(st){if(window[st]){window[st][key]=val;if(el.hasAttribute("data-fpage"))window[st].page=1;}}else if(key){window[key]=val;}var r=el.getAttribute("data-frender"),fn=window[r]||(window.VIEWS&&window.VIEWS[r]);if(typeof fn==="function")fn();}
 function setStateVal(){var el=this;window[el.getAttribute("data-skey")]=el.getAttribute("data-sval");var r=el.getAttribute("data-srender"),fn=window[r]||(window.VIEWS&&window.VIEWS[r]);if(typeof fn==="function")fn();}
 Object.assign(window,{__absorb,applyFilter,setStateVal});
+function resetDbFilter(){dbState={q:"",grupo:"",privilegio:"",estado:"",sortCol:"id",sortDir:"asc",page:1,pageSize:10,sel:new Set()};VIEWS.database()}
+function resetTerrAsignFilter(){terrAsignFilter={month:"",encargado:""};renderTerrAsign()}
+function saveSubPlan(){CONG_CFG.plan=document.getElementById("sub_plan").value;persistAll();closeModal();toast("Suscripción actualizada ✓")}
+function saveIaRefresh(){if(currentView==="ia")VIEWS.ia();toast("Análisis actualizado con los datos más recientes ✓")}
+function saveMiPerfilBlock(){closeModal();toast("Perfil actualizado correctamente ✓")}
+function toggleOnClass(){this.classList.toggle("on")}
+function goActividadCloseNotif(){go("actividad");var p=document.getElementById("notifPop");if(p)p.remove()}
+function markNotifReadClose(i){markNotifRead(i);var p=document.getElementById("notifPop");if(p)p.remove()}
+function selectLangHighlight(){document.querySelectorAll('input[name=lang]').forEach(function(r){r.parentElement.style.borderColor="var(--border)"});this.style.borderColor="var(--brand-500)"}
+Object.assign(window,{resetDbFilter,resetTerrAsignFilter,saveSubPlan,saveIaRefresh,saveMiPerfilBlock,toggleOnClass,goActividadCloseNotif,markNotifReadClose,selectLangHighlight});
+
 
 
 
