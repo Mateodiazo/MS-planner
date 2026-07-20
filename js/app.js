@@ -2768,3 +2768,29 @@ try{Object.defineProperties(window,{
   terrTab:{get(){return terrTab},set(v){terrTab=v},configurable:true}
 })}catch(e){console.error('bridge',e)}
 
+
+/* ============================================================
+   EVENT DELEGATION (Fase 3) — reemplaza los handlers inline para CSP estricta.
+   Uso en el HTML/templates:
+     data-click="fnGlobal"                     -> window.fnGlobal.call(el)
+     data-click="fn" data-click-args='["x",1]' -> window.fn.call(el, "x", 1)
+   Tokens especiales en args: "$event" (el evento) y "$el" (el elemento).
+   Soporta: click, change, input, dblclick, keydown, mouseover, mouseout, submit.
+   ============================================================ */
+function kbdActivate(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); this.click(); } }
+function focusGlobalSearch(){ const s=document.getElementById('globalSearch'); if(s) s.focus(); }
+(function(){
+  const TYPES=['click','change','input','dblclick','keydown','mouseover','mouseout','submit'];
+  function handle(e){
+    const t=e.target; if(!t||!t.closest) return;
+    const el=t.closest('[data-'+e.type+']');
+    if(!el) return;
+    const fn=window[el.getAttribute('data-'+e.type)];
+    if(typeof fn!=='function') return;
+    let args=[]; const raw=el.getAttribute('data-'+e.type+'-args');
+    if(raw){ try{ args=JSON.parse(raw).map(a=> a==='$event'?e : a==='$el'?el : a); }catch(_){} }
+    return fn.apply(el,args);
+  }
+  TYPES.forEach(ty=>document.addEventListener(ty,handle,false));
+})();
+Object.assign(window,{kbdActivate,focusGlobalSearch});
