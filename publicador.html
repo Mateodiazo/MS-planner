@@ -562,7 +562,12 @@ function renderAsign(){
     </div>`).join('')}
   </main>`;
 }
-function confirmAsg(id){const a=ASG.find(x=>x.id===id);if(a)a.status='conf';render();toast('¡Asignación confirmada! ✓');}
+async function confirmAsg(id){const a=ASG.find(x=>x.id===id);
+  if(SB&&ME.publisherId){
+    try{await sbRest('assignment_responses?on_conflict=assignment_id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:[{assignment_id:id,publisher_id:ME.publisherId,status:'conf',responded_at:new Date().toISOString()}]});}
+    catch(e){toast('No se pudo confirmar: '+(e.message||e));return;}
+  }
+  if(a)a.status='conf';render();toast('¡Asignación confirmada! ✓');}
 
 /* ============================================================
    INFORME
@@ -596,7 +601,18 @@ function renderInforme(){
     </div>
   </main>`;
 }
-function sendReport(){const cur=MONTHS.find(m=>m.cur);if(cur){cur.sent=true;cur.sd=new Date().toLocaleDateString('es-CO');}showSuccess('¡Informe enviado!','Tu informe del mes fue registrado correctamente.');}
+async function sendReport(){const cur=MONTHS.find(m=>m.cur);
+  if(SB&&ME.publisherId){
+    const done=(today.h||0)+(today.m||0)/60, totH=(cur?cur.h:0)+done;
+    const body={publisher_id:ME.publisherId,period:curPeriod(),submitted:true,
+      hours:Math.floor(totH),minutes:Math.round((totH-Math.floor(totH))*60),
+      studies:(cur?cur.est:0)+(today.estudios||0),revisits:(cur?cur.rev:0)+(today.revisitas||0),
+      publications:today.pubs||0,videos:today.videos||0,notes:today.notas||'',submitted_at:new Date().toISOString()};
+    try{await sbRest('field_reports?on_conflict=publisher_id,period',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:[body]});}
+    catch(e){toast('No se pudo enviar: '+(e.message||e));return;}
+  }
+  if(cur){cur.sent=true;cur.sd=new Date().toLocaleDateString('es-CO');}
+  showSuccess('¡Informe enviado!','Tu informe del mes fue registrado correctamente.');}
 
 /* ============================================================
    AJUSTES / PERFIL
