@@ -110,7 +110,7 @@ VIEWS.dashboard=()=>{
   const rolesData=[{l:'Publicadores',v:DB.filter(p=>p.role==='Publicador').length,c:'#94a3b8'},{l:'Precursores',v:STATS.precReg+STATS.precAux,c:'#22C55E'},{l:'Siervos M.',v:STATS.siervos,c:'#06b6d4'},{l:'Ancianos',v:STATS.ancianos,c:'#8B5CF6'},{l:'No bautiz.',v:STATS.noBaut,c:'#F59E0B'}];
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Buenos días, Paublo 👋','Centro de control · Congregación Las Flores · '+dstr(TODAY),
-      `${can('comm.send')?`<button class="btn" onclick="openComm()">${svg('send')}Enviar notificación</button>`:''}<button class="btn primary" onclick="go('programaciones')">${svg('calendar')}Ver calendario</button>`)}
+      `${can('comm.send')?`<button class="btn" data-click="openComm">${svg('send')}Enviar notificación</button>`:''}<button class="btn primary" onclick="go('programaciones')">${svg('calendar')}Ver calendario</button>`)}
     <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div><span class="kpi-trend ${k.tr}">${k.tr==='down'?'▼':k.tr==='up'?'▲':'•'} ${k.trv}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
 
     <div class="dash-rowlabel">Indicadores y gráficas</div>
@@ -208,7 +208,7 @@ const DURACIONES=['1 min','2 min','3 min','4 min','5 min','8 min','10 min','15 m
 VIEWS.programaciones=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Programaciones','Reuniones entre semana y fin de semana, discursos y servicio del campo',
-      `${can('assign.manage')?`<button class="btn primary" onclick="openAssignCategories()">${svg('plus')}Nueva asignación</button>`:''}`)}
+      `${can('assign.manage')?`<button class="btn primary" data-click="openAssignCategories">${svg('plus')}Nueva asignación</button>`:''}`)}
     <div class="tabs">
       <div class="tab ${progTab==='calendario'?'active':''}" onclick="setProgTab('calendario')">Calendario</div>
       <div class="tab ${progTab==='vmc'?'active':''}" onclick="setProgTab('vmc')">Reunión entre semana</div>
@@ -239,7 +239,7 @@ function renderProgCalendar(){
   document.getElementById('progContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
       <b style="font-size:15px">Mes actual y próximo mes</b>
-      <div style="margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="cal-event mid" style="margin:0">Martes · Reunión entre semana</span><span class="cal-event we" style="margin:0">Domingo · Reunión fin de semana</span><button class="btn sm" onclick="progToday()">Hoy</button><button class="icon-btn" onclick="progNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="progNav(1)">${svg('chevR')}</button></div>
+      <div style="margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="cal-event mid" style="margin:0">Martes · Reunión entre semana</span><span class="cal-event we" style="margin:0">Domingo · Reunión fin de semana</span><button class="btn sm" data-click="progToday">Hoy</button><button class="icon-btn" onclick="progNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="progNav(1)">${svg('chevR')}</button></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px">${monthCalHTML(progCal.y,progCal.m)}${monthCalHTML(ny,nm)}</div>`;
 }
@@ -252,7 +252,7 @@ function openMeeting(isoDate,type){
       <div class="part-person">${p.person?`${avatarHTML(p.person.fullName)}<b style="font-size:13px">${p.person.fullName}</b>`:`<span class="badge red"><span class="bdot"></span>Vacante</span>`}</div>
       <div class="part-badges">${p.person?confBadge(p.confirmed):''}<button class="icon-btn" style="width:32px;height:32px" data-tip="Reasignar" onclick="closeModal();openReassignPart('${isoDate}','${type}','${p.role}')">${svg('edit')}</button></div>
     </div>`).join('')}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button><button class="btn" onclick="closeModal();openAttReg('${isoDate}','${type}')">${svg('check')}Registrar asistencia</button><button class="btn primary" onclick="closeModal();openAssignCategories()">${svg('plus')}Añadir asignación</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn" onclick="closeModal();openAttReg('${isoDate}','${type}')">${svg('check')}Registrar asistencia</button><button class="btn primary" onclick="closeModal();openAssignCategories()">${svg('plus')}Añadir asignación</button>`});
 }
 /* (renderVMC eliminado: sustituido por la programación de 3 meses) */
 function discFor(dt){const iso=diso(dt);const ov=DISC_OVR[iso]||{};
@@ -260,7 +260,7 @@ function discFor(dt){const iso=diso(dt);const ov=DISC_OVR[iso]||{};
   return {iso,orador,bosq:ov.bosq!=null?ov.bosq:10+hashStr('b'+iso)%180,cancion:ov.cancion!=null?ov.cancion:1+hashStr('c'+iso)%150,tema:ov.tema||seededPick(DISCURSOS,'t'+iso),cong:ov.cong||seededPick(CIRCUITO_CONGS,'cg'+iso)};}
 function renderDiscursos(){
   const sundays=[];let d=new Date(TODAY);let g=0;while(sundays.length<10&&g<90){if(d.getDay()===0)sundays.push(new Date(d));d.setDate(d.getDate()+1);g++}
-  document.getElementById('progContent').innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:34px;height:34px">${svg('speak')}</div><h3>Discursos públicos programados</h3><div class="actions"><button class="btn sm primary" onclick="openDiscursoModal()">${svg('plus')}Nuevo discurso</button></div></div>
+  document.getElementById('progContent').innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:34px;height:34px">${svg('speak')}</div><h3>Discursos públicos programados</h3><div class="actions"><button class="btn sm primary" data-click="openDiscursoModal">${svg('plus')}Nuevo discurso</button></div></div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Orador</th><th>N° Bosquejo</th><th>Tema</th><th>Canción</th><th>Congregación</th><th></th></tr></thead><tbody>
     ${sundays.map(dt=>{const dc=discFor(dt);
       return `<tr><td><b>${dshort(dt)}</b></td><td><div class="cell-user">${avatarHTML(dc.orador.fullName)}<b>${dc.orador.fullName}</b></div></td><td>#${dc.bosq}</td><td class="muted">“${dc.tema}”</td><td>${dc.cancion}</td><td>${dc.cong}</td><td style="text-align:right"><button class="icon-btn" style="width:32px;height:32px" onclick="openDiscursoMenu(event,'${dc.iso}')">${svg('dots')}</button></td></tr>`}).join('')}
@@ -281,7 +281,7 @@ function verOradorContacto(name){const p=DB.find(x=>x.fullName===name);if(p)open
 function openReemplazarOrador(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'refresh',tint:'t-violet',title:'Reemplazar discursante',sub:`${dstr(dt)} · actualmente ${dc.orador.fullName}`,
     body:`<div class="form-row full"><label>Nuevo discursante</label>${searchSelect('rep_orador',males.map(m=>({value:m.id,label:m.fullName})),dc.orador.id)}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReemplazarOrador('${iso}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReemplazarOrador('${iso}'))">${svg('check')}Guardar</button>`});}
 function saveReemplazarOrador(iso){const pid=sselValue('rep_orador');if(!pid){toast('Selecciona el nuevo discursante');return;}
   const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   DISC_OVR[iso]={oradorId:pid,bosq:dc.bosq,cancion:dc.cancion,tema:dc.tema,cong:dc.cong};
@@ -293,7 +293,7 @@ function saveReemplazarOrador(iso){const pid=sselValue('rep_orador');if(!pid){to
 function openCambiarFechaDiscurso(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'calendar',tint:'t-violet',title:'Cambiar fecha del discurso',sub:`${dc.orador.fullName} · actual: ${dstr(dt)}`,
     body:`<div class="form-row full"><label>Nueva fecha (domingo)</label><input class="input" type="date" id="cfd_date" value="${iso}"/><span class="field-hint" id="cfd_hint" aria-live="polite" style="margin-top:6px">Los discursos públicos se programan los domingos.</span></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveCambiarFechaDiscurso('${iso}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveCambiarFechaDiscurso('${iso}'))">${svg('check')}Guardar</button>`});}
 function saveCambiarFechaDiscurso(iso){const v=document.getElementById('cfd_date').value;if(!v){toast('Selecciona la nueva fecha');return;}
   const nd=new Date(v+'T00:00:00');
   if(nd.getDay()!==0){const h=document.getElementById('cfd_hint');if(h){h.textContent='La fecha elegida no es domingo. Selecciona un domingo.';h.className='field-hint err';}toast('La nueva fecha debe ser un domingo');return;}
@@ -315,7 +315,7 @@ function openDiscursoModal(iso){if(!requireCap('assign.manage'))return;const isE
       <div class="form-row full"><label>Tema</label><select class="select" id="disc_tema">${DISCURSOS.map(t=>`<option${isEdit&&dc.tema===t?' selected':''}>${t}</option>`).join('')}</select></div>
       <div class="form-row"><label>Fecha (domingo)</label><input class="input" id="disc_fecha" type="date" value="${defIso}"/></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveDiscurso(${isEdit?`'${iso}'`:'null'}))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveDiscurso(${isEdit?`'${iso}'`:'null'}))">${svg('check')}Guardar</button>`});
 }
 function saveDiscurso(prevIso){const v=document.getElementById('disc_fecha').value;if(!v){toast('Selecciona la fecha del discurso');return;}
   const nd=new Date(v+'T00:00:00');if(nd.getDay()!==0){toast('El discurso debe programarse un domingo');return;}
@@ -341,7 +341,7 @@ const ASSIGN_CATS=[
 function openAssignCategories(){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'plus',tint:'t-brand',title:'Nueva asignación',sub:'Selecciona la categoría que deseas programar',size:'lg',
     body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" onclick="pickAssignCat('${c.id}')" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button>`});
 }
 function pickAssignCat(id){closeModal();if(id==='disc'){openDiscursoModal()}else if(id==='vmc'||id==='we'){progTab=id;if(currentView==='programaciones')VIEWS.programaciones();else go('programaciones')}else{openModal('assignment')}}
 
@@ -371,7 +371,7 @@ function openReassignPart(iso,type,role){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'refresh',tint:type==='mid'?'t-brand':'t-violet',title:'Reasignar parte',sub:`${role} · ${dstr(date)} · ${meetingMeta(type).title}`,
     body:`<div class="form-row full"><label>Publicador asignado</label>${searchSelect('rp_pub',[{value:'',label:'— Dejar vacante —'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),part.person?part.person.id:'')}</div>
       <div class="form-row full" style="margin-top:12px"><label>Estado</label><select class="select" id="rp_conf"><option value="0"${!part.confirmed?' selected':''}>Por confirmar</option><option value="1"${part.confirmed?' selected':''}>Confirmado</option></select></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReassignPart('${iso}','${type}','${role}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReassignPart('${iso}','${type}','${role}'))">${svg('check')}Guardar</button>`});}
 function saveReassignPart(iso,type,role){const pid=sselValue('rp_pub');const conf=document.getElementById('rp_conf').value==='1';
   MEET_OVR[iso+type+'|'+role]={personId:pid||null,confirmed:pid?conf:false};
   refreshStats();persistAll();closeModal();
@@ -386,7 +386,7 @@ let dbState={q:'',grupo:'',privilegio:'',estado:'',sortCol:'id',sortDir:'asc',pa
 VIEWS.database=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Base de datos','CRM interno · '+DB.length+' registros de la congregación',
-      `<button class="btn" onclick="exportDbFiltered()">${svg('download')}Exportar</button>${can('data.create')?`<button class="btn primary" onclick="openModal('publisher')">${svg('plus')}Nuevo publicador</button>`:''}`)}
+      `<button class="btn" data-click="exportDbFiltered">${svg('download')}Exportar</button>${can('data.create')?`<button class="btn primary" onclick="openModal('publisher')">${svg('plus')}Nuevo publicador</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">
       ${[{v:STATS.total,l:'Publicadores',t:'t-brand',i:'people'},{v:DB.filter(p=>p.estado==='Activo').length,l:'Activos',t:'t-green',i:'check'},{v:DB.filter(p=>p.estado==='Irregular').length,l:'Irregulares',t:'t-amber',i:'warn'},{v:STATS.precReg+STATS.precAux,l:'Precursores',t:'t-violet',i:'flag'},{v:GRUPOS.length,l:'Grupos',t:'t-cyan',i:'people'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -423,9 +423,9 @@ function renderDbTable(){
   if(dbState.page>pages)dbState.page=pages;const start=(dbState.page-1)*dbState.pageSize;const rows=all.slice(start,start+dbState.pageSize);
   const sel=dbState.sel;const allIds=all.map(p=>p.id);const allSelected=total>0&&allIds.every(id=>sel.has(id));
   const bulk=sel.size?`<div class="bulk-bar"><span class="bulk-count"><span class="dot"></span>${sel.size} seleccionado${sel.size!==1?'s':''}</span>
-      <button class="btn sm primary" onclick="bulkRemind()">${svg('send')}Enviar recordatorio</button>
-      <button class="btn sm" onclick="bulkExport()">${svg('download')}Exportar selección</button>
-      <button class="btn sm ghost" style="margin-left:auto" onclick="clearSel()">${svg('x')}Quitar selección</button></div>`:'';
+      <button class="btn sm primary" data-click="bulkRemind">${svg('send')}Enviar recordatorio</button>
+      <button class="btn sm" data-click="bulkExport">${svg('download')}Exportar selección</button>
+      <button class="btn sm ghost" style="margin-left:auto" data-click="clearSel">${svg('x')}Quitar selección</button></div>`:'';
   document.getElementById('dbTableWrap').innerHTML=`${bulk}
     <table class="data"><thead><tr><th style="width:40px"><input type="checkbox" class="row-chk" id="dbSelAll" ${allSelected?'checked':''} onclick="toggleSelAll(this.checked)" aria-label="Seleccionar todos"></th>${th('nombre','Publicador')}<th>Contacto</th>${th('grupo','Grupo')}${th('role','Privilegio')}${th('estado','Estado')}${th('bautismo','Bautismo')}<th></th></tr></thead><tbody>
       ${rows.map(p=>`<tr class="clickable ${sel.has(p.id)?'row-sel':''}" ondblclick="openFicha(${p.id})">
@@ -523,7 +523,7 @@ function fichaViewConfig(id){
         ${statCard(estudios,'Estudios bíblicos')}
         ${statCard(asist+'%','Asistencia promedio')}
       </div>`,
-    footer:`<button class="btn" onclick="closeModal();openHistAsign(${id})">${svg('calendar')}Historial</button><button class="btn primary" onclick="closeModal()">Cerrar</button>`};
+    footer:`<button class="btn" onclick="closeModal();openHistAsign(${id})">${svg('calendar')}Historial</button><button class="btn primary" data-click="closeModal">Cerrar</button>`};
 }
 function openFicha(id){if(!requireCap('personal.view'))return;openModalCustom(fichaViewConfig(id))}
 function fichaToEdit(id){if(!requireCap('data.edit'))return;swapModalContent(fichaEditConfig(id,true))}
@@ -609,13 +609,13 @@ function openHistAsign(id){
   for(let i=0;i<8;i++)items.push({fecha:dstr(daysAgo(rint(3,180))),tipo:pick(['Discurso público','Lectura de la Biblia','Micrófonos','Acomodadores','Audio','Conductor de La Atalaya','Oración','Presidente']),estado:chance(.85)?'Completada':'Programada'});
   openModalCustom({icon:'calendar',tint:'t-violet',title:'Historial de asignaciones',sub:p.fullName,
     body:`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Fecha</th><th>Asignación</th><th>Estado</th></tr></thead><tbody>${items.map(a=>`<tr><td class="muted">${a.fecha}</td><td><b>${a.tipo}</b></td><td>${a.estado==='Completada'?'<span class="badge green"><span class="bdot"></span>Completada</span>':'<span class="badge blue"><span class="bdot"></span>Programada</span>'}</td></tr>`).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function openInformesPub(id){
   const p=DB.find(x=>x.id===id);const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio'];
   openModalCustom({icon:'report',tint:'t-cyan',title:'Informes mensuales',sub:p.fullName+' · 2026',
     body:`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Mes</th><th>Estado</th><th>Horas</th><th>Estudios</th></tr></thead><tbody>${meses.map((m,i)=>{const ent=i<5?true:chance(.7);return `<tr><td><b>${m}</b></td><td>${ent?'<span class="badge green"><span class="bdot"></span>Entregado</span>':'<span class="badge red"><span class="bdot"></span>Pendiente</span>'}</td><td>${ent?rint(2,60)+' h':'—'}</td><td>${ent?rint(0,6):'—'}</td></tr>`}).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function openPrivilegio(id){
   const p=DB.find(x=>x.id===id);
@@ -624,21 +624,21 @@ function openPrivilegio(id){
       <div class="form-row"><label>Nuevo privilegio</label><select class="select" id="newPriv">${PRIVILEGIOS.map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select></div>
       <div class="form-row full" style="margin-top:16px"><label>Fecha de nombramiento</label><input class="input" type="date" value="${diso(TODAY)}"/></div>
       <div class="form-row full" style="margin-top:16px"><label>Observaciones</label><textarea class="textarea" placeholder="Acuerdo del cuerpo de ancianos…"></textarea></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="applyPriv(${id})">${svg('check')}Actualizar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="applyPriv(${id})">${svg('check')}Actualizar</button>`});
 }
 function applyPriv(id){const v=document.getElementById('newPriv').value;const p=DB.find(x=>x.id===id);p.role=v;p.privilegio=v;p.privilegios=[v];p.accessRole=defaultAccessRole([v]);closeModal();if(currentView==='database')renderDbTable();toast('Privilegio actualizado')}
 function markInactive(id){
   const p=DB.find(x=>x.id===id);
   openModalCustom({icon:'pause',tint:'t-red',title:'Marcar como inactivo',sub:`¿Confirmas esta acción para ${esc(p.fullName)}?`,
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">El publicador se marcará como <b>inactivo</b> y dejará de aparecer en las asignaciones activas. Podrás reactivarlo en cualquier momento desde su ficha.</p>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="applyInactive(${id})">${svg('pause')}Marcar inactivo</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" onclick="applyInactive(${id})">${svg('pause')}Marcar inactivo</button>`});
 }
 function applyInactive(id){const p=DB.find(x=>x.id===id);p.estado='Inactivo';closeModal();if(currentView==='database')renderDbTable();toast(p.nombre+' marcado como inactivo')}
 function deletePublisher(id){
   const p=DB.find(x=>x.id===id);
   openModalCustom({icon:'trash',tint:'t-red',title:'Eliminar publicador',sub:`¿Seguro que deseas eliminar a ${esc(p.fullName)}?`,
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">Esta acción quitará de forma permanente a <b>${esc(p.fullName)}</b> de la base de datos de la congregación. Sus asignaciones e informes asociados dejarán de mostrarse.</p><p class="muted" style="font-size:12.5px;margin-top:12px">Esta acción no se puede deshacer.</p>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn danger" onclick="applyDelete(${id})">${svg('trash')}Eliminar definitivamente</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" onclick="applyDelete(${id})">${svg('trash')}Eliminar definitivamente</button>`});
 }
 function applyDelete(id){if(!requireCap('personal.manage'))return;const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${esc(p.fullName)} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${esc(p.fullName)} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
 
@@ -654,7 +654,7 @@ VIEWS.territorios=()=>{
   const proximo=TERR.find(t=>t.estado==='Pendiente')||TERR.find(t=>t.estado==='Activo');
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Mapas y Territorios','Panel de administración · '+STATS.terrTotal+' territorios en Bogotá D.C.',
-      `<button class="btn" onclick="exportTerrDocx()">${svg('download')}Descargar reporte</button>${can('territory.manage')?`<button class="btn primary" onclick="openTerrCreate()">${svg('plus')}Nuevo territorio</button>`:''}`)}
+      `<button class="btn" data-click="exportTerrDocx">${svg('download')}Descargar reporte</button>${can('territory.manage')?`<button class="btn primary" data-click="openTerrCreate">${svg('plus')}Nuevo territorio</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:18px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
       ${[{v:STATS.terrTotal,l:'Total de territorios',t:'t-brand',i:'map'},{v:STATS.terrTotal-STATS.terrComp,l:'Pendientes por cubrir',t:'t-amber',i:'clock'},{v:STATS.terrComp,l:'Completados este ciclo',t:'t-green',i:'check'},{v:cobertura+'%',l:'Cobertura del ciclo',t:'t-cyan',i:'chart'},{v:'#'+(proximo?proximo.num:'—'),l:'Próximo programado',t:'t-violet',i:'flag'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -679,7 +679,7 @@ function openAsignTerr(num){if(!requireCap('territory.manage'))return;const t=nu
       <div class="form-row"><label>Responsable *</label>${searchSelect('at_resp',males.map(p=>({value:p.id,label:p.fullName})),t&&t.resp?t.resp.id:'')}</div>
       <div class="form-row full"><label>Territorio</label><select class="select" id="at_terr">${TERR.map(x=>`<option value="${x.num}"${t&&x.num===t.num?' selected':''}>Territorio ${x.num} · ${esc(x.barrio)} (${esc(x.localidad)})</option>`).join('')}</select></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAsignTerr())">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAsignTerr())">${svg('check')}Guardar</button>`});
 }
 function saveAsignTerr(){const num=document.getElementById('at_terr').value;const t=TERR.find(x=>x.num===num);if(!t)return;
   const rid=sselValue('at_resp');if(!rid){toast('Selecciona el responsable');return;}
@@ -717,7 +717,7 @@ function renderTerrAsign(){
   let list=TERR_ASIGN.slice().sort((a,b)=>a.date<b.date?1:(a.date>b.date?-1:0));
   if(terrAsignFilter.month)list=list.filter(a=>a.date.slice(0,7)===terrAsignFilter.month);
   if(terrAsignFilter.encargado)list=list.filter(a=>String(a.encargadoId)===terrAsignFilter.encargado);
-  el.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-green" style="width:34px;height:34px">${svg('calendar')}</div><h3>Asignaciones de predicación diaria</h3><div class="actions"><button class="btn sm primary" onclick="openTerrAsignModal()">${svg('plus')}Nueva asignación</button></div></div>
+  el.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-green" style="width:34px;height:34px">${svg('calendar')}</div><h3>Asignaciones de predicación diaria</h3><div class="actions"><button class="btn sm primary" data-click="openTerrAsignModal">${svg('plus')}Nueva asignación</button></div></div>
     <div style="padding:11px 18px;background:var(--brand-50);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-500);line-height:1.4">${svg('phone')}<span>La <b>Confirmación</b> se actualiza automáticamente según la respuesta del hermano desde su aplicación (Confirmado o Rechazado). El administrador solo puede visualizar este estado, no modificarlo.</span></div>
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <div class="field" style="height:38px">${svg('calendar')}<select onchange="terrAsignFilter.month=this.value;renderTerrAsign()"><option value="">Todos los meses</option>${months.map(m=>`<option value="${m}"${terrAsignFilter.month===m?' selected':''} style="text-transform:capitalize">${mesLabel(m)}</option>`).join('')}</select></div>
@@ -739,7 +739,7 @@ function openTerrAsignModal(id){const a=id?TERR_ASIGN.find(x=>x.id===id):null;co
     <div id="ta_terrs" style="display:flex;flex-wrap:wrap;gap:7px;max-height:220px;overflow:auto;padding:4px 2px">${TERR.map(t=>`<button type="button" class="chip-sel${sel.includes(t.num)?' on':''}" data-terr="${t.num}" onclick="this.classList.toggle('on')" title="${esc(t.barrio)} · ${esc(t.localidad)}">#${t.num}${usados[t.num]?' •':''}</button>`).join('')}</div>
     <span class="field-hint" style="margin-top:8px">Puedes asignar uno o varios territorios para el mismo día. El punto (•) indica territorios ya asignados en otra fecha.</span>
     <div class="form-row full" style="margin-top:14px"><label>Observaciones (opcional)</label><textarea class="textarea" id="ta_obs" placeholder="Notas de la salida…">${a?a.obs||'':''}</textarea></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrAsign('${id||''}'))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrAsign('${id||''}'))">${svg('check')}Guardar</button>`});
 }
 function saveTerrAsign(id){const date=document.getElementById('ta_date').value;const enc=sselValue('ta_enc');const terrs=Array.prototype.slice.call(document.querySelectorAll('#ta_terrs .chip-sel.on')).map(b=>b.getAttribute('data-terr'));const obs=(document.getElementById('ta_obs').value||'').trim();
   if(!date){toast('Selecciona una fecha');return;}
@@ -804,7 +804,7 @@ function openTerrEdit(num){if(!requireCap('territory.manage'))return;const t=TER
       </div>
       <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
       <div id="te_img_wrap">${terrImgFieldHTML(t.img,'te_img_wrap')}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrEdit('${num}'))">${svg('check')}Guardar cambios</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrEdit('${num}'))">${svg('check')}Guardar cambios</button>`});}
 function saveTerrEdit(num){const t=TERR.find(x=>x.num===num);if(!t)return;
   const mapsEl=document.getElementById('te_maps');const maps=(mapsEl.value||'').trim();
   if(maps&&!isValidMaps(maps)){validateMapsUrl(mapsEl);toast('El enlace de Google Maps no es válido');return;}
@@ -826,7 +826,7 @@ function openTerrCreate(){if(!requireCap('territory.manage'))return;terrEditImg=
     </div>
     <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
     <div id="tc_img_wrap">${terrImgFieldHTML(null,'tc_img_wrap')}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrCreate('${nextNum}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrCreate('${nextNum}'))">${svg('check')}Guardar</button>`});}
 function saveNoPredica(){
   const dir=(document.getElementById('npd_dir').value||'').trim();
   if(!dir){document.getElementById('npd_dir').classList.add('invalid');toast('Ingresa la dirección');return;}
@@ -919,7 +919,7 @@ function openTerrHist(num){
       ${noPred.length?`<div class="form-section-title">Casas donde no se predica</div><div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Dirección</th><th>Motivo</th><th>Fecha</th></tr></thead><tbody>${noPred.map(n=>`<tr><td><b>${esc(n.dir.split(',')[0])}</b></td><td><span class="badge red">${esc(n.motivo)}</span></td><td class="muted">${n.fecha}</td></tr>`).join('')}</tbody></table></div>`:''}
       <div class="form-section-title">Historial de asignaciones</div>
       <div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Responsable</th><th>Fecha asignación</th><th>Fecha completado</th><th>Observaciones</th></tr></thead><tbody>${t.hist.map(h=>`<tr><td><b>${h.resp}</b></td><td class="muted">${h.asign}</td><td>${h.comp==='Pendiente'?'<span class="badge amber">Pendiente</span>':`<span class="muted">${h.comp}</span>`}</td><td class="muted">${esc(h.obs)}</td></tr>`).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>${t.maps?`<button class="btn" onclick="openTerrMaps('${t.num}')">${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" onclick="closeModal();openAsignTerr('${t.num}')">${svg('refresh')}Reasignar</button><button class="btn primary" onclick="closeModal();openTerrEdit('${t.num}')">${svg('edit')}Editar territorio</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>${t.maps?`<button class="btn" onclick="openTerrMaps('${t.num}')">${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" onclick="closeModal();openAsignTerr('${t.num}')">${svg('refresh')}Reasignar</button><button class="btn primary" onclick="closeModal();openTerrEdit('${t.num}')">${svg('edit')}Editar territorio</button>`});
 }
 function terrMiniMap(t){
   const idx=(parseInt(t.num,10)-1)%42;const{x,y}=lfCell(idx);const cx=x+LF_CW/2,cy=y+LF_CH/2;
@@ -975,7 +975,7 @@ function openExhibTurn(ex,iso,si){if(!requireCap('assign.manage'))return;const d
       <div class="form-row"><label>Responsable 2 *</label>${searchSelect('ext_p2',pubsActive.map(p=>({value:p.id,label:p.fullName})),cur?cur[1].id:'')}</div>
     </div>
     <span class="field-hint" style="margin-top:10px">Cada turno requiere dos publicadores. También puedes dejar el turno vacante.</span>`,
-    footer:`<button class="btn danger" onclick="vaciarExhibTurn()">${svg('trash')}Dejar vacante</button><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveExhibTurn())">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn danger" data-click="vaciarExhibTurn">${svg('trash')}Dejar vacante</button><button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveExhibTurn())">${svg('check')}Guardar</button>`});}
 function __extKey(){const ex=document.getElementById('ext_ex').value;const iso=document.getElementById('ext_fecha').value;const si=document.getElementById('ext_slot').value;if(!iso){toast('Selecciona la fecha del turno');return null}return ex+'|'+iso+'|'+si;}
 function saveExhibTurn(){const key=__extKey();if(!key)return;
   const p1=sselValue('ext_p1'),p2=sselValue('ext_p2');
@@ -1047,7 +1047,7 @@ function openSendReport(titulo){
       <div class="form-row full"><label>Destinatario *</label><input class="input" id="sr_mail" type="email" placeholder="correo@ejemplo.com" value="${CONG_CFG.mail||'lasflores@congregacion.org'}" oninput="validateEmail(this)" aria-describedby="sr_mail_hint"/><span class="field-hint" id="sr_mail_hint" aria-live="polite"></span></div>
       <div class="form-row full"><label>Mensaje (opcional)</label><textarea class="textarea" id="sr_msg" placeholder="Mensaje para el destinatario…"></textarea></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendReportMail('${titulo.replace(/'/g,'')}'))">${svg('send')}Enviar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendReportMail('${titulo.replace(/'/g,'')}'))">${svg('send')}Enviar</button>`});}
 function sendReportMail(titulo){const el=document.getElementById('sr_mail');const mail=(el.value||'').trim();
   if(!mail||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){el.classList.add('invalid');toast('Ingresa un correo válido');return;}
   closeModal();notify('Nuevo anuncio',`Reporte "${titulo}" enviado a ${mail}.`);toast(`Reporte "${titulo}" enviado a ${mail} ✓`);}
@@ -1065,7 +1065,7 @@ function openRegistrarInforme(pubId){const r=INFORMES.find(x=>String(x.pub.id)==
       <div class="form-row"><label>Estudios bíblicos</label><input class="input" id="ri_est" type="number" min="0" max="30" value="${r.entregado?r.estudios:''}" placeholder="0"/></div>
     </div>
     <label class="check" style="margin-top:14px"><input type="checkbox" id="ri_aux" ${r.auxiliar?'checked':''}/><span class="box">${svg('check')}</span>Participó como precursor (regular/auxiliar)</label>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveRegistrarInforme(${r.pub.id}))">${svg('check')}Guardar informe</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveRegistrarInforme(${r.pub.id}))">${svg('check')}Guardar informe</button>`});}
 function saveRegistrarInforme(pubId){const r=INFORMES.find(x=>String(x.pub.id)===String(pubId));if(!r)return;
   const horas=parseInt(document.getElementById('ri_horas').value,10);
   if(!(horas>=0)||horas>200){document.getElementById('ri_horas').classList.add('invalid');toast('Ingresa un número de horas válido (0–200)');return;}
@@ -1123,7 +1123,7 @@ function repPreview(type){
   const dlAction=type==='terr'
     ? `<button class="btn" onclick="closeModal();exportTerrDocx()">${svg('download')}Word</button><button class="btn primary" onclick="closeModal();exportTerrPdf()">${svg('download')}PDF</button>`
     : `<button class="btn primary" onclick="closeModal();${REPORT_DL[type]||''}()">${svg('download')}Descargar</button>`;
-  openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" onclick="closeModal()">Cerrar</button>${dlAction}`});
+  openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" data-click="closeModal">Cerrar</button>${dlAction}`});
 }
 const REPORT_DL={bd:'repBaseDatos',pub:'repBaseDatos',prec:'repPrecursores',inf6:'repInformes6m',cards:'downloadAllCards',asist:'openAsistYearSelect',pred:'repPredicacion',campo:'openFieldSummarySelect',s1:'openS1Select'};
 function tablePreview(head,rows,total){return `<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="muted" style="font-size:12px;margin-top:10px">Mostrando ${rows.length} de ${total} registros.</p>`}
@@ -1150,7 +1150,7 @@ VIEWS.actividad=()=>{
   const items=actItems();
   const counts={all:items.length,notif:items.filter(i=>i.kind==='notif').length,tarea:items.filter(i=>i.kind==='tarea').length};
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" onclick="markAllActivity()">${svg('check')}Marcar todo leído</button><button class="btn" onclick="openNotifPrefs()">${svg('settings')}Preferencias</button>${can('data.create')?`<button class="btn primary" onclick="openModal('task')">${svg('plus')}Nueva tarea</button>`:''}`)}
+    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" data-click="markAllActivity">${svg('check')}Marcar todo leído</button><button class="btn" data-click="openNotifPrefs">${svg('settings')}Preferencias</button>${can('data.create')?`<button class="btn primary" onclick="openModal('task')">${svg('plus')}Nueva tarea</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:20px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       ${[{v:activityPending(),l:'Pendientes en total',t:'t-brand',i:'bell'},{v:NOTIFS.filter(n=>!n.read).length,l:'Notificaciones sin leer',t:'t-amber',i:'bell'},{v:TASKS.filter(t=>t.estado!=='Completada').length,l:'Tareas por completar',t:'t-violet',i:'tasks'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -1238,7 +1238,7 @@ function openComm(){if(!requireCap('comm.send'))return;
         <div class="form-row"><label>Hora de envío</label><input class="input" type="time" value="08:00"/></div>
       </div>
       <label class="check" style="margin-top:16px"><input type="checkbox"/><span class="box">${svg('check')}</span>Programar envío para la fecha y hora indicadas</label>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveWithFeedback(this,()=>sendComm(true))">${svg('clock')}Programar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendComm(false))">${svg('send')}Enviar ahora</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn" onclick="saveWithFeedback(this,()=>sendComm(true))">${svg('clock')}Programar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendComm(false))">${svg('send')}Enviar ahora</button>`});
 }
 function sendComm(scheduled){
   const t=(document.getElementById('comm_titulo').value||'').trim();const m=(document.getElementById('comm_msg').value||'').trim();
@@ -1278,9 +1278,9 @@ function openGrupoModal(idx){if(!requireCap('data.edit'))return;const isEdit=(id
       <div class="form-row full"><label>Auxiliar</label>${searchSelect('grp_aux',males.map(m=>m.fullName),isEdit?g.aux:males[1].fullName)}</div>
     </div>
     <div class="form-section-title">${svg('people')} Integrantes <span id="grp_count" style="color:var(--ink-400);font-weight:600">(${curMembers.length})</span></div>
-    <div class="form-row full" style="margin-bottom:12px"><label>Agregar publicador al grupo</label><div style="display:flex;gap:8px;align-items:flex-start">${searchSelect('grp_add',DB.filter(p=>p.estado!=='Inactivo').map(p=>({value:p.id,label:p.fullName})),'',{placeholder:'Buscar publicador…'})}<button type="button" class="btn" style="flex-shrink:0" onclick="grpAddMember()">${svg('plus')}Agregar</button></div></div>
+    <div class="form-row full" style="margin-bottom:12px"><label>Agregar publicador al grupo</label><div style="display:flex;gap:8px;align-items:flex-start">${searchSelect('grp_add',DB.filter(p=>p.estado!=='Inactivo').map(p=>({value:p.id,label:p.fullName})),'',{placeholder:'Buscar publicador…'})}<button type="button" class="btn" style="flex-shrink:0" data-click="grpAddMember">${svg('plus')}Agregar</button></div></div>
     <div id="grp_members" style="display:flex;flex-wrap:wrap;gap:7px;max-height:200px;overflow:auto;padding:2px">${grpMembersChips()}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveGrupo('${isEdit?gi:''}'))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveGrupo('${isEdit?gi:''}'))">${svg('check')}Guardar</button>`});
 }
 function saveGrupo(idx){const nombre=(document.getElementById('grp_nombre').value||'').trim();const sup=sselValue('grp_sup');const aux=sselValue('grp_aux');
   if(!nombre){toast('Ingresa el nombre del grupo');return;}
@@ -1302,7 +1302,7 @@ function openAnuncioModal(i){if(!requireCap('anuncio.manage'))return;const isEdi
       <div class="form-row full"><label>Título *</label><input class="input" id="an_titulo" value="${isEdit?a.t.replace(/"/g,'&quot;'):''}" placeholder="Ej. Asamblea de circuito"/></div>
       <div class="form-row full"><label>Descripción *</label><textarea class="textarea" id="an_desc" placeholder="Detalles del anuncio…">${isEdit?a.d:''}</textarea></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAnuncio(${isEdit?i:'null'}))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAnuncio(${isEdit?i:'null'}))">${svg('check')}Guardar</button>`});}
 function saveAnuncio(i){
   const t=(document.getElementById('an_titulo').value||'').trim();const d=(document.getElementById('an_desc').value||'').trim();
   if(!t||!d){if(!t)document.getElementById('an_titulo').classList.add('invalid');if(!d)document.getElementById('an_desc').classList.add('invalid');toast('Completa título y descripción');return;}
@@ -1324,7 +1324,7 @@ function openEventoModal(){if(!requireCap('anuncio.manage'))return;
       <div class="form-row"><label>Fecha</label><input class="input" id="ev_fecha" type="date" value="${diso(TODAY)}"/></div>
       <div class="form-row"><label>Detalle</label><input class="input" id="ev_det" placeholder="Ej. Todos los grupos"/></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveEvento())">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveEvento())">${svg('check')}Guardar</button>`});}
 function saveEvento(){
   const n=(document.getElementById('ev_nombre').value||'').trim();
   if(!n){document.getElementById('ev_nombre').classList.add('invalid');toast('Ingresa el nombre del evento');return;}
@@ -1346,7 +1346,7 @@ function openSubGestion(){if(!requireCap('billing'))return;
         <div class="lst-item"><div class="lst-ico t-green">${svg('check')}</div><div class="lst-body"><b>Suscripción activa</b><p>Renovación: 01 ene 2027 · USD 20,00/año</p></div></div>
         <div class="lst-item"><div class="lst-ico t-brand">${svg('people')}</div><div class="lst-body"><b>Publicadores ilimitados</b><p>Incluye todos los módulos y reportes oficiales</p></div></div>
       </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{CONG_CFG.plan=document.getElementById('sub_plan').value;persistAll();closeModal();toast('Suscripción actualizada ✓')})">${svg('check')}Guardar cambios</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{CONG_CFG.plan=document.getElementById('sub_plan').value;persistAll();closeModal();toast('Suscripción actualizada ✓')})">${svg('check')}Guardar cambios</button>`});}
 function renderConfig(){
   const el=document.getElementById('configContent');let h='';
   if(['reuniones','eventos','circuitos'].includes(configTab))configTab='general';
@@ -1380,12 +1380,12 @@ function renderConfig(){
       <div class="form-row"><label>Secretario</label><input class="input" id="cfg_secre" value="${C('secre')||'Hugo Molano'}"/></div>
     </div>
     <div class="form-section-title">${svg('refresh')} Datos de demostración</div>
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><p class="muted" style="font-size:12.5px;flex:1;min-width:220px">Los cambios se guardan en este navegador (almacenamiento local). Puedes volver al estado original del demo en cualquier momento.</p><button class="btn" onclick="resetDemoData()">${svg('refresh')}Restablecer datos demo</button></div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><p class="muted" style="font-size:12.5px;flex:1;min-width:220px">Los cambios se guardan en este navegador (almacenamiento local). Puedes volver al estado original del demo en cualquier momento.</p><button class="btn" data-click="resetDemoData">${svg('refresh')}Restablecer datos demo</button></div>
   </div></div>`;}
-  else if(configTab==='anuncios'){h=`<div class="card" style="margin-bottom:20px"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('bell')}</div><h3>Anuncios</h3><div class="actions"><button class="btn sm primary" onclick="openAnuncioModal()">${svg('plus')}Crear anuncio</button></div></div>
+  else if(configTab==='anuncios'){h=`<div class="card" style="margin-bottom:20px"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('bell')}</div><h3>Anuncios</h3><div class="actions"><button class="btn sm primary" data-click="openAnuncioModal">${svg('plus')}Crear anuncio</button></div></div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Título</th><th>Descripción</th><th>Fecha</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${ANUNCIOS.map((a,i)=>`<tr><td><b>${a.t}</b></td><td class="muted">${a.d}</td><td class="muted">${a.time}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" onclick="openAnuncioModal(${i})">${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" onclick="delAnuncio(${i})">${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="4"><div class="empty">Sin anuncios. Crea el primero con «Crear anuncio».</div></td></tr>`}</tbody></table></div></div>
     <div class="cols-2"><div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:32px;height:32px">${svg('calendar')}</div><h3>Calendario de eventos</h3></div><div class="card-pad" style="display:flex;justify-content:center"><div style="max-width:300px;width:100%">${miniCalendar()}</div></div></div>
-      <div class="card"><div class="card-head"><h3>Próximos eventos</h3><div class="actions"><button class="btn sm primary" onclick="openEventoModal()">${svg('plus')}Nuevo evento</button></div></div><div class="lst">
+      <div class="card"><div class="card-head"><h3>Próximos eventos</h3><div class="actions"><button class="btn sm primary" data-click="openEventoModal">${svg('plus')}Nuevo evento</button></div></div><div class="lst">
         ${EVENTS.map((e,i)=>`<div class="lst-item"><div class="lst-ico ${e.t}">${svg(e.i)}</div><div class="lst-body"><b>${e.n}</b><p>${e.d}</p></div><button class="icon-btn" style="width:28px;height:28px;flex-shrink:0" data-tip="Eliminar" onclick="delEvento(${i})">${svg('trash')}</button></div>`).join('')||`<div class="empty" style="padding:26px">Sin eventos próximos.</div>`}
       </div></div></div>`;}
   else if(configTab==='inf'){const sw=(on)=>`<label class="switch"><input type="checkbox" ${on?'checked':''}/><span class="tr"></span></label>`;h=`
@@ -1403,7 +1403,7 @@ function renderConfig(){
         <div class="set-row"><div class="set-ico">${svg('star')}</div><div><b>Año de servicio</b><p>Periodo activo</p></div><div class="ctrl"><input class="set-input" type="text" value="2026"/></div></div>
       </div></div>
     </div>`;}
-  else if(configTab==='grupos'){h=`<div class="card"><div class="card-head"><h3>Administración de grupos</h3><div class="actions"><button class="btn sm primary" onclick="openGrupoModal()">${svg('plus')}Nuevo grupo</button></div></div>
+  else if(configTab==='grupos'){h=`<div class="card"><div class="card-head"><h3>Administración de grupos</h3><div class="actions"><button class="btn sm primary" data-click="openGrupoModal">${svg('plus')}Nuevo grupo</button></div></div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Grupo</th><th>Superintendente</th><th>Auxiliar</th><th>Publicadores</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${REAL_GROUPS.map((g,i)=>`<tr><td><b>${g.n}</b></td><td><div class="cell-user">${avatarHTML(g.sup)}<b>${g.sup}</b></div></td><td><div class="cell-user">${avatarHTML(g.aux)}<b>${g.aux}</b></div></td><td>${DB.filter(p=>p.grupoIdx===i).length}</td><td style="text-align:right"><button class="btn sm ghost" onclick="openGrupoModal(${i})">${svg('settings')}Configurar</button></td></tr>`).join('')}</tbody></table></div></div>`;}
   else if(configTab==='sub'){h=`<div class="cols-2">
     <div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('star')}</div><h3>Plan actual</h3></div><div class="card-pad">
@@ -1411,7 +1411,7 @@ function renderConfig(){
       <p class="muted" style="font-size:13px;margin:8px 0 16px">Plan Anual · todas las funciones · publicadores ilimitados</p>
       <span class="badge green"><span class="bdot"></span>Activo</span>
       <div style="margin-top:18px;padding:14px;background:var(--surface-3);border-radius:12px;display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:13px;display:block">Próximo pago</b><span class="muted" style="font-size:12.5px">01 ene 2027</span></div><b style="font-size:16px">USD 20,00</b></div>
-      <button class="btn primary" style="margin-top:16px;width:100%" onclick="openSubGestion()">Gestionar suscripción</button>
+      <button class="btn primary" style="margin-top:16px;width:100%" data-click="openSubGestion">Gestionar suscripción</button>
     </div></div>
     <div class="card"><div class="card-head"><h3>Historial de pagos</h3></div><div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Estado</th></tr></thead><tbody>${PAGOS.map(p=>`<tr><td class="muted">${p.f}</td><td><b>${p.c}</b></td><td>${p.m}</td><td><span class="badge green"><span class="bdot"></span>${p.e}</span></td></tr>`).join('')}</tbody></table></div></div>
   </div>`;}
@@ -1522,7 +1522,7 @@ VIEWS.asistencia=()=>{
   const bars=asistVista==='semanal'?asistWeeks(asistFY,asistWeekMonth):FY_ORDER.slice(0,6).map(ci=>({label:ATT_LABELS[ci],mid:attVal(asistFY,ci,'mid'),we:attVal(asistFY,ci,'we')}));
   const compTitle=asistVista==='semanal'?('Asistencia semanal · '+new Date(2000,asistWeekMonth,1).toLocaleDateString('es-CO',{month:'long'})+' '+(asistWeekMonth>=8?asistFY-1:asistFY)):'Asistencia mensual · comparativo';
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Asistencia','Registro de asistencia a las reuniones de la congregación',`<button class="btn primary" onclick="openRegAsist()">${svg('plus')}Registrar asistencia</button>`)}
+    ${pageHead('Asistencia','Registro de asistencia a las reuniones de la congregación',`<button class="btn primary" data-click="openRegAsist">${svg('plus')}Registrar asistencia</button>`)}
     <div class="kpi-grid" style="margin-bottom:20px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))">
       ${kpis.map(k=>`<div class="kpi" style="cursor:pointer" role="button" tabindex="0" onclick="${k.act}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${k.act}}"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div><span class="kpi-chev">${svg('chevR')}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -1558,7 +1558,7 @@ function openAttReg(iso,type){const date=new Date(iso+'T00:00:00');const meta=me
   openModalCustom({icon:'people',tint:type==='mid'?'t-brand':'t-violet',title:'Registrar asistencia',sub:`${dlong(date).replace(/^\w/,c=>c.toUpperCase())} · ${esc(meta.title)}`,
     body:`<div class="form-grid"><div class="form-row"><label>Total de asistentes *</label><input class="input" type="number" min="0" id="att_total" value="${(reg?reg.count:a.count)||''}" placeholder="0" aria-describedby="att_total_hint"/><span class="field-hint" id="att_total_hint" aria-live="polite"></span></div><div class="form-row"><label>Conexiones Zoom</label><input class="input" type="number" min="0" id="att_zoom" value="${reg?reg.zoom:Math.round((a.count||30)*0.2)}"/></div><div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="att_obs" placeholder="Notas opcionales…">${reg?reg.obs||'':''}</textarea></div></div>
       <div style="margin-top:14px">${ya?`<span class="badge green">${svg('check')}Registrado</span>`:`<span class="badge amber">${svg('clock')}Pendiente de registrar</span>`}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAttReg('${iso}','${type}'))">${svg('check')}Guardar registro</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAttReg('${iso}','${type}'))">${svg('check')}Guardar registro</button>`});
 }
 function saveAttReg(iso,type){const el=document.getElementById('att_total');const val=parseInt((el.value||'').trim(),10);
   if(!(val>=1)||val>2000){el.classList.add('invalid');el.setAttribute('aria-invalid','true');const h=document.getElementById('att_total_hint');if(h){h.textContent='Ingresa un total de asistentes válido (1 o más).';h.className='field-hint err';}toast('Revisa el total de asistentes');return;}
@@ -1570,23 +1570,23 @@ function scheduledMeetings(){const res=[];let d=new Date(TODAY);d.setDate(d.getD
 function openRegAsist(){const list=scheduledMeetings();const def=list.find(m=>m.past&&!m.registered)||list.find(m=>m.past)||list[0];
   openModalCustom({icon:'calendar',tint:'t-brand',title:'Registrar asistencia',sub:'Selecciona la reunión que deseas registrar',
     body:`<div class="form-row full"><label>Fecha de la reunión programada</label><select class="select" id="ra_sel">${list.map(m=>{const meta=meetingMeta(m.type);return `<option value="${m.iso}|${m.type}"${def&&m.iso===def.iso&&m.type===def.type?' selected':''}>${dstr(m.date)} · ${m.type==='mid'?'Entre semana':'Fin de semana'} · ${esc(meta.title)}${m.registered?' — registrada':(m.past?' — pendiente':' — programada')}</option>`;}).join('')}</select><span class="field-hint" style="margin-top:8px">Solo se muestran fechas con reunión programada (martes y domingo).</span></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="raContinue()">${svg('chevR')}Continuar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="raContinue">${svg('chevR')}Continuar</button>`});
 }
 function raContinue(){const v=document.getElementById('ra_sel').value;const p=v.split('|');closeModal();openAttReg(p[0],p[1]);}
 function openPendientes(){const {pend}=attScanList();
   openModalCustom({icon:'clock',tint:'t-amber',title:'Pendientes por registrar',sub:`${pend.length} reunión(es) con fecha pasada sin asistencia registrada`,size:'lg',
     body:pend.length?`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Fecha</th><th>Tipo</th><th>Reunión</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${pend.map(m=>{const meta=meetingMeta(m.type);const iso=diso(m.date);return `<tr><td class="muted">${dstr(m.date)}</td><td>${m.type==='mid'?'Entre semana':'Fin de semana'}</td><td><b>${esc(meta.title)}</b></td><td><span class="badge amber">${svg('clock')}Pendiente</span></td><td style="text-align:right"><button class="btn sm primary" onclick="closeModal();openAttReg('${iso}','${m.type}')">${svg('check')}Registrar</button></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">🎉 No hay reuniones pendientes por registrar.</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function openRegistradas(){const {reg}=attScanList();
   openModalCustom({icon:'check',tint:'t-green',title:'Reuniones registradas',sub:`${reg.length} reunión(es) con asistencia registrada · últimos 90 días`,size:'lg',
     body:reg.length?`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Fecha</th><th>Tipo</th><th>Reunión</th><th>Asistentes</th><th>Estado</th></tr></thead><tbody>${reg.map(m=>{const meta=meetingMeta(m.type);return `<tr><td class="muted">${dstr(m.date)}</td><td>${m.type==='mid'?'Entre semana':'Fin de semana'}</td><td><b>${esc(meta.title)}</b></td><td><b>${m.count}</b></td><td><span class="badge green">${svg('check')}Registrado</span></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">Aún no hay reuniones registradas en el periodo.</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function openAttAvg(type){const label=type==='mid'?'Entre semana':'Fin de semana';const avg=Math.round(FY_ORDER.reduce((a,ci)=>a+attVal(asistFY,ci,type),0)/12);
   openModalCustom({icon:'meeting',tint:type==='mid'?'t-brand':'t-violet',title:`Promedio ${label.toLowerCase()}`,sub:`Año de servicio ${asistFY-1}–${asistFY} · promedio ${avg} asistentes`,size:'lg',
     body:`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Mes (año de servicio)</th><th>Asistentes</th><th>% de aforo</th></tr></thead><tbody>${FY_ORDER.map(ci=>{const v=attVal(asistFY,ci,type);return `<tr><td><b>${ATT_LABELS[ci]}</b></td><td>${v}</td><td class="muted">${Math.round(v/ATT_CAP*100)}%</td></tr>`;}).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function areaChart(data,labels,color,cap){
   const W=560,H=180,pad=8;const max=cap||Math.max(...data);const n=data.length;
@@ -1640,7 +1640,7 @@ function maleOptions(){return males.slice(0,40).map(p=>`<option>${esc(p.fullName
 function pubOptions(){return pubsActive.slice(0,40).map(p=>`<option>${esc(p.fullName)}</option>`).join('')}
 function elderOptions(){return eldersM.map(p=>`<option>${esc(p.fullName)}</option>`).join('')}
 const MODALS={
-  assignment:{icon:'calendar',tint:'t-brand',title:'Nueva asignación',sub:'Asigna un publicador a una parte de la reunión',body:`<div class="form-grid"><div class="form-row full"><label>Reunión</label><select class="select" id="asg_meet" onchange="asgUpdateParts()">${upcomingMeetings(8).map(m=>`<option value="${diso(m.date)}|${m.type}">${dstr(m.date)} · ${m.type==='mid'?'Entre semana (Vida y Ministerio)':'Fin de semana (Discurso + Atalaya)'}</option>`).join('')}</select></div><div class="form-row full"><label>Parte / Rol</label><select class="select" id="asg_part"></select></div><div class="form-row full"><label>Publicador asignado</label>${searchSelect('asg_pub',males.map(m=>({value:m.id,label:m.fullName})),males[0].id)}</div><div class="form-row full"><label>Estado</label><select class="select" id="asg_estado"><option>Por confirmar</option><option>Confirmado</option></select></div></div>`},
+  assignment:{icon:'calendar',tint:'t-brand',title:'Nueva asignación',sub:'Asigna un publicador a una parte de la reunión',body:`<div class="form-grid"><div class="form-row full"><label>Reunión</label><select class="select" id="asg_meet" data-change="asgUpdateParts">${upcomingMeetings(8).map(m=>`<option value="${diso(m.date)}|${m.type}">${dstr(m.date)} · ${m.type==='mid'?'Entre semana (Vida y Ministerio)':'Fin de semana (Discurso + Atalaya)'}</option>`).join('')}</select></div><div class="form-row full"><label>Parte / Rol</label><select class="select" id="asg_part"></select></div><div class="form-row full"><label>Publicador asignado</label>${searchSelect('asg_pub',males.map(m=>({value:m.id,label:m.fullName})),males[0].id)}</div><div class="form-row full"><label>Estado</label><select class="select" id="asg_estado"><option>Por confirmar</option><option>Confirmado</option></select></div></div>`},
   task:{icon:'tasks',tint:'t-violet',title:'Nueva tarea',sub:'Asigna una tarea al cuerpo de ancianos',body:`<div class="form-grid"><div class="form-row full"><label>Nombre de la tarea *</label><input class="input" id="tk_titulo" placeholder="Ej. Revisar territorios vencidos"/></div><div class="form-row full"><label>Descripción</label><textarea class="textarea" id="tk_desc" placeholder="Describe la tarea…"></textarea></div><div class="form-row"><label>Asignada a</label><select class="select" id="tk_asig">${eldersM.map(p=>`<option value="${p.id}">${esc(p.fullName)}</option>`).join('')}</select></div><div class="form-row"><label>Prioridad</label><select class="select" id="tk_prio"><option>Alta</option><option selected>Media</option><option>Baja</option></select></div><div class="form-row"><label>Fecha límite</label><input class="input" id="tk_limite" type="date" value="2026-07-10"/></div><div class="form-row"><label>Estado</label><select class="select" id="tk_estado"><option>Pendiente</option><option>Completada</option></select></div></div>`},
   publisher:{icon:'people',tint:'t-brand',title:'Nuevo publicador',sub:'Crea el registro completo del publicador',size:'lg',body:`
     <div class="form-section-title">${svg('user')} Información personal</div>
@@ -1678,7 +1678,7 @@ const MODALS={
 const MODAL_SAVES={publisher:'savePublisher',task:'saveTaskModal',assignment:'saveAssignment',nopredica:'saveNoPredica'};
 const MODAL_INITS={assignment:()=>asgUpdateParts()};
 const MODAL_CAP={publisher:'personal.manage',task:'assign.manage',nopredica:'territory.manage',assignment:'assign.manage'};
-function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
+function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
 function asgUpdateParts(){const sel=document.getElementById('asg_meet');if(!sel)return;const v=sel.value.split('|');const parts=mkParts(new Date(v[0]+'T00:00:00'),v[1]);document.getElementById('asg_part').innerHTML=parts.map(p=>`<option>${p.role}</option>`).join('');}
 function saveAssignment(){const v=document.getElementById('asg_meet').value.split('|');const iso=v[0],type=v[1];const role=document.getElementById('asg_part').value;const pid=sselValue('asg_pub');
   if(!pid){toast('Selecciona un publicador');return;}
@@ -1719,7 +1719,7 @@ let __modalReturnFocus=null;
 function openModalCustom({icon,tint,title,sub,body,footer,size=''}){
   closeModal();__modalReturnFocus=document.activeElement;
   const ov=document.createElement('div');ov.className='modal-overlay';ov.id='modalOverlay';ov.onclick=e=>{if(e.target===ov)closeModal()};
-  ov.innerHTML=`<div class="modal ${size}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modal-head">${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()" aria-label="Cerrar">${svg('x')}</button></div><div class="modal-body">${body}</div><div class="modal-foot">${footer||`<button class="btn" onclick="closeModal()">Cerrar</button>`}</div></div>`;
+  ov.innerHTML=`<div class="modal ${size}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modal-head">${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" data-click="closeModal" aria-label="Cerrar">${svg('x')}</button></div><div class="modal-body">${body}</div><div class="modal-foot">${footer||`<button class="btn" data-click="closeModal">Cerrar</button>`}</div></div>`;
   document.body.appendChild(ov);document.body.classList.add('modal-lock');document.addEventListener('keydown',modalKeydown);
   const modal=ov.querySelector('.modal');const f=focusablesIn(modal);(f[0]||modal).focus();
 }
@@ -1727,9 +1727,9 @@ function swapModalContent({icon,tint,title,sub,body,footer,size}){
   const ov=document.getElementById('modalOverlay');if(!ov)return openModalCustom({icon,tint,title,sub,body,footer,size});
   const m=ov.querySelector('.modal');if(!m)return;
   if(size!==undefined)m.className='modal '+size;
-  m.querySelector('.modal-head').innerHTML=`${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" onclick="closeModal()" aria-label="Cerrar">${svg('x')}</button>`;
+  m.querySelector('.modal-head').innerHTML=`${icon?`<div class="mh-ico ${tint||'t-brand'}">${svg(icon)}</div>`:''}<div style="flex:1"><h3 id="modalTitle">${title}</h3><p>${sub||''}</p></div><button class="icon-btn" data-click="closeModal" aria-label="Cerrar">${svg('x')}</button>`;
   const b=m.querySelector('.modal-body');b.innerHTML=body;b.scrollTop=0;
-  m.querySelector('.modal-foot').innerHTML=footer||`<button class="btn" onclick="closeModal()">Cerrar</button>`;
+  m.querySelector('.modal-foot').innerHTML=footer||`<button class="btn" data-click="closeModal">Cerrar</button>`;
 }
 function modalKeydown(e){
   if(e.key==='Escape'){closeModal();return;}
@@ -1778,7 +1778,7 @@ function openNotifPrefs(){const sw=(k)=>`<label class="switch"><input type="chec
         <div class="form-row"><label>Recordatorios (día del mes)</label><select class="select" id="np_recordatorios">${['20','25','28','Último día'].map(o=>`<option ${o===NOTIF_PREFS.recordatorios?'selected':''}>${o}</option>`).join('')}</select></div>
         <div class="form-row"><label>Canal de notificación</label><select class="select" id="np_canal">${[['ambos','Correo + plataforma'],['correo','Solo correo'],['plataforma','Solo dentro de la plataforma']].map(([v,l])=>`<option value="${v}" ${v===NOTIF_PREFS.canal?'selected':''}>${l}</option>`).join('')}</select></div>
       </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveNotifPrefs)">${svg('check')}Guardar preferencias</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveNotifPrefs)">${svg('check')}Guardar preferencias</button>`});
 }
 function saveNotifPrefs(){const g=id=>document.getElementById(id);NOTIF_PREFS.enabled=g('np_enabled').checked;Object.keys(NOTIF_PREFS.tipos).forEach(k=>{const el=g('np_'+k);if(el)NOTIF_PREFS.tipos[k]=el.checked;});NOTIF_PREFS.recordatorios=g('np_recordatorios').value;NOTIF_PREFS.canal=g('np_canal').value;try{localStorage.setItem('msp_notif',JSON.stringify(NOTIF_PREFS))}catch(e){}closeModal();toast('Preferencias guardadas correctamente ✓');}
 /* --- Mi perfil --- */
@@ -1796,7 +1796,7 @@ function openMiPerfil(){
       <div class="form-grid">
         <div class="form-row full"><label>Contraseña</label><input class="input" type="password" value="********"/></div>
       </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{closeModal();toast('Perfil actualizado correctamente ✓')})">${svg('check')}Guardar cambios</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>{closeModal();toast('Perfil actualizado correctamente ✓')})">${svg('check')}Guardar cambios</button>`});
 }
 /* --- Idioma --- */
 let APP_LANG='es';
@@ -1804,7 +1804,7 @@ try{const l=localStorage.getItem('msp_lang');if(l)APP_LANG=l;}catch(e){}
 function openIdioma(){const LANGS=[['es','Español','🇪🇸'],['en','Inglés (English)','🇬🇧']];
   openModalCustom({icon:'refresh',tint:'t-brand',title:'Cambiar idioma',sub:'Selecciona el idioma de la plataforma',
     body:`<div style="display:flex;flex-direction:column;gap:10px">${LANGS.map(([v,l,f])=>`<label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid ${v===APP_LANG?'var(--brand-500)':'var(--border)'};border-radius:12px;cursor:pointer" onclick="document.querySelectorAll('input[name=lang]').forEach(r=>r.parentElement.style.borderColor='var(--border)');this.style.borderColor='var(--brand-500)'"><input type="radio" name="lang" value="${v}" ${v===APP_LANG?'checked':''} style="accent-color:var(--brand-500);width:18px;height:18px"/><span style="font-size:20px">${f}</span><b style="font-size:14px">${l}</b></label>`).join('')}</div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveIdioma)">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveIdioma)">${svg('check')}Guardar</button>`});
 }
 function saveIdioma(){const r=document.querySelector('input[name=lang]:checked');if(r){APP_LANG=r.value;try{localStorage.setItem('msp_lang',APP_LANG)}catch(e){}}closeModal();toast(APP_LANG==='en'?'Language set to English (demo)':'Idioma cambiado a Español');}
 /* --- Configuración del usuario (perfil) --- */
@@ -1824,7 +1824,7 @@ function openUserConfig(){const dark=document.documentElement.getAttribute('data
       </div>
       <div class="form-section-title">${svg('eye')} Preferencias de la interfaz</div>
       <div class="set-list">
-        <div class="set-row"><div class="set-ico">${svg('star')}</div><div><b>Modo oscuro</b><p>Tema visual de la plataforma</p></div><div class="ctrl">${sw('uc_dark',dark,' onchange="toggleTheme()"')}</div></div>
+        <div class="set-row"><div class="set-ico">${svg('star')}</div><div><b>Modo oscuro</b><p>Tema visual de la plataforma</p></div><div class="ctrl">${sw('uc_dark',dark,' data-change="toggleTheme"')}</div></div>
         <div class="set-row"><div class="set-ico">${svg('grid')}</div><div><b>Densidad compacta</b><p>Menos espaciado en tablas y listas</p></div><div class="ctrl">${sw('uc_compact',USER_PREFS.compact)}</div></div>
       </div>
       <div class="form-section-title">${svg('shield')} Seguridad de la cuenta</div>
@@ -1834,7 +1834,7 @@ function openUserConfig(){const dark=document.documentElement.getAttribute('data
         <div class="form-row"><label>Nueva contraseña</label><input class="input" type="password" id="uc_pw1" placeholder="Mínimo 8 caracteres"/></div>
         <div class="form-row full"><label>Confirmar nueva contraseña</label><input class="input" type="password" id="uc_pw2" placeholder="Repite la nueva contraseña"/></div>
       </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,saveUserConfig)">${svg('check')}Guardar cambios</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,saveUserConfig)">${svg('check')}Guardar cambios</button>`});
 }
 function saveUserConfig(){const g=id=>document.getElementById(id);
   const p1=g('uc_pw1').value,p2=g('uc_pw2').value;
@@ -2135,7 +2135,7 @@ function syncPanelHTML(){const back=dataBackend();
     <div class="form-section-title">${svg('db')} Estado de la conexión</div>
     <div id="syncStatusBox" style="margin-bottom:16px">${syncStatusHTML()}</div>
     ${SB_ENABLED?`<div class="lst" style="border:1px solid var(--border);border-radius:12px;margin-bottom:16px">${counts.map(c=>`<div class="lst-item"><div class="lst-body"><b>${c[0]}</b></div><span class="tag">${c[1]}</span></div>`).join('')}</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="testSbConnection()">${svg('refresh')}Probar conexión</button><button class="btn" onclick="manualPull()">${svg('download')}Recargar desde Supabase</button><button class="btn primary" onclick="manualPush()">${svg('send')}Enviar datos a Supabase</button></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-click="testSbConnection">${svg('refresh')}Probar conexión</button><button class="btn" data-click="manualPull">${svg('download')}Recargar desde Supabase</button><button class="btn primary" data-click="manualPush">${svg('send')}Enviar datos a Supabase</button></div>
     <p class="muted" style="font-size:12px;margin-top:14px;line-height:1.6">La sincronización con la nube es automática tras cada cambio cuando inicias sesión con una cuenta real, y los cambios de <b>otros usuarios conectados</b> llegan solos (tiempo real) sin recargar la página. Usa <b>Enviar</b> para forzar una copia y <b>Recargar</b> para traer la versión del servidor.</p>`
     :`<div style="font-size:13px;color:var(--ink-500);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;line-height:1.6">${svg('shield')} Estás en <b>modo local</b>: los datos se guardan solo en este navegador. Para activar el respaldo en la nube y compartir datos entre dispositivos, configura Supabase siguiendo <b>SETUP_SUPABASE.md</b> (pega tu URL y anon key en el archivo).</div>`}
   </div></div>`;}
@@ -2150,7 +2150,7 @@ function showDataLoading(on){let o=document.getElementById('dataLoading');
 function resetDemoData(){confirmAction({icon:'refresh',tint:'t-amber',title:'Restablecer datos de demostración',sub:'Se descartan todos los cambios guardados',body:'Se eliminarán los datos guardados en este navegador y la aplicación volverá al estado de demostración original. Esta acción no se puede deshacer.',ok:'Restablecer'},()=>{try{localStorage.removeItem(PERSIST_KEY)}catch(e){}location.reload();});}
 /* Confirmación genérica (antes de acciones destructivas) */
 let __confirmCb=null;
-function confirmAction(opts,cb){__confirmCb=cb;openModalCustom({icon:opts.icon||'warn',tint:opts.tint||'t-red',title:opts.title||'¿Estás seguro?',sub:opts.sub||'',body:`<p style="font-size:13.5px;color:var(--ink-500);line-height:1.6">${opts.body||'Esta acción no se puede deshacer.'}</p>`,footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn ${opts.danger===false?'primary':'danger'}" onclick="__confirmRun()">${svg('check')}${opts.ok||'Confirmar'}</button>`});}
+function confirmAction(opts,cb){__confirmCb=cb;openModalCustom({icon:opts.icon||'warn',tint:opts.tint||'t-red',title:opts.title||'¿Estás seguro?',sub:opts.sub||'',body:`<p style="font-size:13.5px;color:var(--ink-500);line-height:1.6">${opts.body||'Esta acción no se puede deshacer.'}</p>`,footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn ${opts.danger===false?'primary':'danger'}" data-click="__confirmRun">${svg('check')}${opts.ok||'Confirmar'}</button>`});}
 function __confirmRun(){const cb=__confirmCb;__confirmCb=null;closeModal();if(cb)cb();}
 /* Notificación generada por acciones del usuario (alimenta Actividad + campana) */
 function notify(type,msg){const t=NOTIF_TYPES.find(x=>x.type===type)||{type:type,ico:'bell',tint:'t-brand'};NOTIFS.unshift({type:t.type,ico:t.ico,tint:t.tint,msg:msg,time:'Ahora',read:false,date:new Date(TODAY)});renderNav();persistAll();}
@@ -2234,7 +2234,7 @@ let USERS_CACHE=[];
 function usersBackendReady(){return SB_ENABLED&&CURRENT_USER&&!CURRENT_USER.demo;}
 VIEWS.usuarios=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Usuarios','Gestiona el acceso y los roles de la congregación',(usersBackendReady()?`<button class="btn primary" onclick="openUserModal()">${svg('plus')}Nuevo usuario</button>`:''))}
+    ${pageHead('Usuarios','Gestiona el acceso y los roles de la congregación',(usersBackendReady()?`<button class="btn primary" data-click="openUserModal">${svg('plus')}Nuevo usuario</button>`:''))}
     <div id="usersWrap"><div class="card"><div class="empty" style="padding:40px">Cargando usuarios…</div></div></div></div>`;
   loadUsers();
 };
@@ -2242,7 +2242,7 @@ async function loadUsers(){const wrap=document.getElementById('usersWrap');if(!w
   if(!usersBackendReady()){wrap.innerHTML=`<div class="card"><div class="empty" style="padding:46px 24px;text-align:center"><div class="kpi-ico t-amber" style="width:52px;height:52px;margin:0 auto 14px">${svg('shield')}</div><b style="font-size:15px">Disponible con el backend real</b><p class="muted" style="font-size:13px;max-width:460px;margin:8px auto 0;line-height:1.6">La gestión de usuarios usa una función segura de Supabase. Inicia sesión con tu cuenta real (no el modo demostración) para crear y administrar usuarios.</p></div></div>`;return;}
   wrap.innerHTML=`<div class="card"><div class="empty" style="padding:40px">Cargando usuarios…</div></div>`;
   try{const res=await sbFunc('list',{});USERS_CACHE=res.users||[];renderUsersTable();}
-  catch(e){wrap.innerHTML=`<div class="card"><div class="empty" style="padding:40px;text-align:center">No se pudo cargar la lista de usuarios.<br><small class="muted">${(e.message||e)}</small><br><button class="btn sm" style="margin-top:14px" onclick="loadUsers()">${svg('refresh')}Reintentar</button><p class="muted" style="font-size:12px;margin-top:16px;max-width:460px;margin-left:auto;margin-right:auto">Si la función aún no está desplegada, sigue los pasos de <b>SETUP_USERS.md</b>.</p></div></div>`;}
+  catch(e){wrap.innerHTML=`<div class="card"><div class="empty" style="padding:40px;text-align:center">No se pudo cargar la lista de usuarios.<br><small class="muted">${(e.message||e)}</small><br><button class="btn sm" style="margin-top:14px" data-click="loadUsers">${svg('refresh')}Reintentar</button><p class="muted" style="font-size:12px;margin-top:16px;max-width:460px;margin-left:auto;margin-right:auto">Si la función aún no está desplegada, sigue los pasos de <b>SETUP_USERS.md</b>.</p></div></div>`;}
 }
 function renderUsersTable(){const wrap=document.getElementById('usersWrap');if(!wrap)return;
   const me=CURRENT_USER?CURRENT_USER.id:'';const myLevel=userLevel();
@@ -2253,7 +2253,7 @@ function renderUsersTable(){const wrap=document.getElementById('usersWrap');if(!
     const actBtn=canEdit?(u.banned?`<button class="btn sm" onclick="toggleUserActive('${u.id}',true)">${svg('check')}Activar</button>`:`<button class="btn sm ghost" onclick="toggleUserActive('${u.id}',false)">${svg('x')}Desactivar</button>`):'<span class="muted" style="font-size:11.5px">—</span>';
     return `<tr><td><div class="cell-user">${avatarHTML(u.full_name||u.email||'?')}<div><b>${u.full_name||'—'}</b>${u.id===me?' <span class="badge gray" style="font-size:9.5px">tú</span>':''}<br><small class="muted">${u.email||''}</small></div></div></td><td>${lvlSel}</td><td>${estado}</td><td style="text-align:right">${actBtn}</td></tr>`;
   }).join('');
-  wrap.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('people')}</div><h3>Usuarios (${USERS_CACHE.length})</h3><div class="actions"><button class="btn sm" onclick="loadUsers()">${svg('refresh')}Actualizar</button></div></div>
+  wrap.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('people')}</div><h3>Usuarios (${USERS_CACHE.length})</h3><div class="actions"><button class="btn sm" data-click="loadUsers">${svg('refresh')}Actualizar</button></div></div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Usuario</th><th>Nivel de acceso</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${rows||`<tr><td colspan="4"><div class="empty">Sin usuarios.</div></td></tr>`}</tbody></table></div>
     <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--ink-500);line-height:1.5;display:flex;align-items:center;gap:7px">${svg('shield')}<span>Solo puedes asignar niveles iguales o inferiores al tuyo y no puedes modificar tu propia cuenta desde aquí.</span></div>
   </div>`;
@@ -2266,7 +2266,7 @@ function openUserModal(){if(!requireCap('users.manage'))return;const myLevel=use
       <div class="form-row"><label>Nivel de acceso *</label><select class="select" id="nu_level">${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${l===Math.max(myLevel,2)?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select></div>
       <div class="form-row"><label>Contraseña inicial *</label><input class="input" id="nu_pw" type="text" placeholder="Mínimo 8 caracteres"/><span class="field-hint" style="margin-top:6px">Compártela con el usuario; podrá cambiarla luego.</span></div>
     </div>`,
-    footer:`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveNewUser())">${svg('check')}Crear usuario</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveNewUser())">${svg('check')}Crear usuario</button>`});
 }
 async function saveNewUser(){
   const name=(document.getElementById('nu_name').value||'').trim();
@@ -2315,7 +2315,7 @@ function showPublisherMobileOnly(){document.querySelector('.app')&&(document.que
       <h3 style="font-size:18px;font-weight:750;margin-bottom:8px">Tu cuenta es de Publicador</h3>
       <p style="font-size:13px;color:var(--ink-500);line-height:1.6;margin-bottom:22px">El perfil de Publicador está disponible únicamente en la <b>app móvil</b>. Ábrela desde tu teléfono para ver tus asignaciones, registrar tu predicación y enviar tu informe.</p>
       <a class="btn primary" href="publicador.html" style="width:100%;height:46px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px">${svg('logout')}Abrir la app del Publicador</a>
-      <div style="margin-top:12px"><button class="btn ghost sm" onclick="signOut()">Cerrar sesión</button></div>
+      <div style="margin-top:12px"><button class="btn ghost sm" data-click="signOut">Cerrar sesión</button></div>
     </div>
   </div>`;}
 
@@ -2327,14 +2327,14 @@ function showLogin(){document.querySelector('.app')&&(document.querySelector('.a
   const demoDesc={1:'Acceso total: todas las congregaciones, usuarios, configuración y datos',2:'Su congregación: publicadores (info completa), territorios, programa, reportes',3:'Operativo: programa, asignaciones y territorios · sin datos personales ni reportes',4:'Su app móvil: sus salidas, informe de predicación y perfil'};
   const demoIco={1:'shield',2:'db',3:'map',4:'user'};const demoTint={1:'t-violet',2:'t-brand',3:'t-cyan',4:'t-indigo'};
   const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left;width:100%;white-space:normal" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%;min-width:0"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span style="min-width:0"><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="display:block;color:var(--ink-500);font-size:11.5px;line-height:1.4">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
-  const realForm=`<form id="loginForm" onsubmit="submitLogin(event)" style="display:grid;gap:13px">
+  const realForm=`<form id="loginForm" data-submit="submitLogin" data-submit-args='["$event"]' style="display:grid;gap:13px">
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Correo electrónico</label><input class="input" id="lg_email" type="email" autocomplete="username" placeholder="tucorreo@congregacion.org" required/></div>
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Contraseña</label><input class="input" id="lg_pw" type="password" autocomplete="current-password" placeholder="••••••••" required/></div>
       <div id="lg_err" style="display:none;font-size:12.5px;color:var(--red);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:9px 11px"></div>
       <button class="btn primary" id="lg_submit" type="submit" style="width:100%;height:44px;margin-top:2px">${svg('logout')}Iniciar sesión</button>
     </form>`;
   const body=SB_ENABLED
-    ? `${realForm}<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" onclick="toggleDemoPanel()" id="demoToggle">o entrar en modo demostración</button></div><div id="demoPanel" hidden style="margin-top:12px">${demoBtns}</div>`
+    ? `${realForm}<div style="text-align:center;margin-top:16px"><button class="btn ghost sm" data-click="toggleDemoPanel" id="demoToggle">o entrar en modo demostración</button></div><div id="demoPanel" hidden style="margin-top:12px">${demoBtns}</div>`
     : `<div style="font-size:12.5px;color:var(--ink-500);background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:16px;line-height:1.5">${svg('shield')} Backend Supabase no configurado. Entra en <b>modo demostración</b> eligiendo un rol para probar el control de accesos.</div>${demoBtns}`;
   authOverlay().innerHTML=`<div style="width:100%;max-width:410px">
     <div style="text-align:center;margin-bottom:20px;color:#fff"><div style="font-size:30px;font-weight:800;letter-spacing:-.5px">MS <span style="font-weight:400;opacity:.85">PLANNER</span></div><div style="font-size:13px;opacity:.85;margin-top:4px">Administración de la congregación Las Flores</div></div>
