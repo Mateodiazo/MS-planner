@@ -392,10 +392,10 @@ VIEWS.database=()=>{
     </div>
     <div class="card">
       <div style="padding:18px 22px;border-bottom:1px solid var(--border)"><div class="toolbar" style="margin-bottom:0">
-        <div class="field search-field">${svg('search')}<input id="dbq" placeholder="Buscar por nombre, correo o teléfono…" value="${dbState.q}" oninput="dbState.q=this.value;dbState.page=1;renderDbTable()"/></div>
-        <div class="field">${svg('filter')}<select onchange="dbState.grupo=this.value;dbState.page=1;renderDbTable()"><option value="">Todos los grupos</option>${GRUPOS.map(g=>`<option ${dbState.grupo===g?'selected':''}>${g}</option>`).join('')}</select></div>
-        <div class="field">${svg('shield')}<select onchange="dbState.privilegio=this.value;dbState.page=1;renderDbTable()"><option value="">Todos los privilegios</option>${ROLES.map(r=>`<option ${dbState.privilegio===r?'selected':''}>${r}</option>`).join('')}</select></div>
-        <div class="field"><select onchange="dbState.estado=this.value;dbState.page=1;renderDbTable()"><option value="">Todos los estados</option>${['Activo','Irregular','Inactivo'].map(e=>`<option ${dbState.estado===e?'selected':''}>${e}</option>`).join('')}</select></div>
+        <div class="field search-field">${svg('search')}<input id="dbq" placeholder="Buscar por nombre, correo o teléfono…" value="${dbState.q}" data-input="applyFilter" data-fstate="dbState" data-fkey="q" data-fpage="1" data-frender="renderDbTable"/></div>
+        <div class="field">${svg('filter')}<select data-change="applyFilter" data-fstate="dbState" data-fkey="grupo" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los grupos</option>${GRUPOS.map(g=>`<option ${dbState.grupo===g?'selected':''}>${g}</option>`).join('')}</select></div>
+        <div class="field">${svg('shield')}<select data-change="applyFilter" data-fstate="dbState" data-fkey="privilegio" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los privilegios</option>${ROLES.map(r=>`<option ${dbState.privilegio===r?'selected':''}>${r}</option>`).join('')}</select></div>
+        <div class="field"><select data-change="applyFilter" data-fstate="dbState" data-fkey="estado" data-fpage="1" data-frender="renderDbTable"><option value="">Todos los estados</option>${['Activo','Irregular','Inactivo'].map(e=>`<option ${dbState.estado===e?'selected':''}>${e}</option>`).join('')}</select></div>
         <button class="btn ghost sm" onclick="dbState={q:'',grupo:'',privilegio:'',estado:'',sortCol:'id',sortDir:'asc',page:1,pageSize:10,sel:new Set()};VIEWS.database()" style="margin-left:auto">${svg('refresh')}Limpiar</button>
       </div></div>
       <div class="table-wrap" id="dbTableWrap"></div>
@@ -427,7 +427,7 @@ function renderDbTable(){
       <button class="btn sm" data-click="bulkExport">${svg('download')}Exportar selección</button>
       <button class="btn sm ghost" style="margin-left:auto" data-click="clearSel">${svg('x')}Quitar selección</button></div>`:'';
   document.getElementById('dbTableWrap').innerHTML=`${bulk}
-    <table class="data"><thead><tr><th style="width:40px"><input type="checkbox" class="row-chk" id="dbSelAll" ${allSelected?'checked':''} onclick="toggleSelAll(this.checked)" aria-label="Seleccionar todos"></th>${th('nombre','Publicador')}<th>Contacto</th>${th('grupo','Grupo')}${th('role','Privilegio')}${th('estado','Estado')}${th('bautismo','Bautismo')}<th></th></tr></thead><tbody>
+    <table class="data"><thead><tr><th style="width:40px"><input type="checkbox" class="row-chk" id="dbSelAll" ${allSelected?'checked':''} data-click="toggleSelAll" data-click-args='["$checked"]' aria-label="Seleccionar todos"></th>${th('nombre','Publicador')}<th>Contacto</th>${th('grupo','Grupo')}${th('role','Privilegio')}${th('estado','Estado')}${th('bautismo','Bautismo')}<th></th></tr></thead><tbody>
       ${rows.map(p=>`<tr class="clickable ${sel.has(p.id)?'row-sel':''}" data-dblclick="openFicha" data-dblclick-args='[${p.id}]'>
         <td><input type="checkbox" class="row-chk" ${sel.has(p.id)?'checked':''} onclick="event.stopPropagation();toggleSel(${p.id},this.checked)" aria-label="Seleccionar ${esc(p.fullName)}"></td>
         <td><div class="cell-user">${avatarHTML(p.fullName)}<div><b>${esc(p.fullName)}</b><small>${esc(p.localidad)}</small></div></div></td>
@@ -572,7 +572,7 @@ function searchSelect(id,options,selected,opts){opts=opts||{};
   const cur=norm.find(o=>o.value===String(selected))||(opts.placeholder?null:norm[0]);
   return `<div class="ssel" id="${id}" data-value="${cur?ssEsc(cur.value):''}"${opts.onchange?` data-onchange="${ssEsc(opts.onchange)}"`:''}>
     <button type="button" class="ssel-toggle" data-click="sselToggle" data-click-args='["${id}"]' aria-haspopup="listbox"><span class="ssel-cur">${cur?cur.label:(opts.placeholder||'Seleccionar…')}</span>${svg('chevD')}</button>
-    <div class="ssel-pop" hidden><div class="ssel-search-wrap">${svg('search')}<input class="ssel-search" placeholder="Buscar por nombre o apellido…" oninput="sselFilter('${id}',this.value)" onclick="event.stopPropagation()"></div>
+    <div class="ssel-pop" hidden><div class="ssel-search-wrap">${svg('search')}<input class="ssel-search" placeholder="Buscar por nombre o apellido…" data-input="sselFilter" data-input-args='["${id}", "$val"]' data-click="__absorb"></div>
       <div class="ssel-list">${norm.map(o=>`<div class="ssel-opt${cur&&cur.value===o.value?' sel':''}" data-value="${ssEsc(o.value)}" data-l="${ssEsc(o.label.toLowerCase())}" data-click="sselPick" data-click-args='["${id}", "${ssEsc(o.value)}"]'>${o.label}</div>`).join('')}<div class="ssel-empty" hidden>Sin coincidencias</div></div>
     </div></div>`;
 }
@@ -700,7 +700,7 @@ function renderTerr(){
     return;
   }
   // Vista de mapa (con listado integrado)
-  el.innerHTML=terrMap()+`<div class="card" style="margin-top:18px"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('db')}</div><h3>Listado de territorios</h3><div class="actions"><div class="field" style="height:36px">${svg('search')}<input placeholder="Buscar por barrio o localidad…" value="${terrState.q}" oninput="terrState.q=this.value;terrState.page=1;renderTerrTable()"/></div></div></div><div class="table-wrap" id="terrTableWrap"></div></div>`;
+  el.innerHTML=terrMap()+`<div class="card" style="margin-top:18px"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('db')}</div><h3>Listado de territorios</h3><div class="actions"><div class="field" style="height:36px">${svg('search')}<input placeholder="Buscar por barrio o localidad…" value="${terrState.q}" data-input="applyFilter" data-fstate="terrState" data-fkey="q" data-fpage="1" data-frender="renderTerrTable"/></div></div></div><div class="table-wrap" id="terrTableWrap"></div></div>`;
   renderTerrTable();
 }
 /* --- Asignaciones de predicación diaria (CRUD) --- */
@@ -720,8 +720,8 @@ function renderTerrAsign(){
   el.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-green" style="width:34px;height:34px">${svg('calendar')}</div><h3>Asignaciones de predicación diaria</h3><div class="actions"><button class="btn sm primary" data-click="openTerrAsignModal">${svg('plus')}Nueva asignación</button></div></div>
     <div style="padding:11px 18px;background:var(--brand-50);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-500);line-height:1.4">${svg('phone')}<span>La <b>Confirmación</b> se actualiza automáticamente según la respuesta del hermano desde su aplicación (Confirmado o Rechazado). El administrador solo puede visualizar este estado, no modificarlo.</span></div>
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-      <div class="field" style="height:38px">${svg('calendar')}<select onchange="terrAsignFilter.month=this.value;renderTerrAsign()"><option value="">Todos los meses</option>${months.map(m=>`<option value="${m}"${terrAsignFilter.month===m?' selected':''} style="text-transform:capitalize">${mesLabel(m)}</option>`).join('')}</select></div>
-      <div class="field" style="height:38px">${svg('user')}<select onchange="terrAsignFilter.encargado=this.value;renderTerrAsign()"><option value="">Todos los encargados</option>${encs.map(e=>`<option value="${e}"${terrAsignFilter.encargado===e?' selected':''}>${encName(e)}</option>`).join('')}</select></div>
+      <div class="field" style="height:38px">${svg('calendar')}<select data-change="applyFilter" data-fstate="terrAsignFilter" data-fkey="month" data-frender="renderTerrAsign"><option value="">Todos los meses</option>${months.map(m=>`<option value="${m}"${terrAsignFilter.month===m?' selected':''} style="text-transform:capitalize">${mesLabel(m)}</option>`).join('')}</select></div>
+      <div class="field" style="height:38px">${svg('user')}<select data-change="applyFilter" data-fstate="terrAsignFilter" data-fkey="encargado" data-frender="renderTerrAsign"><option value="">Todos los encargados</option>${encs.map(e=>`<option value="${e}"${terrAsignFilter.encargado===e?' selected':''}>${encName(e)}</option>`).join('')}</select></div>
       <button class="btn ghost sm" style="margin-left:auto" onclick="terrAsignFilter={month:'',encargado:''};renderTerrAsign()">${svg('refresh')}Limpiar</button>
     </div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Encargado</th><th>Territorios</th><th>Confirmación</th><th>Observaciones</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
@@ -1516,9 +1516,9 @@ VIEWS.asistencia=()=>{
   const avgWe=Math.round(FY_ORDER.reduce((a,ci)=>a+attVal(asistFY,ci,'we'),0)/12);
   const {reg:regList,pend:pendList}=attScanList();const reg=regList.length,pend=pendList.length;
   const kpis=[{v:avgMid,l:'Promedio entre semana',t:'t-brand',i:'meeting',act:"openAttAvg('mid')"},{v:avgWe,l:'Promedio fin de semana',t:'t-violet',i:'meeting',act:"openAttAvg('we')"},{v:reg,l:'Reuniones registradas',t:'t-green',i:'check',act:'openRegistradas()'},{v:pend,l:'Pendientes de registrar',t:'t-amber',i:'clock',act:'openPendientes()'}];
-  const yearSel=`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px" onchange="asistFY=+this.value;VIEWS.asistencia()" aria-label="Año de servicio">${[CURRENT_SY,CURRENT_SY-1,CURRENT_SY-2].map(fy=>`<option value="${fy}"${fy===asistFY?' selected':''}>${fy-1}–${fy}</option>`).join('')}</select>`;
-  const vistaSeg=`<div class="seg"><button class="${asistVista==='mensual'?'active':''}" onclick="asistVista='mensual';VIEWS.asistencia()">Mensual</button><button class="${asistVista==='semanal'?'active':''}" onclick="asistVista='semanal';VIEWS.asistencia()">Semanal</button></div>`;
-  const monthSel=asistVista==='semanal'?`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px;text-transform:capitalize" onchange="asistWeekMonth=+this.value;VIEWS.asistencia()" aria-label="Mes">${FY_ORDER.map(ci=>`<option value="${ci}"${asistWeekMonth===ci?' selected':''}>${new Date(2000,ci,1).toLocaleDateString('es-CO',{month:'long'})}</option>`).join('')}</select>`:'';
+  const yearSel=`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px" data-change="applyFilter" data-fkey="asistFY" data-fnum="1" data-frender="asistencia" aria-label="Año de servicio">${[CURRENT_SY,CURRENT_SY-1,CURRENT_SY-2].map(fy=>`<option value="${fy}"${fy===asistFY?' selected':''}>${fy-1}–${fy}</option>`).join('')}</select>`;
+  const vistaSeg=`<div class="seg"><button class="${asistVista==='mensual'?'active':''}" data-click="setStateVal" data-skey="asistVista" data-sval="mensual" data-srender="asistencia">Mensual</button><button class="${asistVista==='semanal'?'active':''}" data-click="setStateVal" data-skey="asistVista" data-sval="semanal" data-srender="asistencia">Semanal</button></div>`;
+  const monthSel=asistVista==='semanal'?`<select class="select" style="height:36px;width:auto;padding:0 34px 0 12px;text-transform:capitalize" data-change="applyFilter" data-fkey="asistWeekMonth" data-fnum="1" data-frender="asistencia" aria-label="Mes">${FY_ORDER.map(ci=>`<option value="${ci}"${asistWeekMonth===ci?' selected':''}>${new Date(2000,ci,1).toLocaleDateString('es-CO',{month:'long'})}</option>`).join('')}</select>`:'';
   const bars=asistVista==='semanal'?asistWeeks(asistFY,asistWeekMonth):FY_ORDER.slice(0,6).map(ci=>({label:ATT_LABELS[ci],mid:attVal(asistFY,ci,'mid'),we:attVal(asistFY,ci,'we')}));
   const compTitle=asistVista==='semanal'?('Asistencia semanal · '+new Date(2000,asistWeekMonth,1).toLocaleDateString('es-CO',{month:'long'})+' '+(asistWeekMonth>=8?asistFY-1:asistFY)):'Asistencia mensual · comparativo';
   document.getElementById('content').innerHTML=`<div class="page">
@@ -1778,7 +1778,7 @@ function openNotifPrefs(){const sw=(k)=>`<label class="switch"><input type="chec
         <div class="form-row"><label>Recordatorios (día del mes)</label><select class="select" id="np_recordatorios">${['20','25','28','Último día'].map(o=>`<option ${o===NOTIF_PREFS.recordatorios?'selected':''}>${o}</option>`).join('')}</select></div>
         <div class="form-row"><label>Canal de notificación</label><select class="select" id="np_canal">${[['ambos','Correo + plataforma'],['correo','Solo correo'],['plataforma','Solo dentro de la plataforma']].map(([v,l])=>`<option value="${v}" ${v===NOTIF_PREFS.canal?'selected':''}>${l}</option>`).join('')}</select></div>
       </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveNotifPrefs)">${svg('check')}Guardar preferencias</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveNotifPrefs">${svg('check')}Guardar preferencias</button>`});
 }
 function saveNotifPrefs(){const g=id=>document.getElementById(id);NOTIF_PREFS.enabled=g('np_enabled').checked;Object.keys(NOTIF_PREFS.tipos).forEach(k=>{const el=g('np_'+k);if(el)NOTIF_PREFS.tipos[k]=el.checked;});NOTIF_PREFS.recordatorios=g('np_recordatorios').value;NOTIF_PREFS.canal=g('np_canal').value;try{localStorage.setItem('msp_notif',JSON.stringify(NOTIF_PREFS))}catch(e){}closeModal();toast('Preferencias guardadas correctamente ✓');}
 /* --- Mi perfil --- */
@@ -1804,7 +1804,7 @@ try{const l=localStorage.getItem('msp_lang');if(l)APP_LANG=l;}catch(e){}
 function openIdioma(){const LANGS=[['es','Español','🇪🇸'],['en','Inglés (English)','🇬🇧']];
   openModalCustom({icon:'refresh',tint:'t-brand',title:'Cambiar idioma',sub:'Selecciona el idioma de la plataforma',
     body:`<div style="display:flex;flex-direction:column;gap:10px">${LANGS.map(([v,l,f])=>`<label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid ${v===APP_LANG?'var(--brand-500)':'var(--border)'};border-radius:12px;cursor:pointer" onclick="document.querySelectorAll('input[name=lang]').forEach(r=>r.parentElement.style.borderColor='var(--border)');this.style.borderColor='var(--brand-500)'"><input type="radio" name="lang" value="${v}" ${v===APP_LANG?'checked':''} style="accent-color:var(--brand-500);width:18px;height:18px"/><span style="font-size:20px">${f}</span><b style="font-size:14px">${l}</b></label>`).join('')}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,saveIdioma)">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveIdioma">${svg('check')}Guardar</button>`});
 }
 function saveIdioma(){const r=document.querySelector('input[name=lang]:checked');if(r){APP_LANG=r.value;try{localStorage.setItem('msp_lang',APP_LANG)}catch(e){}}closeModal();toast(APP_LANG==='en'?'Language set to English (demo)':'Idioma cambiado a Español');}
 /* --- Configuración del usuario (perfil) --- */
@@ -1834,7 +1834,7 @@ function openUserConfig(){const dark=document.documentElement.getAttribute('data
         <div class="form-row"><label>Nueva contraseña</label><input class="input" type="password" id="uc_pw1" placeholder="Mínimo 8 caracteres"/></div>
         <div class="form-row full"><label>Confirmar nueva contraseña</label><input class="input" type="password" id="uc_pw2" placeholder="Repite la nueva contraseña"/></div>
       </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" onclick="saveWithFeedback(this,saveUserConfig)">${svg('check')}Guardar cambios</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn primary" data-click="saveDelegated" data-save="saveUserConfig">${svg('check')}Guardar cambios</button>`});
 }
 function saveUserConfig(){const g=id=>document.getElementById(id);
   const p1=g('uc_pw1').value,p2=g('uc_pw2').value;
@@ -2248,7 +2248,7 @@ function renderUsersTable(){const wrap=document.getElementById('usersWrap');if(!
   const me=CURRENT_USER?CURRENT_USER.id:'';const myLevel=userLevel();
   const rows=USERS_CACHE.map(u=>{
     const canEdit=(u.access_level>=myLevel)&&(u.id!==me);
-    const lvlSel=`<select class="select" style="height:32px;font-size:12px;min-width:200px" ${canEdit?'':'disabled'} onchange="setUserLevel('${u.id}',this.value)">${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${u.access_level===l?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select>`;
+    const lvlSel=`<select class="select" style="height:32px;font-size:12px;min-width:200px" ${canEdit?'':'disabled'} data-change="setUserLevel" data-change-args='["${u.id}", "$val"]'>${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${u.access_level===l?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select>`;
     const estado=u.banned?`<span class="badge red">${svg('x')}Inactivo</span>`:`<span class="badge green">${svg('check')}Activo</span>`;
     const actBtn=canEdit?(u.banned?`<button class="btn sm" data-click="toggleUserActive" data-click-args='["${u.id}", true]'>${svg('check')}Activar</button>`:`<button class="btn sm ghost" data-click="toggleUserActive" data-click-args='["${u.id}", false]'>${svg('x')}Desactivar</button>`):'<span class="muted" style="font-size:11.5px">—</span>';
     return `<tr><td><div class="cell-user">${avatarHTML(u.full_name||u.email||'?')}<div><b>${u.full_name||'—'}</b>${u.id===me?' <span class="badge gray" style="font-size:9.5px">tú</span>':''}<br><small class="muted">${u.email||''}</small></div></div></td><td>${lvlSel}</td><td>${estado}</td><td style="text-align:right">${actBtn}</td></tr>`;
@@ -2790,7 +2790,7 @@ function focusGlobalSearch(){ const s=document.getElementById('globalSearch'); i
     const fn=window[el.getAttribute('data-'+e.type)];
     if(typeof fn!=='function') return;
     let args=[]; const raw=el.getAttribute('data-'+e.type+'-args');
-    if(raw){ try{ args=JSON.parse(raw).map(a=> a==='$event'?e : a==='$el'?el : a); }catch(_){} }
+    if(raw){ try{ args=JSON.parse(raw).map(a=> a==='$event'?e : a==='$el'?el : a==='$val'?el.value : a==='$checked'?el.checked : a); }catch(_){} }
     return fn.apply(el,args);
   }
   TYPES.forEach(ty=>document.addEventListener(ty,handle,false));
@@ -2801,5 +2801,10 @@ Object.assign(window,{saveDelegated});
 function hoverTintOn(){this.style.borderColor="var(--brand-300)";this.style.background="var(--brand-50)"}
 function hoverTintOff(){this.style.borderColor="var(--border)";this.style.background="var(--surface)"}
 Object.assign(window,{hoverTintOn,hoverTintOff});
+function __absorb(){}
+function applyFilter(){var el=this;var val=el.hasAttribute("data-fnum")?+el.value:(el.type==="checkbox"?el.checked:el.value);var st=el.getAttribute("data-fstate"),key=el.getAttribute("data-fkey");if(st){if(window[st]){window[st][key]=val;if(el.hasAttribute("data-fpage"))window[st].page=1;}}else if(key){window[key]=val;}var r=el.getAttribute("data-frender"),fn=window[r]||(window.VIEWS&&window.VIEWS[r]);if(typeof fn==="function")fn();}
+function setStateVal(){var el=this;window[el.getAttribute("data-skey")]=el.getAttribute("data-sval");var r=el.getAttribute("data-srender"),fn=window[r]||(window.VIEWS&&window.VIEWS[r]);if(typeof fn==="function")fn();}
+Object.assign(window,{__absorb,applyFilter,setStateVal});
+
 
 
