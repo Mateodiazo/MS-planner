@@ -2286,7 +2286,7 @@ function toggleUserActive(id,active){const u=USERS_CACHE.find(x=>x.id===id);cons
   });
 }
 function profileToUser(authUser,prof){const level=(prof&&prof.access_level)||4;
-  return {id:authUser.id,email:authUser.email,name:(prof&&prof.full_name)||(authUser.email||'').split('@')[0]||'Usuario',level:level,role:ACCESS_LEVELS[level]};}
+  return {id:authUser.id,email:authUser.email,name:(prof&&prof.full_name)||(authUser.email||'').split('@')[0]||'Usuario',level:level,role:ACCESS_LEVELS[level],publisherId:(prof&&prof.publisher_id)||null};}
 async function doLogin(email,password){
   const tok=await sbAuth('password',{email:email,password:password});
   saveSession({access_token:tok.access_token,refresh_token:tok.refresh_token,expires_at:Date.now()+(tok.expires_in||3600)*1000,user:tok.user});
