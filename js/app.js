@@ -269,7 +269,7 @@ function renderDiscursos(){
 function openDiscursoMenu(e,iso){
   const dc=discFor(new Date(iso+'T00:00:00'));
   closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.id='ctxMenu';
-  menu.innerHTML=`<button class="ctx-item" onclick="closeCtxMenu();verOradorContacto('${dc.orador.fullName.replace(/'/g,'')}')">${svg('user')}Ver contacto</button>
+  menu.innerHTML=`<button class="ctx-item" data-preclose="closeCtxMenu" data-click="verOradorContacto" data-click-args='["${dc.orador.fullName.replace(/'/g,'')}"]'>${svg('user')}Ver contacto</button>
     <button class="ctx-item" data-click="openDiscursoModal" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('edit')}Editar información</button>
     <button class="ctx-item" data-click="openReemplazarOrador" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('refresh')}Reemplazar discursante</button>
     <button class="ctx-item" data-click="openCambiarFechaDiscurso" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('calendar')}Cambiar fecha</button>`;
@@ -315,7 +315,7 @@ function openDiscursoModal(iso){if(!requireCap('assign.manage'))return;const isE
       <div class="form-row full"><label>Tema</label><select class="select" id="disc_tema">${DISCURSOS.map(t=>`<option${isEdit&&dc.tema===t?' selected':''}>${t}</option>`).join('')}</select></div>
       <div class="form-row"><label>Fecha (domingo)</label><input class="input" id="disc_fecha" type="date" value="${defIso}"/></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveDiscurso(${isEdit?`'${iso}'`:'null'}))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveDiscurso" data-save-args='[${isEdit?`"${iso}"`:'null'}]'>${svg('check')}Guardar</button>`});
 }
 function saveDiscurso(prevIso){const v=document.getElementById('disc_fecha').value;if(!v){toast('Selecciona la fecha del discurso');return;}
   const nd=new Date(v+'T00:00:00');if(nd.getDay()!==0){toast('El discurso debe programarse un domingo');return;}
@@ -429,7 +429,7 @@ function renderDbTable(){
   document.getElementById('dbTableWrap').innerHTML=`${bulk}
     <table class="data"><thead><tr><th style="width:40px"><input type="checkbox" class="row-chk" id="dbSelAll" ${allSelected?'checked':''} data-click="toggleSelAll" data-click-args='["$checked"]' aria-label="Seleccionar todos"></th>${th('nombre','Publicador')}<th>Contacto</th>${th('grupo','Grupo')}${th('role','Privilegio')}${th('estado','Estado')}${th('bautismo','Bautismo')}<th></th></tr></thead><tbody>
       ${rows.map(p=>`<tr class="clickable ${sel.has(p.id)?'row-sel':''}" data-dblclick="openFicha" data-dblclick-args='[${p.id}]'>
-        <td><input type="checkbox" class="row-chk" ${sel.has(p.id)?'checked':''} onclick="event.stopPropagation();toggleSel(${p.id},this.checked)" aria-label="Seleccionar ${esc(p.fullName)}"></td>
+        <td><input type="checkbox" class="row-chk" ${sel.has(p.id)?'checked':''} data-click="toggleSel" data-click-args='[${p.id}, "$checked"]' data-stop="1" aria-label="Seleccionar ${esc(p.fullName)}"></td>
         <td><div class="cell-user">${avatarHTML(p.fullName)}<div><b>${esc(p.fullName)}</b><small>${esc(p.localidad)}</small></div></div></td>
         <td><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px">${esc(p.tel)}</span><span class="muted" style="font-size:11.5px">${esc(p.email)}</span></div></td>
         <td>${p.grupo}</td><td>${roleBadge(p.role)}</td><td>${estadoBadge(p.estado)}</td><td class="muted">${fmtFecha(p.bautismo)}</td>
@@ -446,10 +446,10 @@ function toggleSelAll(on){const ids=filteredDB().map(p=>p.id);if(on)ids.forEach(
 function clearSel(){dbState.sel.clear();renderDbTable()}
 function bulkRemind(){const n=dbState.sel.size;if(!n)return;dbState.sel.clear();renderDbTable();notify('Informe pendiente',`Se envió recordatorio a ${n} publicador${n!==1?'es':''}.`);toast(`Recordatorio enviado a ${n} publicador${n!==1?'es':''}`)}
 function bulkExport(){const n=dbState.sel.size;if(!n)return;toast(`Exportando ${n} registro${n!==1?'s':''} seleccionado${n!==1?'s':''}…`)}
-function pagerButtons(pages,cur,go){let b=[];const add=p=>b.push(`<button class="pg ${p===cur?'active':''}" onclick="${go}(${p})">${p}</button>`);
+function pagerButtons(pages,cur,go){let b=[];const add=p=>b.push(`<button class="pg ${p===cur?'active':''}" data-click="${go}" data-click-args='[${p}]'>${p}</button>`);
   if(pages<=7){for(let p=1;p<=pages;p++)add(p)}else{add(1);if(cur>3)b.push('<span style="padding:0 4px;color:var(--ink-400)">…</span>');for(let p=Math.max(2,cur-1);p<=Math.min(pages-1,cur+1);p++)add(p);if(cur<pages-2)b.push('<span style="padding:0 4px;color:var(--ink-400)">…</span>');add(pages)}return b.join('')}
 function pageButtons(pages){return pagerButtons(pages,dbState.page,'dbGo')}
-function sortHeader(state,onclick,col,label,align){const s=state.sortCol===col;const rot=s&&state.sortDir==='asc'?-90:90;return `<th class="sortable ${s?'sorted':''}"${align?` style="text-align:${align}"`:''} onclick="${onclick}('${col}')">${label}<span class="sort-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${rot}deg)"><path d="m9 18 6-6-6-6"/></svg></span></th>`}
+function sortHeader(state,onclick,col,label,align){const s=state.sortCol===col;const rot=s&&state.sortDir==='asc'?-90:90;return `<th class="sortable ${s?'sorted':''}"${align?` style="text-align:${align}"`:''} data-click="${onclick}" data-click-args='["${col}"]'>${label}<span class="sort-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${rot}deg)"><path d="m9 18 6-6-6-6"/></svg></span></th>`}
 function dbGo(p){dbState.page=p;renderDbTable()}
 
 function openRowMenu(e,id){
@@ -739,7 +739,7 @@ function openTerrAsignModal(id){const a=id?TERR_ASIGN.find(x=>x.id===id):null;co
     <div id="ta_terrs" style="display:flex;flex-wrap:wrap;gap:7px;max-height:220px;overflow:auto;padding:4px 2px">${TERR.map(t=>`<button type="button" class="chip-sel${sel.includes(t.num)?' on':''}" data-terr="${t.num}" onclick="this.classList.toggle('on')" title="${esc(t.barrio)} · ${esc(t.localidad)}">#${t.num}${usados[t.num]?' •':''}</button>`).join('')}</div>
     <span class="field-hint" style="margin-top:8px">Puedes asignar uno o varios territorios para el mismo día. El punto (•) indica territorios ya asignados en otra fecha.</span>
     <div class="form-row full" style="margin-top:14px"><label>Observaciones (opcional)</label><textarea class="textarea" id="ta_obs" placeholder="Notas de la salida…">${a?a.obs||'':''}</textarea></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrAsign('${id||''}'))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveTerrAsign" data-save-args='["${id||''}"]'>${svg('check')}Guardar</button>`});
 }
 function saveTerrAsign(id){const date=document.getElementById('ta_date').value;const enc=sselValue('ta_enc');const terrs=Array.prototype.slice.call(document.querySelectorAll('#ta_terrs .chip-sel.on')).map(b=>b.getAttribute('data-terr'));const obs=(document.getElementById('ta_obs').value||'').trim();
   if(!date){toast('Selecciona una fecha');return;}
@@ -933,7 +933,7 @@ let exhibSel=0, exhibWeek=0;
 VIEWS.exhibidores=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Exhibidores','Predicación pública · domingo a domingo · 7:00 a. m. a 7:00 p. m. · turnos de 2 h',
-      `${can('assign.manage')?`<button class="btn primary" onclick="openExhibTurn(EXHIB_NAMES[exhibSel],diso(TODAY),0)">${svg('plus')}Asignar turno</button>`:''}`)}
+      `${can('assign.manage')?`<button class="btn primary" data-click="openExhibTurn" data-click-args='["${EXHIB_NAMES[exhibSel]}", "${diso(TODAY)}", 0]'>${svg('plus')}Asignar turno</button>`:''}`)}
     <div id="exhibSummary"></div>
     <div class="tabs">${EXHIB_NAMES.map((n,i)=>`<div class="tab ${exhibSel===i?'active':''}" data-click="setExhib" data-click-args='[${i}]'>${n}</div>`).join('')}</div>
     <div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('grid')}</div><h3>Agenda semanal · ${EXHIB_NAMES[exhibSel]}</h3>
@@ -1047,7 +1047,7 @@ function openSendReport(titulo){
       <div class="form-row full"><label>Destinatario *</label><input class="input" id="sr_mail" type="email" placeholder="correo@ejemplo.com" value="${CONG_CFG.mail||'lasflores@congregacion.org'}" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="sr_mail_hint"/><span class="field-hint" id="sr_mail_hint" aria-live="polite"></span></div>
       <div class="form-row full"><label>Mensaje (opcional)</label><textarea class="textarea" id="sr_msg" placeholder="Mensaje para el destinatario…"></textarea></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendReportMail('${titulo.replace(/'/g,'')}'))">${svg('send')}Enviar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="sendReportMail" data-save-args='["${titulo.replace(/'/g,'')}"]'>${svg('send')}Enviar</button>`});}
 function sendReportMail(titulo){const el=document.getElementById('sr_mail');const mail=(el.value||'').trim();
   if(!mail||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){el.classList.add('invalid');toast('Ingresa un correo válido');return;}
   closeModal();notify('Nuevo anuncio',`Reporte "${titulo}" enviado a ${mail}.`);toast(`Reporte "${titulo}" enviado a ${mail} ✓`);}
@@ -1095,7 +1095,7 @@ VIEWS.reportes=()=>{
       <div style="padding:8px">${reportes.map(r=>`<div class="rep-row">
         <div class="kpi-ico ${r.t}" style="width:36px;height:36px;flex-shrink:0">${svg(r.ico)}</div>
         <div class="rep-info"><b>${esc(r.titulo)}</b><p>${r.d}</p></div>
-        <div class="rep-actions"><button class="btn sm ghost" data-click="repPreview" data-click-args='["${r.pv}"]'>${svg('eye')}Vista previa</button><button class="btn sm" onclick="openSendReport('${r.titulo.replace(/'/g,'')}')">${svg('send')}Enviar</button>${r.pdf?`<button class="btn sm" onclick="${r.docx}()">${svg('download')}Word</button><button class="btn sm primary" onclick="${r.pdf}()">${svg('download')}PDF</button>`:`<button class="btn sm primary" onclick="${r.dl}()">${svg('download')}Descargar</button>`}</div>
+        <div class="rep-actions"><button class="btn sm ghost" data-click="repPreview" data-click-args='["${r.pv}"]'>${svg('eye')}Vista previa</button><button class="btn sm" data-click="openSendReport" data-click-args='["${r.titulo.replace(/'/g,'')}"]'>${svg('send')}Enviar</button>${r.pdf?`<button class="btn sm" data-click="${r.docx}">${svg('download')}Word</button><button class="btn sm primary" data-click="${r.pdf}">${svg('download')}PDF</button>`:`<button class="btn sm primary" data-click="${r.dl}">${svg('download')}Descargar</button>`}</div>
       </div>`).join('')}</div>
     </div>
 
@@ -1122,7 +1122,7 @@ function repPreview(type){
   else if(type==='s1'){title='Servicio de campo y asistencia (S-1) · vista previa';body=tablePreview(['Indicador','Valor'],[['Publicadores activos',String(DB.filter(p=>p.estado!=='Inactivo').length)],['Promedio asistencia fin de semana',String(ATT_WE[TODAY.getMonth()])],['Publicadores · N.º informes','—'],['Precursores auxiliares · Horas','—'],['Precursores regulares · Horas','—']],5)}
   const dlAction=type==='terr'
     ? `<button class="btn" data-click="exportTerrDocx" data-preclose="closeModal">${svg('download')}Word</button><button class="btn primary" data-click="exportTerrPdf" data-preclose="closeModal">${svg('download')}PDF</button>`
-    : `<button class="btn primary" onclick="closeModal();${REPORT_DL[type]||''}()">${svg('download')}Descargar</button>`;
+    : `<button class="btn primary" data-click="${REPORT_DL[type]||'__absorb'}" data-preclose="closeModal">${svg('download')}Descargar</button>`;
   openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" data-click="closeModal">Cerrar</button>${dlAction}`});
 }
 const REPORT_DL={bd:'repBaseDatos',pub:'repBaseDatos',prec:'repPrecursores',inf6:'repInformes6m',cards:'downloadAllCards',asist:'openAsistYearSelect',pred:'repPredicacion',campo:'openFieldSummarySelect',s1:'openS1Select'};
@@ -1280,7 +1280,7 @@ function openGrupoModal(idx){if(!requireCap('data.edit'))return;const isEdit=(id
     <div class="form-section-title">${svg('people')} Integrantes <span id="grp_count" style="color:var(--ink-400);font-weight:600">(${curMembers.length})</span></div>
     <div class="form-row full" style="margin-bottom:12px"><label>Agregar publicador al grupo</label><div style="display:flex;gap:8px;align-items:flex-start">${searchSelect('grp_add',DB.filter(p=>p.estado!=='Inactivo').map(p=>({value:p.id,label:p.fullName})),'',{placeholder:'Buscar publicador…'})}<button type="button" class="btn" style="flex-shrink:0" data-click="grpAddMember">${svg('plus')}Agregar</button></div></div>
     <div id="grp_members" style="display:flex;flex-wrap:wrap;gap:7px;max-height:200px;overflow:auto;padding:2px">${grpMembersChips()}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveGrupo('${isEdit?gi:''}'))">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveGrupo" data-save-args='["${isEdit?gi:''}"]'>${svg('check')}Guardar</button>`});
 }
 function saveGrupo(idx){const nombre=(document.getElementById('grp_nombre').value||'').trim();const sup=sselValue('grp_sup');const aux=sselValue('grp_aux');
   if(!nombre){toast('Ingresa el nombre del grupo');return;}
@@ -1678,7 +1678,7 @@ const MODALS={
 const MODAL_SAVES={publisher:'savePublisher',task:'saveTaskModal',assignment:'saveAssignment',nopredica:'saveNoPredica'};
 const MODAL_INITS={assignment:()=>asgUpdateParts()};
 const MODAL_CAP={publisher:'personal.manage',task:'assign.manage',nopredica:'territory.manage',assignment:'assign.manage'};
-function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>${fn}())">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
+function openModal(type){if(MODAL_CAP[type]&&!requireCap(MODAL_CAP[type]))return;const m=MODALS[type];const fn=MODAL_SAVES[type]||'defaultModalSave';openModalCustom({...m,footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="${fn}">${svg('check')}Guardar</button>`});if(MODAL_INITS[type])MODAL_INITS[type]();}
 function asgUpdateParts(){const sel=document.getElementById('asg_meet');if(!sel)return;const v=sel.value.split('|');const parts=mkParts(new Date(v[0]+'T00:00:00'),v[1]);document.getElementById('asg_part').innerHTML=parts.map(p=>`<option>${p.role}</option>`).join('');}
 function saveAssignment(){const v=document.getElementById('asg_meet').value.split('|');const iso=v[0],type=v[1];const role=document.getElementById('asg_part').value;const pid=sselValue('asg_pub');
   if(!pid){toast('Selecciona un publicador');return;}
