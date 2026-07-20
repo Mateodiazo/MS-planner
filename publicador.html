@@ -306,7 +306,39 @@ const ICON={
 };
 function ic(n){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICON[n]||'')+'</svg>';}
 
-const ME={ name:'Jairo Castro', first:'Jairo', cong:'Las Flores', role:'Publicador', photo:null };
+/* ============================================================
+   Supabase (sin librerías) — Fase B: backend del Publicador.
+   Reutiliza el patrón del panel admin (GoTrue + PostgREST vía fetch).
+   ============================================================ */
+const SUPABASE_URL='https://iibparqecemexsscgnay.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpYnBhcnFlY2VtZXhzc2NnbmF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1MTA4OTAsImV4cCI6MjA5OTA4Njg5MH0.ra6DLxpgaosKL-d-tC4N0cUU7IJTArUalp5PA5W7Wj8';
+const SB_ENABLED=/^https:\/\/.+\.supabase\.co\/?$/.test(SUPABASE_URL)&&SUPABASE_ANON_KEY.length>20;
+const PUB_SESSION_KEY='pub_session';
+let SB=false; // true cuando hay sesión real (no demo)
+function loadSession(){try{return JSON.parse(localStorage.getItem(PUB_SESSION_KEY)||'null')}catch(e){return null}}
+function saveSession(s){try{localStorage.setItem(PUB_SESSION_KEY,JSON.stringify(s))}catch(e){}}
+function clearSession(){try{localStorage.removeItem(PUB_SESSION_KEY)}catch(e){}}
+async function sbAuth(grant,payload){
+  const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type='+grant,{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error_description||j.msg||j.error||('Error '+r.status));
+  return j;
+}
+async function sbRest(path,opts){opts=opts||{};const s=loadSession();
+  const headers=Object.assign({'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},opts.headers||{});
+  if(s&&s.access_token)headers['Authorization']='Bearer '+s.access_token;
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{method:opts.method||'GET',headers,body:opts.body?JSON.stringify(opts.body):undefined});
+  if(!r.ok)throw new Error('REST '+r.status+': '+(await r.text().catch(()=>'')));
+  if(r.status===204)return null;
+  const t=await r.text();if(!t)return null;try{return JSON.parse(t)}catch(e){return null}
+}
+async function refreshIfNeeded(){const s=loadSession();if(!s||!s.access_token)return null;
+  if(s.expires_at&&s.expires_at>Date.now()+60000)return s;
+  try{const tok=await sbAuth('refresh_token',{refresh_token:s.refresh_token});const ns={access_token:tok.access_token,refresh_token:tok.refresh_token,expires_at:Date.now()+(tok.expires_in||3600)*1000,user:tok.user||s.user};saveSession(ns);return ns;}
+  catch(e){clearSession();return null;}
+}
+
+let ME={ name:'Jairo Castro', first:'Jairo', cong:'Las Flores', role:'Publicador', photo:null };
 
 // Actividad de hoy (editable en la sesión)
 let today={ h:0, m:0, estudios:0, revisitas:0, pubs:0, videos:0, notas:'' };
@@ -319,7 +351,7 @@ let monthH=16; // horas ya registradas este mes
 let prefs={ size:'grande', theme:'auto', nDiario:true, nAsign:true, nInforme:true };
 
 // Próximas asignaciones (reuniones + salidas) — ejemplo
-const ASG=[
+let ASG=[
   {id:1,type:'Lectura de la Biblia',cat:'book',date:addDays(1),time:'7:30 p.m.',meet:'Entre semana',status:'pend',desc:'Lees el pasaje semanal de la Biblia (4 min).'},
   {id:2,type:'Salida de predicación',cat:'map',date:addDays(3),time:'9:00 a.m.',meet:'Territorio #017',status:'conf',desc:'Punto de encuentro: Salón del Reino.'},
   {id:3,type:'Micrófonos',cat:'mic',date:addDays(6),time:'7:00 p.m.',meet:'Entre semana',status:'conf',desc:'Encargado de los micrófonos durante la reunión.'},
@@ -327,7 +359,7 @@ const ASG=[
 ];
 
 // Historial mensual — ejemplo
-const MONTHS=[
+let MONTHS=[
   {m:'Junio 2026',h:16,est:3,rev:12,sent:false,cur:true},
   {m:'Mayo 2026',h:22,est:4,rev:15,sent:true,sd:'02/06/2026'},
   {m:'Abril 2026',h:18,est:3,rev:10,sent:true,sd:'01/05/2026'},
@@ -336,7 +368,7 @@ const MONTHS=[
 ];
 
 // Anuncios — ejemplo
-const ANN=[
+let ANN=[
   {ic:'star',t:'Semana especial de predicación',d:'Del 15 al 21 de julio. ¡Anímate a participar!',w:'hace 2 h'},
   {ic:'cal',t:'Cambio de horario de reunión',d:'La reunión del jueves será a las 7:30 p.m.',w:'ayer'},
   {ic:'book',t:'Estudio de La Atalaya',d:'Recuerda preparar el artículo de esta semana.',w:'hace 3 días'}
@@ -373,14 +405,37 @@ function renderLogin(){
     <div class="lcard">
       <h2>Iniciar sesión</h2>
       <p class="lsub">Ingresa con tu correo y contraseña.</p>
-      <div class="field"><label>Correo electrónico</label><input type="email" placeholder="tucorreo@ejemplo.com" autocomplete="username"></div>
-      <div class="field"><label>Contraseña</label><input type="password" placeholder="••••••••" autocomplete="current-password"></div>
-      <button class="big-btn primary" onclick="enterApp()">${ic('logout')} Entrar</button>
+      <div class="field"><label>Correo electrónico</label><input id="lg_email" type="email" placeholder="tucorreo@ejemplo.com" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('lg_pw').focus()"></div>
+      <div class="field"><label>Contraseña</label><input id="lg_pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin(document.getElementById('lg_btn'))"></div>
+      <button class="big-btn primary" id="lg_btn" onclick="doLogin(this)">${ic('logout')} Entrar</button>
     </div>
-    <div class="lfoot"><button onclick="enterApp()">o entrar en modo demostración</button></div>
+    <div class="lfoot"><button onclick="enterDemo()">o entrar en modo demostración</button></div>
   </div>`;
 }
-function enterApp(){view='inicio';animate=true;render();}
+async function doLogin(btn){
+  if(!SB_ENABLED){toast('Backend no configurado');return;}
+  const email=(document.getElementById('lg_email').value||'').trim().toLowerCase();
+  const pw=document.getElementById('lg_pw').value||'';
+  if(!email||!pw){toast('Ingresa tu correo y contraseña');return;}
+  if(btn){btn.disabled=true;btn.innerHTML=ic('refresh')+' Entrando…';}
+  try{
+    const tok=await sbAuth('password',{email:email,password:pw});
+    saveSession({access_token:tok.access_token,refresh_token:tok.refresh_token,expires_at:Date.now()+(tok.expires_in||3600)*1000,user:tok.user});
+    await loadMe(tok.user);
+    SB=true;view='inicio';animate=true;render();
+  }catch(e){
+    toast('No se pudo entrar: '+(e.message||e));
+    if(btn){btn.disabled=false;btn.innerHTML=ic('logout')+' Entrar';}
+  }
+}
+function enterDemo(){SB=false;view='inicio';animate=true;render();}
+function enterApp(){view='inicio';animate=true;render();} // compat
+async function loadMe(user){
+  let prof=null;try{const r=await sbRest('profiles?select=full_name,publisher_id,access_level&id=eq.'+user.id);prof=r&&r[0];}catch(e){}
+  const nm=(prof&&prof.full_name)||(user.email||'').split('@')[0]||'Publicador';
+  ME={name:nm,first:(nm||'').split(' ')[0]||'Publicador',cong:'Las Flores',role:'Publicador',photo:null,publisherId:(prof&&prof.publisher_id)||null,email:user.email};
+}
+async function signOutPub(){const s=loadSession();if(SB_ENABLED&&s&&s.access_token){try{await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token}})}catch(e){}}clearSession();SB=false;location.reload();}
 
 /* ============================================================
    Estructura general (cabecera + tabbar)
@@ -570,7 +625,7 @@ function renderAjustes(){
       <div class="rows">
         <button class="lrow first" onclick="toast('Soporte: escríbenos a soporte@claria.co')"><span class="ci">${ic('help')}</span><span class="lt"><b>Ayuda y soporte</b><small>¿Tienes dudas? Estamos para ayudarte</small></span><span class="chev">${ic('chev')}</span></button>
         <button class="lrow" onclick="toast('MS Planner · App del Publicador v1.0')"><span class="ci">${ic('shield')}</span><span class="lt"><b>Acerca de</b><small>Versión 1.0 · MS Planner</small></span><span class="chev">${ic('chev')}</span></button>
-        <button class="lrow" onclick="renderLogin()"><span class="ci" style="background:var(--red-50);color:var(--red-700)">${ic('logout')}</span><span class="lt"><b style="color:var(--red-700)">Cerrar sesión</b></span></button>
+        <button class="lrow" onclick="SB?signOutPub():renderLogin()"><span class="ci" style="background:var(--red-50);color:var(--red-700)">${ic('logout')}</span><span class="lt"><b style="color:var(--red-700)">Cerrar sesión</b></span></button>
       </div>
     </div>
     <div style="text-align:center;color:var(--ink3);font-size:calc(12.5px * var(--scale));padding:6px 0 4px">© 2026 MS Planner · ${ME.cong}</div>
@@ -619,7 +674,14 @@ document.addEventListener('pointerdown',function(e){const b=e.target.closest&&e.
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(prefs.theme==='auto')applyTheme();});
 
 /* Arranque */
-loadPrefs();applyTheme();applyScale();renderLogin();
+loadPrefs();applyTheme();applyScale();
+(async function boot(){
+  renderLogin(); // muestra login mientras se verifica la sesión
+  if(SB_ENABLED){
+    const s=await refreshIfNeeded();
+    if(s&&s.user){ try{ await loadMe(s.user); SB=true; view='inicio'; animate=true; render(); }catch(e){} }
+  }
+})();
 </script>
 </body>
 </html>
