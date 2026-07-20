@@ -28,7 +28,7 @@ const VIEW_CAP={programaciones:'program.manage',asistencia:'stats.view',database
 const TITLES={dashboard:'Dashboard',programaciones:'Programaciones',reuniones:'Reuniones',asistencia:'Asistencia',actividad:'Actividad',tareas:'Actividad',database:'Base de datos',territorios:'Mapas y Territorios',exhibidores:'Exhibidores',usuarios:'Usuarios',informes:'Informes Mensuales',reportes:'Reportes',ia:'AI Insights',notificaciones:'Actividad',config:'Configuración de la Congregación'};
 let currentView='dashboard';
 function navBadge(id){if(id==='actividad')return activityPending();if(id==='informes')return STATS.infPend;if(id==='programaciones')return STATS.asignPend;return 0}
-function renderNav(){document.getElementById('nav').innerHTML=NAV.map(s=>{const items=s.items.filter(it=>!it.cap||can(it.cap));if(!items.length)return '';return `<div class="nav-section-title">${s.sec}</div>${items.map(it=>{const badge=navBadge(it.id);return `<div class="nav-item ${it.id===currentView?'active':''}" ${it.id===currentView?'aria-current="page"':''} onclick="go('${it.id}')" data-tip="${it.label}" title="${it.label}">${svg(it.ico)}<span class="nav-label">${it.label}</span>${badge?`<span class="nav-badge ${it.badgeMuted?'muted':''}">${badge}</span>`:''}</div>`}).join('')}`}).join('')}
+function renderNav(){document.getElementById('nav').innerHTML=NAV.map(s=>{const items=s.items.filter(it=>!it.cap||can(it.cap));if(!items.length)return '';return `<div class="nav-section-title">${s.sec}</div>${items.map(it=>{const badge=navBadge(it.id);return `<div class="nav-item ${it.id===currentView?'active':''}" ${it.id===currentView?'aria-current="page"':''} data-click="go" data-click-args='["${it.id}"]' data-tip="${it.label}" title="${it.label}">${svg(it.ico)}<span class="nav-label">${it.label}</span>${badge?`<span class="nav-badge ${it.badgeMuted?'muted':''}">${badge}</span>`:''}</div>`}).join('')}`}).join('')}
 function go(id){refreshStats();if(VIEW_CAP[id]&&!can(VIEW_CAP[id])){id='dashboard';}currentView=id;renderNav();document.getElementById('breadcrumbs').innerHTML=`<span>Las Flores</span><span class="sep">${svg('chevR')}</span><b>${TITLES[id]}</b>`;closeMobileNav();const c=document.getElementById('content');c.innerHTML='';c.scrollTop=0;VIEWS[id]()}
 
 /* SHARED UI */
@@ -83,7 +83,7 @@ function renderOpsDashboard(){
     <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
     <div class="dash-rowlabel">Accesos rápidos</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
-      ${[{i:'calendar',t:'t-brand',n:'Programa de reuniones',d:'Partes y asignaciones.',v:'programaciones'},{i:'map',t:'t-green',n:'Territorios',d:'Entrega y devolución.',v:'territorios'},{i:'display',t:'t-cyan',n:'Exhibidores',d:'Turnos de predicación pública.',v:'exhibidores'},{i:'bell',t:'t-amber',n:'Actividad',d:'Tus tareas y avisos.',v:'actividad'}].map(c=>`<button type="button" onclick="go('${c.v}')" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px">${c.d}</p></button>`).join('')}
+      ${[{i:'calendar',t:'t-brand',n:'Programa de reuniones',d:'Partes y asignaciones.',v:'programaciones'},{i:'map',t:'t-green',n:'Territorios',d:'Entrega y devolución.',v:'territorios'},{i:'display',t:'t-cyan',n:'Exhibidores',d:'Turnos de predicación pública.',v:'exhibidores'},{i:'bell',t:'t-amber',n:'Actividad',d:'Tus tareas y avisos.',v:'actividad'}].map(c=>`<button type="button" data-click="go" data-click-args='["${c.v}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px">${c.d}</p></button>`).join('')}
     </div></div>`;
 }
 VIEWS.dashboard=()=>{
@@ -110,7 +110,7 @@ VIEWS.dashboard=()=>{
   const rolesData=[{l:'Publicadores',v:DB.filter(p=>p.role==='Publicador').length,c:'#94a3b8'},{l:'Precursores',v:STATS.precReg+STATS.precAux,c:'#22C55E'},{l:'Siervos M.',v:STATS.siervos,c:'#06b6d4'},{l:'Ancianos',v:STATS.ancianos,c:'#8B5CF6'},{l:'No bautiz.',v:STATS.noBaut,c:'#F59E0B'}];
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Buenos días, Paublo 👋','Centro de control · Congregación Las Flores · '+dstr(TODAY),
-      `${can('comm.send')?`<button class="btn" data-click="openComm">${svg('send')}Enviar notificación</button>`:''}<button class="btn primary" onclick="go('programaciones')">${svg('calendar')}Ver calendario</button>`)}
+      `${can('comm.send')?`<button class="btn" data-click="openComm">${svg('send')}Enviar notificación</button>`:''}<button class="btn primary" data-click="go" data-click-args='["programaciones"]'>${svg('calendar')}Ver calendario</button>`)}
     <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div><span class="kpi-trend ${k.tr}">${k.tr==='down'?'▼':k.tr==='up'?'▲':'•'} ${k.trv}</span></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
 
     <div class="dash-rowlabel">Indicadores y gráficas</div>
@@ -134,7 +134,7 @@ VIEWS.dashboard=()=>{
         <div class="card-pad">${donut(rolesData)}</div>
       </div>
       <div class="card">
-        <div class="card-head"><div class="kpi-ico t-cyan" style="width:32px;height:32px">${svg('people')}</div><h3>Asistencia a reuniones</h3><div class="actions"><button class="btn sm ghost" onclick="go('asistencia')">Ver ${svg('chevR')}</button></div></div>
+        <div class="card-head"><div class="kpi-ico t-cyan" style="width:32px;height:32px">${svg('people')}</div><h3>Asistencia a reuniones</h3><div class="actions"><button class="btn sm ghost" data-click="go" data-click-args='["asistencia"]'>Ver ${svg('chevR')}</button></div></div>
         <div class="card-pad">
           <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><b>Entre semana</b><span class="muted">${ATT_MID[5]} · ${midPct}%</span></div><div class="progress"><span style="width:${midPct}%"></span></div></div>
           <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><b>Fin de semana</b><span class="muted">${ATT_WE[5]} · ${wePct}%</span></div><div class="progress"><span style="width:${wePct}%;background:linear-gradient(90deg,#8B5CF6,#5B21B6)"></span></div></div>
@@ -152,7 +152,7 @@ VIEWS.dashboard=()=>{
       <div class="card">
         <div class="card-head"><div class="kpi-ico t-amber" style="width:32px;height:32px">${svg('clock')}</div><h3>Sin confirmar · 2 semanas</h3><div class="actions"><span class="badge amber">${unconfList.length}</span></div></div>
         <div class="lst">${unconfList.slice(0,5).map(a=>`<div class="lst-item">${avatarHTML(a.person.fullName)}<div class="lst-body"><b>${a.role}</b><p>${a.person.fullName} · ${dshort(a.date)}</p></div><span class="badge amber" style="font-size:10px">Pendiente</span></div>`).join('')||'<div class="empty" style="padding:24px">Todo confirmado 🎉</div>'}</div>
-        <div style="padding:12px 22px;border-top:1px solid var(--border)"><button class="btn sm ghost" onclick="go('programaciones')">Ver programaciones ${svg('chevR')}</button></div>
+        <div style="padding:12px 22px;border-top:1px solid var(--border)"><button class="btn sm ghost" data-click="go" data-click-args='["programaciones"]'>Ver programaciones ${svg('chevR')}</button></div>
       </div>
       <div class="card">
         <div class="card-head"><div class="kpi-ico t-violet" style="width:32px;height:32px">${svg('report')}</div><h3>Informes mensuales</h3></div>
@@ -167,7 +167,7 @@ VIEWS.dashboard=()=>{
       <div class="card">
         <div class="card-head"><div class="kpi-ico t-red" style="width:32px;height:32px">${svg('bell')}</div><h3>Alertas</h3></div>
         <div class="alert-list">
-          ${[{ico:'warn',t:'t-red',n:`${STATS.terrVenc} territorios vencidos`,d:'Requieren reasignación',badge:'red',action:'territorios'},{ico:'report',t:'t-amber',n:`${STATS.infPend} informes pendientes`,d:'Cierre de mes en 1 día',badge:'amber',action:'informes'},{ico:'clock',t:'t-violet',n:`${unconfList.length} asignaciones sin confirmar`,d:'Próximas 2 semanas',badge:'violet',action:'programaciones'},{ico:'people',t:'t-cyan',n:`${irregulares} publicadores irregulares`,d:'Sin actividad reciente',badge:'cyan',action:'database'}].map(a=>`<div class="alert-row" onclick="go('${a.action}')"><div class="alert-dot ${a.t}">${svg(a.ico)}</div><div class="alert-tx"><b>${a.n}</b><p>${a.d}</p></div><span class="badge ${a.badge}" style="font-size:10px">Revisar</span></div>`).join('')}
+          ${[{ico:'warn',t:'t-red',n:`${STATS.terrVenc} territorios vencidos`,d:'Requieren reasignación',badge:'red',action:'territorios'},{ico:'report',t:'t-amber',n:`${STATS.infPend} informes pendientes`,d:'Cierre de mes en 1 día',badge:'amber',action:'informes'},{ico:'clock',t:'t-violet',n:`${unconfList.length} asignaciones sin confirmar`,d:'Próximas 2 semanas',badge:'violet',action:'programaciones'},{ico:'people',t:'t-cyan',n:`${irregulares} publicadores irregulares`,d:'Sin actividad reciente',badge:'cyan',action:'database'}].map(a=>`<div class="alert-row" data-click="go" data-click-args='["${a.action}"]'><div class="alert-dot ${a.t}">${svg(a.ico)}</div><div class="alert-tx"><b>${a.n}</b><p>${a.d}</p></div><span class="badge ${a.badge}" style="font-size:10px">Revisar</span></div>`).join('')}
         </div>
       </div>
     </div>
@@ -210,10 +210,10 @@ VIEWS.programaciones=()=>{
     ${pageHead('Programaciones','Reuniones entre semana y fin de semana, discursos y servicio del campo',
       `${can('assign.manage')?`<button class="btn primary" data-click="openAssignCategories">${svg('plus')}Nueva asignación</button>`:''}`)}
     <div class="tabs">
-      <div class="tab ${progTab==='calendario'?'active':''}" onclick="setProgTab('calendario')">Calendario</div>
-      <div class="tab ${progTab==='vmc'?'active':''}" onclick="setProgTab('vmc')">Reunión entre semana</div>
-      <div class="tab ${progTab==='we'?'active':''}" onclick="setProgTab('we')">Reunión fin de semana</div>
-      <div class="tab ${progTab==='discursos'?'active':''}" onclick="setProgTab('discursos')">Discursos Públicos</div>
+      <div class="tab ${progTab==='calendario'?'active':''}" data-click="setProgTab" data-click-args='["calendario"]'>Calendario</div>
+      <div class="tab ${progTab==='vmc'?'active':''}" data-click="setProgTab" data-click-args='["vmc"]'>Reunión entre semana</div>
+      <div class="tab ${progTab==='we'?'active':''}" data-click="setProgTab" data-click-args='["we"]'>Reunión fin de semana</div>
+      <div class="tab ${progTab==='discursos'?'active':''}" data-click="setProgTab" data-click-args='["discursos"]'>Discursos Públicos</div>
     </div>
     <div id="progContent"></div></div>`;
   renderProgTab();
@@ -226,8 +226,8 @@ function monthCalHTML(y,m){
   let cells='';
   for(let i=0;i<startDow;i++){const pd=new Date(y,m,1-startDow+i);cells+=`<div class="bigcal-cell out"><div class="dnum">${pd.getDate()}</div></div>`}
   for(let d=1;d<=dim;d++){const date=new Date(y,m,d);const dw=date.getDay();const isToday=diso(date)===diso(TODAY);let evs='';
-    if(dw===2){const u=unconfirmedCount(date,'mid');evs+=`<div class="cal-event mid" onclick="openMeeting('${diso(date)}','mid')">7:00 p. m.<small>Reunión entre semana${u?` · ${u} s/c`:''}</small></div>`}
-    if(dw===0){const u=unconfirmedCount(date,'we');evs+=`<div class="cal-event we" onclick="openMeeting('${diso(date)}','we')">8:00 a. m.<small>Discurso + Atalaya${u?` · ${u} s/c`:''}</small></div>`}
+    if(dw===2){const u=unconfirmedCount(date,'mid');evs+=`<div class="cal-event mid" data-click="openMeeting" data-click-args='["${diso(date)}", "mid"]'>7:00 p. m.<small>Reunión entre semana${u?` · ${u} s/c`:''}</small></div>`}
+    if(dw===0){const u=unconfirmedCount(date,'we');evs+=`<div class="cal-event we" data-click="openMeeting" data-click-args='["${diso(date)}", "we"]'>8:00 a. m.<small>Discurso + Atalaya${u?` · ${u} s/c`:''}</small></div>`}
     cells+=`<div class="bigcal-cell ${isToday?'today':''}"><div class="dnum">${d}</div>${evs}</div>`;}
   const total=startDow+dim;const trail=(7-total%7)%7;for(let i=1;i<=trail;i++)cells+=`<div class="bigcal-cell out"><div class="dnum">${i}</div></div>`;
   return `<div class="bigcal"><div class="bigcal-head"><h3>${monthName(y,m)}</h3></div><div class="bigcal-grid">${dows.map(d=>`<div class="bigcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
@@ -239,7 +239,7 @@ function renderProgCalendar(){
   document.getElementById('progContent').innerHTML=`
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
       <b style="font-size:15px">Mes actual y próximo mes</b>
-      <div style="margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="cal-event mid" style="margin:0">Martes · Reunión entre semana</span><span class="cal-event we" style="margin:0">Domingo · Reunión fin de semana</span><button class="btn sm" data-click="progToday">Hoy</button><button class="icon-btn" onclick="progNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="progNav(1)">${svg('chevR')}</button></div>
+      <div style="margin-left:auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap"><span class="cal-event mid" style="margin:0">Martes · Reunión entre semana</span><span class="cal-event we" style="margin:0">Domingo · Reunión fin de semana</span><button class="btn sm" data-click="progToday">Hoy</button><button class="icon-btn" data-click="progNav" data-click-args='[-1]'>${svg('chevL')}</button><button class="icon-btn" data-click="progNav" data-click-args='[1]'>${svg('chevR')}</button></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px">${monthCalHTML(progCal.y,progCal.m)}${monthCalHTML(ny,nm)}</div>`;
 }
@@ -263,7 +263,7 @@ function renderDiscursos(){
   document.getElementById('progContent').innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:34px;height:34px">${svg('speak')}</div><h3>Discursos públicos programados</h3><div class="actions"><button class="btn sm primary" data-click="openDiscursoModal">${svg('plus')}Nuevo discurso</button></div></div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Orador</th><th>N° Bosquejo</th><th>Tema</th><th>Canción</th><th>Congregación</th><th></th></tr></thead><tbody>
     ${sundays.map(dt=>{const dc=discFor(dt);
-      return `<tr><td><b>${dshort(dt)}</b></td><td><div class="cell-user">${avatarHTML(dc.orador.fullName)}<b>${dc.orador.fullName}</b></div></td><td>#${dc.bosq}</td><td class="muted">“${dc.tema}”</td><td>${dc.cancion}</td><td>${dc.cong}</td><td style="text-align:right"><button class="icon-btn" style="width:32px;height:32px" onclick="openDiscursoMenu(event,'${dc.iso}')">${svg('dots')}</button></td></tr>`}).join('')}
+      return `<tr><td><b>${dshort(dt)}</b></td><td><div class="cell-user">${avatarHTML(dc.orador.fullName)}<b>${dc.orador.fullName}</b></div></td><td>#${dc.bosq}</td><td class="muted">“${dc.tema}”</td><td>${dc.cancion}</td><td>${dc.cong}</td><td style="text-align:right"><button class="icon-btn" style="width:32px;height:32px" data-click="openDiscursoMenu" data-click-args='["$event", "${dc.iso}"]'>${svg('dots')}</button></td></tr>`}).join('')}
     </tbody></table></div></div>`;
 }
 function openDiscursoMenu(e,iso){
@@ -340,7 +340,7 @@ const ASSIGN_CATS=[
 ];
 function openAssignCategories(){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'plus',tint:'t-brand',title:'Nueva asignación',sub:'Selecciona la categoría que deseas programar',size:'lg',
-    body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" onclick="pickAssignCat('${c.id}')" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
+    body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" data-click="pickAssignCat" data-click-args='["${c.id}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
     footer:`<button class="btn" data-click="closeModal">Cancelar</button>`});
 }
 function pickAssignCat(id){closeModal();if(id==='disc'){openDiscursoModal()}else if(id==='vmc'||id==='we'){progTab=id;if(currentView==='programaciones')VIEWS.programaciones();else go('programaciones')}else{openModal('assignment')}}
@@ -361,9 +361,9 @@ function meetingCardsHTML(type){
 }
 function meetingAccCard(dt,type,weekNo,meta){
   const parts=mkParts(dt,type);const conf=parts.filter(p=>p.confirmed).length;
-  return `<div class="card acc-card" style="margin-bottom:14px"><div class="card-head acc-head" onclick="toggleAcc(this)"><div class="kpi-ico ${type==='mid'?'t-brand':'t-violet'}" style="width:36px;height:36px">${svg('meeting')}</div><div><h3>Semana ${weekNo} · ${dshort(dt)}</h3><div class="muted" style="font-size:12.5px">${esc(meta.title)} · ${dlong(dt).replace(/^\w/,c=>c.toUpperCase())} · ${meta.time}</div></div><div class="actions"><span class="badge ${conf===parts.length?'green':'amber'}"><span class="bdot"></span>${conf}/${parts.length} confirmadas</span><button class="btn sm" onclick="event.stopPropagation();openMeeting('${diso(dt)}','${type}')">${svg('eye')}Ver detalle</button><span class="acc-chev">${svg('chevD')}</span></div></div>
+  return `<div class="card acc-card" style="margin-bottom:14px"><div class="card-head acc-head" data-click="toggleAcc" data-click-args='["$el"]'><div class="kpi-ico ${type==='mid'?'t-brand':'t-violet'}" style="width:36px;height:36px">${svg('meeting')}</div><div><h3>Semana ${weekNo} · ${dshort(dt)}</h3><div class="muted" style="font-size:12.5px">${esc(meta.title)} · ${dlong(dt).replace(/^\w/,c=>c.toUpperCase())} · ${meta.time}</div></div><div class="actions"><span class="badge ${conf===parts.length?'green':'amber'}"><span class="bdot"></span>${conf}/${parts.length} confirmadas</span><button class="btn sm" onclick="event.stopPropagation();openMeeting('${diso(dt)}','${type}')">${svg('eye')}Ver detalle</button><span class="acc-chev">${svg('chevD')}</span></div></div>
       <div class="acc-body" hidden><div class="table-wrap"><table class="data"><thead><tr><th>Parte</th><th>Responsable</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>
-        ${parts.map(p=>`<tr><td><b>${p.role}</b>${p.theme?`<br><small class="muted">“${p.theme}”</small>`:p.sub?`<br><small class="muted">${p.sub}</small>`:''}</td><td>${p.person?`<div class="cell-user">${avatarHTML(p.person.fullName)}<b>${p.person.fullName}</b></div>`:`<span class="badge red"><span class="bdot"></span>Vacante</span>`}</td><td>${p.person?confBadge(p.confirmed):'—'}</td><td style="text-align:right"><button class="btn sm ghost" onclick="openReassignPart('${diso(dt)}','${type}','${p.role}')">${svg('refresh')}Reasignar</button></td></tr>`).join('')}
+        ${parts.map(p=>`<tr><td><b>${p.role}</b>${p.theme?`<br><small class="muted">“${p.theme}”</small>`:p.sub?`<br><small class="muted">${p.sub}</small>`:''}</td><td>${p.person?`<div class="cell-user">${avatarHTML(p.person.fullName)}<b>${p.person.fullName}</b></div>`:`<span class="badge red"><span class="bdot"></span>Vacante</span>`}</td><td>${p.person?confBadge(p.confirmed):'—'}</td><td style="text-align:right"><button class="btn sm ghost" data-click="openReassignPart" data-click-args='["${diso(dt)}", "${type}", "${p.role}"]'>${svg('refresh')}Reasignar</button></td></tr>`).join('')}
       </tbody></table></div></div></div>`;
 }
 function toggleAcc(head){const card=head.parentElement;const body=card.querySelector('.acc-body');const willOpen=body.hidden;body.hidden=!willOpen;card.classList.toggle('open',willOpen);}
@@ -386,7 +386,7 @@ let dbState={q:'',grupo:'',privilegio:'',estado:'',sortCol:'id',sortDir:'asc',pa
 VIEWS.database=()=>{
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Base de datos','CRM interno · '+DB.length+' registros de la congregación',
-      `<button class="btn" data-click="exportDbFiltered">${svg('download')}Exportar</button>${can('data.create')?`<button class="btn primary" onclick="openModal('publisher')">${svg('plus')}Nuevo publicador</button>`:''}`)}
+      `<button class="btn" data-click="exportDbFiltered">${svg('download')}Exportar</button>${can('data.create')?`<button class="btn primary" data-click="openModal" data-click-args='["publisher"]'>${svg('plus')}Nuevo publicador</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">
       ${[{v:STATS.total,l:'Publicadores',t:'t-brand',i:'people'},{v:DB.filter(p=>p.estado==='Activo').length,l:'Activos',t:'t-green',i:'check'},{v:DB.filter(p=>p.estado==='Irregular').length,l:'Irregulares',t:'t-amber',i:'warn'},{v:STATS.precReg+STATS.precAux,l:'Precursores',t:'t-violet',i:'flag'},{v:GRUPOS.length,l:'Grupos',t:'t-cyan',i:'people'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -416,7 +416,7 @@ function filteredDB(){
 }
 function sortBy(col){if(dbState.sortCol===col){dbState.sortDir=dbState.sortDir==='asc'?'desc':'asc'}else{dbState.sortCol=col;dbState.sortDir='asc'}renderDbTable()}
 function sortIco(col){const rot=dbState.sortCol===col&&dbState.sortDir==='asc'?-90:90;return `<span class="sort-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${rot}deg)"><path d="m9 18 6-6-6-6"/></svg></span>`}
-function th(col,label){return `<th class="sortable ${dbState.sortCol===col?'sorted':''}" onclick="sortBy('${col}')">${label}${sortIco(col)}</th>`}
+function th(col,label){return `<th class="sortable ${dbState.sortCol===col?'sorted':''}" data-click="sortBy" data-click-args='["${col}"]'>${label}${sortIco(col)}</th>`}
 function renderDbTable(){
   saveUiState();
   const all=filteredDB();const total=all.length;const pages=Math.max(1,Math.ceil(total/dbState.pageSize));
@@ -428,7 +428,7 @@ function renderDbTable(){
       <button class="btn sm ghost" style="margin-left:auto" data-click="clearSel">${svg('x')}Quitar selección</button></div>`:'';
   document.getElementById('dbTableWrap').innerHTML=`${bulk}
     <table class="data"><thead><tr><th style="width:40px"><input type="checkbox" class="row-chk" id="dbSelAll" ${allSelected?'checked':''} onclick="toggleSelAll(this.checked)" aria-label="Seleccionar todos"></th>${th('nombre','Publicador')}<th>Contacto</th>${th('grupo','Grupo')}${th('role','Privilegio')}${th('estado','Estado')}${th('bautismo','Bautismo')}<th></th></tr></thead><tbody>
-      ${rows.map(p=>`<tr class="clickable ${sel.has(p.id)?'row-sel':''}" ondblclick="openFicha(${p.id})">
+      ${rows.map(p=>`<tr class="clickable ${sel.has(p.id)?'row-sel':''}" data-dblclick="openFicha" data-dblclick-args='[${p.id}]'>
         <td><input type="checkbox" class="row-chk" ${sel.has(p.id)?'checked':''} onclick="event.stopPropagation();toggleSel(${p.id},this.checked)" aria-label="Seleccionar ${esc(p.fullName)}"></td>
         <td><div class="cell-user">${avatarHTML(p.fullName)}<div><b>${esc(p.fullName)}</b><small>${esc(p.localidad)}</small></div></div></td>
         <td><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px">${esc(p.tel)}</span><span class="muted" style="font-size:11.5px">${esc(p.email)}</span></div></td>
@@ -437,7 +437,7 @@ function renderDbTable(){
       </tr>`).join('')||`<tr><td colspan="8"><div class="empty">Sin resultados para los filtros aplicados</div></td></tr>`}
     </tbody></table>
     <div class="pager"><span class="pager-info">Mostrando <b>${total?start+1:0}–${Math.min(start+dbState.pageSize,total)}</b> de <b>${total}</b> registros</span>
-      <div class="pager-ctrl"><button class="pg" ${dbState.page===1?'disabled':''} onclick="dbGo(${dbState.page-1})">${svg('chevL')}</button>${pageButtons(pages)}<button class="pg" ${dbState.page===pages?'disabled':''} onclick="dbGo(${dbState.page+1})">${svg('chevR')}</button></div>
+      <div class="pager-ctrl"><button class="pg" ${dbState.page===1?'disabled':''} data-click="dbGo" data-click-args='[${dbState.page-1}]'>${svg('chevL')}</button>${pageButtons(pages)}<button class="pg" ${dbState.page===pages?'disabled':''} data-click="dbGo" data-click-args='[${dbState.page+1}]'>${svg('chevR')}</button></div>
     </div>`;
   const hc=document.getElementById('dbSelAll');if(hc)hc.indeterminate=sel.size>0&&!allSelected;
 }
@@ -482,7 +482,7 @@ function fichaViewConfig(id){
       <div style="display:flex;align-items:center;gap:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:20px;flex-wrap:wrap">
         <div class="avatar" style="width:58px;height:58px;font-size:21px;background:${avColor(p.fullName)}">${initials(p.fullName)}</div>
         <div style="flex:1;min-width:150px"><div style="font-size:19px;font-weight:750;letter-spacing:-.3px">${esc(p.fullName)}</div><div style="font-size:12.5px;color:var(--ink-500);margin-top:2px">${p.grupo} · Congregación Las Flores</div><div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap">${roleBadge(p.role)}${estadoBadge(p.estado)}</div></div>
-        <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn sm" onclick="fichaToEdit(${id})">${svg('edit')}Editar</button><button class="btn sm primary" onclick="downloadCard(${id})">${svg('download')}Descargar tarjeta</button></div>
+        <div style="display:flex;gap:8px;flex-shrink:0"><button class="btn sm" data-click="fichaToEdit" data-click-args='[${id}]'>${svg('edit')}Editar</button><button class="btn sm primary" data-click="downloadCard" data-click-args='[${id}]'>${svg('download')}Descargar tarjeta</button></div>
       </div>
 
       <div class="form-section-title">${svg('phone')} Información de contacto</div>
@@ -541,8 +541,8 @@ function fichaEditConfig(id,fromView){
         <div class="form-row"><label>Nombre</label><input class="input" id="ec_nombre" value="${esc(p.nombre)}"/></div>
         <div class="form-row"><label>Apellidos</label><input class="input" id="ec_ape" value="${esc(p.apellidos)}"/></div>
         <div class="form-row"><label>Fecha de nacimiento</label><input class="input" type="date" id="ec_nac" value="${p.nacimiento}"/></div>
-        <div class="form-row"><label>Teléfono</label><input class="input" id="ec_tel" value="${esc(p.tel)}" inputmode="numeric" oninput="maskPhone(this)" aria-describedby="ec_tel_hint"/><span class="field-hint" id="ec_tel_hint" aria-live="polite"></span></div>
-        <div class="form-row"><label>Correo electrónico</label><input class="input" type="email" id="ec_mail" value="${esc(p.email)}" oninput="validateEmail(this)" aria-describedby="ec_mail_hint"/><span class="field-hint" id="ec_mail_hint" aria-live="polite"></span></div>
+        <div class="form-row"><label>Teléfono</label><input class="input" id="ec_tel" value="${esc(p.tel)}" inputmode="numeric" data-input="maskPhone" data-input-args='["$el"]' aria-describedby="ec_tel_hint"/><span class="field-hint" id="ec_tel_hint" aria-live="polite"></span></div>
+        <div class="form-row"><label>Correo electrónico</label><input class="input" type="email" id="ec_mail" value="${esc(p.email)}" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="ec_mail_hint"/><span class="field-hint" id="ec_mail_hint" aria-live="polite"></span></div>
         <div class="form-row"><label>Dirección</label><input class="input" id="ec_dir" value="${esc(p.dir)}"/></div></div>
       <div class="form-section-title">${svg('shield')} Información congregacional</div>
       <div class="form-grid">
@@ -550,7 +550,7 @@ function fichaEditConfig(id,fromView){
         <div class="form-row"><label>Nivel de acceso (rol)</label><select class="select" id="ec_access">${ACCESS_ROLES.map(r=>`<option ${r===access?'selected':''}>${r}</option>`).join('')}</select></div>
         <div class="form-row"><label>Estado</label><select class="select" id="ec_estado">${['Activo','Irregular','Inactivo'].map(e=>`<option ${e===p.estado?'selected':''}>${e}</option>`).join('')}</select></div>
         <div class="form-row full"><label>Privilegios ministeriales</label>
-          <div id="ec_privs" style="display:flex;flex-wrap:wrap;gap:8px">${PRIVILEGIOS.map(pr=>`<button type="button" class="chip-sel${privs.includes(pr)?' on':''}" data-priv="${pr}" aria-pressed="${privs.includes(pr)}" onclick="togglePrivChip(this)">${pr}</button>`).join('')}</div>
+          <div id="ec_privs" style="display:flex;flex-wrap:wrap;gap:8px">${PRIVILEGIOS.map(pr=>`<button type="button" class="chip-sel${privs.includes(pr)?' on':''}" data-priv="${pr}" aria-pressed="${privs.includes(pr)}" data-click="togglePrivChip" data-click-args='["$el"]'>${pr}</button>`).join('')}</div>
           <span class="field-hint" style="margin-top:8px">Selecciona uno o varios privilegios. El nivel de acceso se ajusta automáticamente (Anciano → Administrador de Congregación; Siervo Ministerial → Administrador de Asignaciones; los demás → Publicador). El Super Administrador se asigna manualmente.</span>
         </div></div>
       <div class="form-section-title">${svg('doc')} Información adicional</div>
@@ -571,9 +571,9 @@ function searchSelect(id,options,selected,opts){opts=opts||{};
   const norm=options.map(o=>(o&&typeof o==='object')?{value:String(o.value),label:String(o.label)}:{value:String(o),label:String(o)});
   const cur=norm.find(o=>o.value===String(selected))||(opts.placeholder?null:norm[0]);
   return `<div class="ssel" id="${id}" data-value="${cur?ssEsc(cur.value):''}"${opts.onchange?` data-onchange="${ssEsc(opts.onchange)}"`:''}>
-    <button type="button" class="ssel-toggle" onclick="sselToggle('${id}')" aria-haspopup="listbox"><span class="ssel-cur">${cur?cur.label:(opts.placeholder||'Seleccionar…')}</span>${svg('chevD')}</button>
+    <button type="button" class="ssel-toggle" data-click="sselToggle" data-click-args='["${id}"]' aria-haspopup="listbox"><span class="ssel-cur">${cur?cur.label:(opts.placeholder||'Seleccionar…')}</span>${svg('chevD')}</button>
     <div class="ssel-pop" hidden><div class="ssel-search-wrap">${svg('search')}<input class="ssel-search" placeholder="Buscar por nombre o apellido…" oninput="sselFilter('${id}',this.value)" onclick="event.stopPropagation()"></div>
-      <div class="ssel-list">${norm.map(o=>`<div class="ssel-opt${cur&&cur.value===o.value?' sel':''}" data-value="${ssEsc(o.value)}" data-l="${ssEsc(o.label.toLowerCase())}" onclick="sselPick('${id}','${ssEsc(o.value)}')">${o.label}</div>`).join('')}<div class="ssel-empty" hidden>Sin coincidencias</div></div>
+      <div class="ssel-list">${norm.map(o=>`<div class="ssel-opt${cur&&cur.value===o.value?' sel':''}" data-value="${ssEsc(o.value)}" data-l="${ssEsc(o.label.toLowerCase())}" data-click="sselPick" data-click-args='["${id}", "${ssEsc(o.value)}"]'>${o.label}</div>`).join('')}<div class="ssel-empty" hidden>Sin coincidencias</div></div>
     </div></div>`;
 }
 function sselToggle(id){const w=document.getElementById(id);if(!w)return;const pop=w.querySelector('.ssel-pop');const wasOpen=!pop.hidden;document.querySelectorAll('.ssel-pop').forEach(p=>p.hidden=true);if(!wasOpen){pop.hidden=false;const s=pop.querySelector('.ssel-search');s.value='';sselFilter(id,'');setTimeout(()=>s.focus(),10);}}
@@ -624,21 +624,21 @@ function openPrivilegio(id){
       <div class="form-row"><label>Nuevo privilegio</label><select class="select" id="newPriv">${PRIVILEGIOS.map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select></div>
       <div class="form-row full" style="margin-top:16px"><label>Fecha de nombramiento</label><input class="input" type="date" value="${diso(TODAY)}"/></div>
       <div class="form-row full" style="margin-top:16px"><label>Observaciones</label><textarea class="textarea" placeholder="Acuerdo del cuerpo de ancianos…"></textarea></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="applyPriv(${id})">${svg('check')}Actualizar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="applyPriv" data-click-args='[${id}]'>${svg('check')}Actualizar</button>`});
 }
 function applyPriv(id){const v=document.getElementById('newPriv').value;const p=DB.find(x=>x.id===id);p.role=v;p.privilegio=v;p.privilegios=[v];p.accessRole=defaultAccessRole([v]);closeModal();if(currentView==='database')renderDbTable();toast('Privilegio actualizado')}
 function markInactive(id){
   const p=DB.find(x=>x.id===id);
   openModalCustom({icon:'pause',tint:'t-red',title:'Marcar como inactivo',sub:`¿Confirmas esta acción para ${esc(p.fullName)}?`,
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">El publicador se marcará como <b>inactivo</b> y dejará de aparecer en las asignaciones activas. Podrás reactivarlo en cualquier momento desde su ficha.</p>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" onclick="applyInactive(${id})">${svg('pause')}Marcar inactivo</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" data-click="applyInactive" data-click-args='[${id}]'>${svg('pause')}Marcar inactivo</button>`});
 }
 function applyInactive(id){const p=DB.find(x=>x.id===id);p.estado='Inactivo';closeModal();if(currentView==='database')renderDbTable();toast(p.nombre+' marcado como inactivo')}
 function deletePublisher(id){
   const p=DB.find(x=>x.id===id);
   openModalCustom({icon:'trash',tint:'t-red',title:'Eliminar publicador',sub:`¿Seguro que deseas eliminar a ${esc(p.fullName)}?`,
     body:`<p style="font-size:14px;color:var(--ink-700);line-height:1.6">Esta acción quitará de forma permanente a <b>${esc(p.fullName)}</b> de la base de datos de la congregación. Sus asignaciones e informes asociados dejarán de mostrarse.</p><p class="muted" style="font-size:12.5px;margin-top:12px">Esta acción no se puede deshacer.</p>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" onclick="applyDelete(${id})">${svg('trash')}Eliminar definitivamente</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn danger" data-click="applyDelete" data-click-args='[${id}]'>${svg('trash')}Eliminar definitivamente</button>`});
 }
 function applyDelete(id){if(!requireCap('personal.manage'))return;const i=DB.findIndex(x=>x.id===id);if(i>=0){const p=DB[i];DB.splice(i,1);refreshDerived();persistAll();closeModal();if(currentView==='database')renderDbTable();toastAction(`${esc(p.fullName)} eliminado de la base de datos`,'Deshacer',()=>{DB.splice(Math.min(i,DB.length),0,p);refreshDerived();persistAll();if(currentView==='database')renderDbTable();toast(`${esc(p.fullName)} restaurado`)},{icon:'trash',cls:'undo',duration:6000})}}
 
@@ -664,9 +664,9 @@ VIEWS.territorios=()=>{
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><span class="badge green">${STATS.terrComp} completados</span><span class="badge amber">${STATS.terrTotal-STATS.terrComp} pendientes</span><span class="badge red">${STATS.terrVenc} vencidos</span><span class="muted" style="font-size:12px;margin-left:auto;align-self:center">Faltan ${STATS.terrTotal-STATS.terrComp} para completar el ciclo</span></div>
     </div></div>
     <div class="tabs">
-      <div class="tab ${terrTab==='mapa'?'active':''}" onclick="setTerrTab('mapa')">Vista de mapa</div>
-      <div class="tab ${terrTab==='asignaciones'?'active':''}" onclick="setTerrTab('asignaciones')">Asignaciones</div>
-      <div class="tab ${terrTab==='nopredica'?'active':''}" onclick="setTerrTab('nopredica')">Casas donde no se predica</div>
+      <div class="tab ${terrTab==='mapa'?'active':''}" data-click="setTerrTab" data-click-args='["mapa"]'>Vista de mapa</div>
+      <div class="tab ${terrTab==='asignaciones'?'active':''}" data-click="setTerrTab" data-click-args='["asignaciones"]'>Asignaciones</div>
+      <div class="tab ${terrTab==='nopredica'?'active':''}" data-click="setTerrTab" data-click-args='["nopredica"]'>Casas donde no se predica</div>
     </div>
     <div id="terrContent"></div></div>`;
   renderTerr();
@@ -695,8 +695,8 @@ function renderTerr(){
   const el=document.getElementById('terrContent');
   if(terrTab==='asignaciones'){renderTerrAsign();return}
   if(terrTab==='nopredica'){
-    el.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-red" style="width:34px;height:34px">${svg('home')}</div><h3>Casas donde no se predica</h3><div class="actions"><button class="btn sm primary" onclick="openModal('nopredica')">${svg('plus')}Registrar</button></div></div>
-      <div class="table-wrap"><table class="data"><thead><tr><th>N° Territorio</th><th>Dirección</th><th>Localidad</th><th>Motivo</th><th>Fecha</th><th>Observaciones</th><th style="text-align:right">Acción</th></tr></thead><tbody>${NO_PREDICA.map((n,i)=>`<tr><td><b>#${n.terr}</b></td><td><b>${esc(n.dir.split(',')[0])}</b></td><td>${esc(n.localidad)}</td><td><span class="badge red">${esc(n.motivo)}</span></td><td class="muted">${n.fecha}</td><td class="muted">${esc(n.obs)}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" onclick="delNoPredica(${i})">${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">No hay casas registradas. Usa «Registrar» para añadir la primera.</div></td></tr>`}</tbody></table></div></div>`;
+    el.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-red" style="width:34px;height:34px">${svg('home')}</div><h3>Casas donde no se predica</h3><div class="actions"><button class="btn sm primary" data-click="openModal" data-click-args='["nopredica"]'>${svg('plus')}Registrar</button></div></div>
+      <div class="table-wrap"><table class="data"><thead><tr><th>N° Territorio</th><th>Dirección</th><th>Localidad</th><th>Motivo</th><th>Fecha</th><th>Observaciones</th><th style="text-align:right">Acción</th></tr></thead><tbody>${NO_PREDICA.map((n,i)=>`<tr><td><b>#${n.terr}</b></td><td><b>${esc(n.dir.split(',')[0])}</b></td><td>${esc(n.localidad)}</td><td><span class="badge red">${esc(n.motivo)}</span></td><td class="muted">${n.fecha}</td><td class="muted">${esc(n.obs)}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" data-click="delNoPredica" data-click-args='[${i}]'>${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">No hay casas registradas. Usa «Registrar» para añadir la primera.</div></td></tr>`}</tbody></table></div></div>`;
     return;
   }
   // Vista de mapa (con listado integrado)
@@ -725,7 +725,7 @@ function renderTerrAsign(){
       <button class="btn ghost sm" style="margin-left:auto" onclick="terrAsignFilter={month:'',encargado:''};renderTerrAsign()">${svg('refresh')}Limpiar</button>
     </div>
     <div class="table-wrap"><table class="data"><thead><tr><th>Fecha</th><th>Encargado</th><th>Territorios</th><th>Confirmación</th><th>Observaciones</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
-      ${list.map(a=>`<tr><td><b>${dstr(new Date(a.date+'T00:00:00'))}</b><br><small class="muted" style="text-transform:capitalize">${diaSemana(a.date)}</small></td><td><div class="cell-user">${avatarHTML(encName(a.encargadoId))}<b>${encName(a.encargadoId)}</b></div></td><td><div style="display:flex;flex-wrap:wrap;gap:5px">${a.territorios.map(n=>`<span class="badge violet">#${n}</span>`).join('')||'<span class="muted">—</span>'}</div></td><td>${confBadgeAsign(a.conf)}<div class="muted" style="font-size:10.5px;margin-top:4px;display:flex;align-items:center;gap:3px">${svg('phone')}<span>vía app del hermano</span></div></td><td class="muted">${esc(a.obs||'—')}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" onclick="openTerrAsignModal('${a.id}')">${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" onclick="delTerrAsign('${a.id}')">${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="6"><div class="empty">Sin asignaciones para los filtros aplicados.</div></td></tr>`}
+      ${list.map(a=>`<tr><td><b>${dstr(new Date(a.date+'T00:00:00'))}</b><br><small class="muted" style="text-transform:capitalize">${diaSemana(a.date)}</small></td><td><div class="cell-user">${avatarHTML(encName(a.encargadoId))}<b>${encName(a.encargadoId)}</b></div></td><td><div style="display:flex;flex-wrap:wrap;gap:5px">${a.territorios.map(n=>`<span class="badge violet">#${n}</span>`).join('')||'<span class="muted">—</span>'}</div></td><td>${confBadgeAsign(a.conf)}<div class="muted" style="font-size:10.5px;margin-top:4px;display:flex;align-items:center;gap:3px">${svg('phone')}<span>vía app del hermano</span></div></td><td class="muted">${esc(a.obs||'—')}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" data-click="openTerrAsignModal" data-click-args='["${a.id}"]'>${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" data-click="delTerrAsign" data-click-args='["${a.id}"]'>${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="6"><div class="empty">Sin asignaciones para los filtros aplicados.</div></td></tr>`}
     </tbody></table></div></div>`;
 }
 function openTerrAsignModal(id){const a=id?TERR_ASIGN.find(x=>x.id===id):null;const sel=a?a.territorios.slice():[];
@@ -762,18 +762,18 @@ function renderTerrTable(){
   const all=terrFiltered();const total=all.length;const pages=Math.max(1,Math.ceil(total/terrState.pageSize));
   if(terrState.page>pages)terrState.page=pages;const start=(terrState.page-1)*terrState.pageSize;const rows=all.slice(start,start+terrState.pageSize);
   document.getElementById('terrTableWrap').innerHTML=`<table class="data"><thead><tr>${sortHeader(terrState,'terrSortBy','num','N°')}${sortHeader(terrState,'terrSortBy','barrio','Localidad / Barrio')}${sortHeader(terrState,'terrSortBy','estado','Estado')}<th>Asignación</th><th>Completado</th>${sortHeader(terrState,'terrSortBy','cobertura','Cobertura')}<th></th></tr></thead><tbody>
-    ${rows.map(t=>`<tr class="clickable" ondblclick="openTerrHist('${t.num}')"><td><b>${t.num}</b></td><td><b>${esc(t.barrio)}</b><br><small class="muted">${esc(t.localidad)} · ${t.cuadras} cuadras · ${t.viviendas} viviendas</small></td><td>${estadoBadge(t.estado)}</td><td class="muted">${t.asign}</td><td class="muted">${t.comp}</td><td><span class="badge ${t.estado==='Vencido'?'red':'gray'}">${t.cobertura}</span></td><td style="text-align:right"><button class="btn sm ghost" onclick="event.stopPropagation();openTerrHist('${t.num}')">${svg('eye')}Ficha</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin territorios para la búsqueda</div></td></tr>`}
+    ${rows.map(t=>`<tr class="clickable" data-dblclick="openTerrHist" data-dblclick-args='["${t.num}"]'><td><b>${t.num}</b></td><td><b>${esc(t.barrio)}</b><br><small class="muted">${esc(t.localidad)} · ${t.cuadras} cuadras · ${t.viviendas} viviendas</small></td><td>${estadoBadge(t.estado)}</td><td class="muted">${t.asign}</td><td class="muted">${t.comp}</td><td><span class="badge ${t.estado==='Vencido'?'red':'gray'}">${t.cobertura}</span></td><td style="text-align:right"><button class="btn sm ghost" onclick="event.stopPropagation();openTerrHist('${t.num}')">${svg('eye')}Ficha</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin territorios para la búsqueda</div></td></tr>`}
   </tbody></table>
   <div class="pager"><span class="pager-info">Mostrando <b>${total?start+1:0}–${Math.min(start+terrState.pageSize,total)}</b> de <b>${total}</b> territorios</span>
-    <div class="pager-ctrl"><button class="pg" ${terrState.page===1?'disabled':''} onclick="terrGo(${terrState.page-1})">${svg('chevL')}</button>${pagerButtons(pages,terrState.page,'terrGo')}<button class="pg" ${terrState.page===pages?'disabled':''} onclick="terrGo(${terrState.page+1})">${svg('chevR')}</button></div>
+    <div class="pager-ctrl"><button class="pg" ${terrState.page===1?'disabled':''} data-click="terrGo" data-click-args='[${terrState.page-1}]'>${svg('chevL')}</button>${pagerButtons(pages,terrState.page,'terrGo')}<button class="pg" ${terrState.page===pages?'disabled':''} data-click="terrGo" data-click-args='[${terrState.page+1}]'>${svg('chevR')}</button></div>
   </div>`;
 }
 function setTerrResp(num,id){if(!requireCap('territory.manage'))return;const t=TERR.find(x=>x.num===num);if(!t)return;const p=id?DB.find(x=>String(x.id)===String(id)):null;t.resp=p;if(p&&t.asign==='—')t.asign=dstr(TODAY);persistAll();renderTerrTable();toast(p?`Responsable de #${num}: ${esc(p.fullName)}`:`Asignación eliminada · Territorio #${num}`);}
 /* --- imagen y ubicación de territorios --- */
 let terrEditImg=null;
 function terrImgFieldHTML(img,wrapId){const acc='image/jpeg,image/jpg,image/png,image/webp';
-  if(img)return `<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap"><img src="${img}" alt="Imagen del territorio" style="width:250px;max-width:100%;height:158px;object-fit:cover;border-radius:12px;border:1px solid var(--border)"/><div style="display:flex;flex-direction:column;gap:8px"><label class="btn sm" style="cursor:pointer">${svg('edit')}Reemplazar<input type="file" accept="${acc}" style="display:none" onchange="terrImgPick(this,'${wrapId}')"/></label><button type="button" class="btn sm danger" onclick="terrImgRemove('${wrapId}')">${svg('trash')}Quitar</button></div></div>`;
-  return `<label class="terr-drop">${svg('map')}<div><b>Subir imagen del territorio</b><small>JPG, JPEG, PNG o WEBP</small></div><input type="file" accept="${acc}" style="display:none" onchange="terrImgPick(this,'${wrapId}')"/></label>`;}
+  if(img)return `<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap"><img src="${img}" alt="Imagen del territorio" style="width:250px;max-width:100%;height:158px;object-fit:cover;border-radius:12px;border:1px solid var(--border)"/><div style="display:flex;flex-direction:column;gap:8px"><label class="btn sm" style="cursor:pointer">${svg('edit')}Reemplazar<input type="file" accept="${acc}" style="display:none" data-change="terrImgPick" data-change-args='["$el", "${wrapId}"]'/></label><button type="button" class="btn sm danger" data-click="terrImgRemove" data-click-args='["${wrapId}"]'>${svg('trash')}Quitar</button></div></div>`;
+  return `<label class="terr-drop">${svg('map')}<div><b>Subir imagen del territorio</b><small>JPG, JPEG, PNG o WEBP</small></div><input type="file" accept="${acc}" style="display:none" data-change="terrImgPick" data-change-args='["$el", "${wrapId}"]'/></label>`;}
 function terrImgPick(input,wrapId){const f=input.files&&input.files[0];if(!f)return;if(!/^image\/(jpeg|jpg|png|webp)$/i.test(f.type)){toast('Formato no válido · usa JPG, PNG o WEBP');return;}
   const r=new FileReader();r.onload=e=>{terrEditImg=e.target.result;const w=document.getElementById(wrapId);if(w)w.innerHTML=terrImgFieldHTML(terrEditImg,wrapId);
     if(dataBackend()==='supabase'){
@@ -800,7 +800,7 @@ function openTerrEdit(num){if(!requireCap('territory.manage'))return;const t=TER
     body:`<div class="form-grid">
         <div class="form-row"><label>Responsable</label>${searchSelect('te_resp',[{value:'',label:'Sin asignar'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),t.resp?t.resp.id:'')}</div>
         <div class="form-row"><label>Estado</label><select class="select" id="te_estado">${['Activo','Pendiente','Completado','Vencido'].map(e=>`<option${e===t.estado?' selected':''}>${e}</option>`).join('')}</select></div>
-        <div class="form-row full"><label>Ubicación (Google Maps)</label><input class="input" id="te_maps" value="${t.maps||''}" placeholder="https://maps.app.goo.gl/… o https://www.google.com/maps/…" oninput="validateMapsUrl(this)" aria-describedby="te_maps_hint"/><span class="field-hint" id="te_maps_hint" aria-live="polite"></span></div>
+        <div class="form-row full"><label>Ubicación (Google Maps)</label><input class="input" id="te_maps" value="${t.maps||''}" placeholder="https://maps.app.goo.gl/… o https://www.google.com/maps/…" data-input="validateMapsUrl" data-input-args='["$el"]' aria-describedby="te_maps_hint"/><span class="field-hint" id="te_maps_hint" aria-live="polite"></span></div>
       </div>
       <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
       <div id="te_img_wrap">${terrImgFieldHTML(t.img,'te_img_wrap')}</div>`,
@@ -822,7 +822,7 @@ function openTerrCreate(){if(!requireCap('territory.manage'))return;terrEditImg=
       <div class="form-row"><label>Viviendas aprox.</label><input class="input" id="tc_viv" type="number" placeholder="0"/></div>
       <div class="form-row"><label>Responsable</label>${searchSelect('tc_resp',[{value:'',label:'Sin asignar'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),'')}</div>
       <div class="form-row"><label>Estado</label><select class="select" id="tc_estado"><option>Pendiente</option><option>Activo</option></select></div>
-      <div class="form-row full"><label>Ubicación (Google Maps)</label><input class="input" id="tc_maps" placeholder="https://maps.app.goo.gl/…" oninput="validateMapsUrl(this)" aria-describedby="tc_maps_hint"/><span class="field-hint" id="tc_maps_hint" aria-live="polite"></span></div>
+      <div class="form-row full"><label>Ubicación (Google Maps)</label><input class="input" id="tc_maps" placeholder="https://maps.app.goo.gl/…" data-input="validateMapsUrl" data-input-args='["$el"]' aria-describedby="tc_maps_hint"/><span class="field-hint" id="tc_maps_hint" aria-live="polite"></span></div>
     </div>
     <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
     <div id="tc_img_wrap">${terrImgFieldHTML(null,'tc_img_wrap')}</div>`,
@@ -858,10 +858,10 @@ function renderTerrCal(){
   let cells='';
   for(let i=0;i<startDow;i++){const pd=new Date(y,m,1-startDow+i);cells+=`<div class="bigcal-cell out"><div class="dnum">${pd.getDate()}</div></div>`}
   for(let d=1;d<=dim;d++){const date=new Date(y,m,d);const isToday=diso(date)===diso(TODAY);const t=terrForDate(date);
-    let ev='';if(t)ev=`<div class="cal-event terr ${t.estado==='Pendiente'?'pend':''}" onclick="openTerrHist('${t.num}')">Territorio #${t.num}<small>Cap. ${t.captain.split(' ')[0]} ${t.captain.split(' ')[1]||''} · ${t.estado}</small></div>`;
+    let ev='';if(t)ev=`<div class="cal-event terr ${t.estado==='Pendiente'?'pend':''}" data-click="openTerrHist" data-click-args='["${t.num}"]'>Territorio #${t.num}<small>Cap. ${t.captain.split(' ')[0]} ${t.captain.split(' ')[1]||''} · ${t.estado}</small></div>`;
     cells+=`<div class="bigcal-cell ${isToday?'today':''}"><div class="dnum">${d}</div>${ev}</div>`;}
   const total=startDow+dim;const trail=(7-total%7)%7;for(let i=1;i<=trail;i++)cells+=`<div class="bigcal-cell out"><div class="dnum">${i}</div></div>`;
-  document.getElementById('terrContent').innerHTML=`<div class="bigcal"><div class="bigcal-head"><h3>${monName}</h3><div class="actions"><span class="muted" style="font-size:12px;margin-right:6px">Salidas de predicación: todos los días</span><button class="icon-btn" onclick="terrCalNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="terrCalNav(1)">${svg('chevR')}</button></div></div><div class="bigcal-grid">${dows.map(d=>`<div class="bigcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  document.getElementById('terrContent').innerHTML=`<div class="bigcal"><div class="bigcal-head"><h3>${monName}</h3><div class="actions"><span class="muted" style="font-size:12px;margin-right:6px">Salidas de predicación: todos los días</span><button class="icon-btn" data-click="terrCalNav" data-click-args='[-1]'>${svg('chevL')}</button><button class="icon-btn" data-click="terrCalNav" data-click-args='[1]'>${svg('chevR')}</button></div></div><div class="bigcal-grid">${dows.map(d=>`<div class="bigcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
 }
 function terrCalNav(delta){terrCal.m+=delta;if(terrCal.m<0){terrCal.m=11;terrCal.y--}if(terrCal.m>11){terrCal.m=0;terrCal.y++}renderTerrCal()}
 function lfMapBG(){
@@ -884,7 +884,7 @@ function terrMap(){
   let cells='';
   for(let i=0;i<37;i++){const t=TERR[i];const{x,y}=lfCell(i);
     const fill={Activo:'#f0fdf4',Pendiente:'#fffbeb',Completado:'#ecfeff',Vencido:'#fef2f2'}[t.estado];const stroke={Activo:'#22C55E',Pendiente:'#F59E0B',Completado:'#06b6d4',Vencido:'#EF4444'}[t.estado];
-    cells+=`<g style="cursor:pointer" onclick="openTerrHist('${t.num}')"><rect x="${x}" y="${y}" width="${LF_CW}" height="${LF_CH}" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/><text x="${x+LF_CW/2}" y="${y+15}" text-anchor="middle" font-size="11" font-weight="800" fill="${stroke}" font-family="Inter">${t.num}</text></g>`;}
+    cells+=`<g style="cursor:pointer" data-click="openTerrHist" data-click-args='["${t.num}"]'><rect x="${x}" y="${y}" width="${LF_CW}" height="${LF_CH}" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="1.4"/><text x="${x+LF_CW/2}" y="${y+15}" text-anchor="middle" font-size="11" font-weight="800" fill="${stroke}" font-family="Inter">${t.num}</text></g>`;}
   return `<div class="card card-pad"><div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;align-items:center"><b style="font-size:13.5px">Territorio Las Flores · 37 sectores</b><span class="badge green"><span class="bdot"></span>Activo</span><span class="badge amber"><span class="bdot"></span>Pendiente</span><span class="badge cyan"><span class="bdot"></span>Completado</span><span class="badge red"><span class="bdot"></span>Vencido</span></div><div style="overflow-x:auto;background:var(--surface-2);border-radius:14px;border:1px solid var(--border);padding:8px"><svg viewBox="0 0 820 360" style="width:100%;min-width:720px">${lfMapBG()}${cells}</svg></div></div>`;
 }
 function tStat(label,value,ico,tint){return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 14px;display:flex;align-items:center;gap:11px"><div class="kpi-ico ${tint}" style="width:32px;height:32px;flex-shrink:0">${svg(ico)}</div><div style="min-width:0"><div style="font-size:10.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--ink-400)">${label}</div><div style="font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${value}</div></div></div>`}
@@ -919,7 +919,7 @@ function openTerrHist(num){
       ${noPred.length?`<div class="form-section-title">Casas donde no se predica</div><div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Dirección</th><th>Motivo</th><th>Fecha</th></tr></thead><tbody>${noPred.map(n=>`<tr><td><b>${esc(n.dir.split(',')[0])}</b></td><td><span class="badge red">${esc(n.motivo)}</span></td><td class="muted">${n.fecha}</td></tr>`).join('')}</tbody></table></div>`:''}
       <div class="form-section-title">Historial de asignaciones</div>
       <div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Responsable</th><th>Fecha asignación</th><th>Fecha completado</th><th>Observaciones</th></tr></thead><tbody>${t.hist.map(h=>`<tr><td><b>${h.resp}</b></td><td class="muted">${h.asign}</td><td>${h.comp==='Pendiente'?'<span class="badge amber">Pendiente</span>':`<span class="muted">${h.comp}</span>`}</td><td class="muted">${esc(h.obs)}</td></tr>`).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cerrar</button>${t.maps?`<button class="btn" onclick="openTerrMaps('${t.num}')">${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" onclick="closeModal();openAsignTerr('${t.num}')">${svg('refresh')}Reasignar</button><button class="btn primary" onclick="closeModal();openTerrEdit('${t.num}')">${svg('edit')}Editar territorio</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>${t.maps?`<button class="btn" data-click="openTerrMaps" data-click-args='["${t.num}"]'>${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" onclick="closeModal();openAsignTerr('${t.num}')">${svg('refresh')}Reasignar</button><button class="btn primary" onclick="closeModal();openTerrEdit('${t.num}')">${svg('edit')}Editar territorio</button>`});
 }
 function terrMiniMap(t){
   const idx=(parseInt(t.num,10)-1)%42;const{x,y}=lfCell(idx);const cx=x+LF_CW/2,cy=y+LF_CH/2;
@@ -935,9 +935,9 @@ VIEWS.exhibidores=()=>{
     ${pageHead('Exhibidores','Predicación pública · domingo a domingo · 7:00 a. m. a 7:00 p. m. · turnos de 2 h',
       `${can('assign.manage')?`<button class="btn primary" onclick="openExhibTurn(EXHIB_NAMES[exhibSel],diso(TODAY),0)">${svg('plus')}Asignar turno</button>`:''}`)}
     <div id="exhibSummary"></div>
-    <div class="tabs">${EXHIB_NAMES.map((n,i)=>`<div class="tab ${exhibSel===i?'active':''}" onclick="setExhib(${i})">${n}</div>`).join('')}</div>
+    <div class="tabs">${EXHIB_NAMES.map((n,i)=>`<div class="tab ${exhibSel===i?'active':''}" data-click="setExhib" data-click-args='[${i}]'>${n}</div>`).join('')}</div>
     <div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('grid')}</div><h3>Agenda semanal · ${EXHIB_NAMES[exhibSel]}</h3>
-      <div class="actions"><span class="badge green"><span class="bdot"></span>Completo</span><span class="badge gray">Vacante</span><button class="icon-btn" onclick="exhibNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="exhibNav(1)">${svg('chevR')}</button></div></div>
+      <div class="actions"><span class="badge green"><span class="bdot"></span>Completo</span><span class="badge gray">Vacante</span><button class="icon-btn" data-click="exhibNav" data-click-args='[-1]'>${svg('chevL')}</button><button class="icon-btn" data-click="exhibNav" data-click-args='[1]'>${svg('chevR')}</button></div></div>
       <div class="card-pad" id="exhibGridWrap"></div>
     </div></div>`;
   renderExhib();
@@ -960,7 +960,7 @@ function renderExhib(){
   // grid
   let html=`<div class="exwrap"><div class="exgrid"><div class="gh corner">Hora</div>${days.map(d=>`<div class="gh ${diso(d)===todayISO?'today':''}">${DOW_ABBR[d.getDay()]}<small>${d.getDate()}</small></div>`).join('')}`;
   TURN_SLOTS.forEach((s,si)=>{html+=`<div class="gt">${s[0]}<br>${s[1]}</div>`;days.forEach(d=>{const t=exhibTurn(ex,d,si);const isT=diso(d)===todayISO;
-    html+=`<div class="gc ${isT?'today':''}" role="button" onclick="openExhibTurn('${ex}','${diso(d)}',${si})">${t?`<div class="ex-full">${t.map(p=>`<div class="ex-person">${avatarHTML(p.fullName,'av-xs')}<span>${esc(p.fullName.split(' ')[0])}</span></div>`).join('')}</div>`:`<div class="ex-empty">Vacante</div>`}</div>`;});});
+    html+=`<div class="gc ${isT?'today':''}" role="button" data-click="openExhibTurn" data-click-args='["${ex}", "${diso(d)}", ${si}]'>${t?`<div class="ex-full">${t.map(p=>`<div class="ex-person">${avatarHTML(p.fullName,'av-xs')}<span>${esc(p.fullName.split(' ')[0])}</span></div>`).join('')}</div>`:`<div class="ex-empty">Vacante</div>`}</div>`;});});
   html+='</div></div>';
   document.getElementById('exhibGridWrap').innerHTML=html;
 }
@@ -1013,10 +1013,10 @@ VIEWS.informes=()=>{
     <div class="card" style="margin-bottom:20px"><div class="card-pad"><div style="display:flex;justify-content:space-between;margin-bottom:9px"><b style="font-size:13.5px">Avance global de entrega del mes</b><b style="font-size:13.5px;color:var(--green-700)">${globalPct}%</b></div><div class="progress lg"><span style="width:${globalPct}%;background:var(--green)"></span></div></div></div>
     <div class="card"><div class="card-head"><h3>Detalle por publicador</h3>
       <div class="actions"><div class="seg">
-        <button class="${informeFilter==='todos'?'active':''}" onclick="setInformeFilter('todos')">Todos</button>
-        <button class="${informeFilter==='entregados'?'active':''}" onclick="setInformeFilter('entregados')">Entregados</button>
-        <button class="${informeFilter==='pendientes'?'active':''}" onclick="setInformeFilter('pendientes')">Pendientes</button>
-        <button class="${informeFilter==='precursores'?'active':''}" onclick="setInformeFilter('precursores')">Precursores</button>
+        <button class="${informeFilter==='todos'?'active':''}" data-click="setInformeFilter" data-click-args='["todos"]'>Todos</button>
+        <button class="${informeFilter==='entregados'?'active':''}" data-click="setInformeFilter" data-click-args='["entregados"]'>Entregados</button>
+        <button class="${informeFilter==='pendientes'?'active':''}" data-click="setInformeFilter" data-click-args='["pendientes"]'>Pendientes</button>
+        <button class="${informeFilter==='precursores'?'active':''}" data-click="setInformeFilter" data-click-args='["precursores"]'>Precursores</button>
       </div></div></div>
       <div class="table-wrap" id="infTableWrap"></div>
       </div></div>`;
@@ -1034,17 +1034,17 @@ function renderInfTable(){
   const all=infFiltered();const total=all.length;const pages=Math.max(1,Math.ceil(total/infState.pageSize));
   if(infState.page>pages)infState.page=pages;const start=(infState.page-1)*infState.pageSize;const rows=all.slice(start,start+infState.pageSize);
   document.getElementById('infTableWrap').innerHTML=`<table class="data"><thead><tr>${sortHeader(infState,'infSortBy','nombre','Publicador')}${sortHeader(infState,'infSortBy','grupo','Grupo')}${sortHeader(infState,'infSortBy','estado','Estado')}${sortHeader(infState,'infSortBy','horas','Horas')}${sortHeader(infState,'infSortBy','estudios','Estudios')}${sortHeader(infState,'infSortBy','tipo','Tipo')}<th style="text-align:right">Acción</th></tr></thead><tbody>
-    ${rows.map(r=>`<tr><td><div class="cell-user">${avatarHTML(r.pub.fullName)}<div><b>${r.pub.fullName}</b><small>${r.pub.role}</small></div></div></td><td class="muted">${r.pub.grupo}</td><td>${r.entregado?`<span class="badge green">${svg('check')}Entregado</span>`:`<span class="badge red">${svg('warn')}Pendiente</span>`}</td><td>${r.entregado?'<b>'+r.horas+' h</b>':'—'}</td><td>${r.entregado?r.estudios:'—'}</td><td>${r.auxiliar?'<span class="badge violet">Precursor</span>':'<span class="badge gray">Publicador</span>'}</td><td style="text-align:right">${r.entregado?`<button class="btn sm ghost" onclick="openRegistrarInforme(${r.pub.id})">${svg('edit')}Editar</button>`:`<button class="btn sm ghost" onclick="remindInforme(${r.pub.id})">${svg('send')}Recordar</button><button class="btn sm primary" style="margin-left:6px" onclick="openRegistrarInforme(${r.pub.id})">${svg('check')}Registrar</button>`}</td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin registros para este filtro</div></td></tr>`}
+    ${rows.map(r=>`<tr><td><div class="cell-user">${avatarHTML(r.pub.fullName)}<div><b>${r.pub.fullName}</b><small>${r.pub.role}</small></div></div></td><td class="muted">${r.pub.grupo}</td><td>${r.entregado?`<span class="badge green">${svg('check')}Entregado</span>`:`<span class="badge red">${svg('warn')}Pendiente</span>`}</td><td>${r.entregado?'<b>'+r.horas+' h</b>':'—'}</td><td>${r.entregado?r.estudios:'—'}</td><td>${r.auxiliar?'<span class="badge violet">Precursor</span>':'<span class="badge gray">Publicador</span>'}</td><td style="text-align:right">${r.entregado?`<button class="btn sm ghost" data-click="openRegistrarInforme" data-click-args='[${r.pub.id}]'>${svg('edit')}Editar</button>`:`<button class="btn sm ghost" data-click="remindInforme" data-click-args='[${r.pub.id}]'>${svg('send')}Recordar</button><button class="btn sm primary" style="margin-left:6px" data-click="openRegistrarInforme" data-click-args='[${r.pub.id}]'>${svg('check')}Registrar</button>`}</td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin registros para este filtro</div></td></tr>`}
     </tbody></table>
     <div class="pager"><span class="pager-info">Mostrando <b>${total?start+1:0}–${Math.min(start+infState.pageSize,total)}</b> de <b>${total}</b> · filtro: <b>${informeFilter}</b></span>
-      <div class="pager-ctrl"><button class="pg" ${infState.page===1?'disabled':''} onclick="infGo(${infState.page-1})">${svg('chevL')}</button>${pagerButtons(pages,infState.page,'infGo')}<button class="pg" ${infState.page===pages?'disabled':''} onclick="infGo(${infState.page+1})">${svg('chevR')}</button></div>
+      <div class="pager-ctrl"><button class="pg" ${infState.page===1?'disabled':''} data-click="infGo" data-click-args='[${infState.page-1}]'>${svg('chevL')}</button>${pagerButtons(pages,infState.page,'infGo')}<button class="pg" ${infState.page===pages?'disabled':''} data-click="infGo" data-click-args='[${infState.page+1}]'>${svg('chevR')}</button></div>
     </div>`;
 }
 
 function openSendReport(titulo){
   openModalCustom({icon:'send',tint:'t-brand',title:'Enviar reporte por correo',sub:titulo,
     body:`<div class="form-grid">
-      <div class="form-row full"><label>Destinatario *</label><input class="input" id="sr_mail" type="email" placeholder="correo@ejemplo.com" value="${CONG_CFG.mail||'lasflores@congregacion.org'}" oninput="validateEmail(this)" aria-describedby="sr_mail_hint"/><span class="field-hint" id="sr_mail_hint" aria-live="polite"></span></div>
+      <div class="form-row full"><label>Destinatario *</label><input class="input" id="sr_mail" type="email" placeholder="correo@ejemplo.com" value="${CONG_CFG.mail||'lasflores@congregacion.org'}" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="sr_mail_hint"/><span class="field-hint" id="sr_mail_hint" aria-live="polite"></span></div>
       <div class="form-row full"><label>Mensaje (opcional)</label><textarea class="textarea" id="sr_msg" placeholder="Mensaje para el destinatario…"></textarea></div>
     </div>`,
     footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendReportMail('${titulo.replace(/'/g,'')}'))">${svg('send')}Enviar</button>`});}
@@ -1095,7 +1095,7 @@ VIEWS.reportes=()=>{
       <div style="padding:8px">${reportes.map(r=>`<div class="rep-row">
         <div class="kpi-ico ${r.t}" style="width:36px;height:36px;flex-shrink:0">${svg(r.ico)}</div>
         <div class="rep-info"><b>${esc(r.titulo)}</b><p>${r.d}</p></div>
-        <div class="rep-actions"><button class="btn sm ghost" onclick="repPreview('${r.pv}')">${svg('eye')}Vista previa</button><button class="btn sm" onclick="openSendReport('${r.titulo.replace(/'/g,'')}')">${svg('send')}Enviar</button>${r.pdf?`<button class="btn sm" onclick="${r.docx}()">${svg('download')}Word</button><button class="btn sm primary" onclick="${r.pdf}()">${svg('download')}PDF</button>`:`<button class="btn sm primary" onclick="${r.dl}()">${svg('download')}Descargar</button>`}</div>
+        <div class="rep-actions"><button class="btn sm ghost" data-click="repPreview" data-click-args='["${r.pv}"]'>${svg('eye')}Vista previa</button><button class="btn sm" onclick="openSendReport('${r.titulo.replace(/'/g,'')}')">${svg('send')}Enviar</button>${r.pdf?`<button class="btn sm" onclick="${r.docx}()">${svg('download')}Word</button><button class="btn sm primary" onclick="${r.pdf}()">${svg('download')}PDF</button>`:`<button class="btn sm primary" onclick="${r.dl}()">${svg('download')}Descargar</button>`}</div>
       </div>`).join('')}</div>
     </div>
 
@@ -1150,12 +1150,12 @@ VIEWS.actividad=()=>{
   const items=actItems();
   const counts={all:items.length,notif:items.filter(i=>i.kind==='notif').length,tarea:items.filter(i=>i.kind==='tarea').length};
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" data-click="markAllActivity">${svg('check')}Marcar todo leído</button><button class="btn" data-click="openNotifPrefs">${svg('settings')}Preferencias</button>${can('data.create')?`<button class="btn primary" onclick="openModal('task')">${svg('plus')}Nueva tarea</button>`:''}`)}
+    ${pageHead('Actividad','Centro unificado de notificaciones y tareas · todo lo pendiente en un solo lugar',`<button class="btn" data-click="markAllActivity">${svg('check')}Marcar todo leído</button><button class="btn" data-click="openNotifPrefs">${svg('settings')}Preferencias</button>${can('data.create')?`<button class="btn primary" data-click="openModal" data-click-args='["task"]'>${svg('plus')}Nueva tarea</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:20px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       ${[{v:activityPending(),l:'Pendientes en total',t:'t-brand',i:'bell'},{v:NOTIFS.filter(n=>!n.read).length,l:'Notificaciones sin leer',t:'t-amber',i:'bell'},{v:TASKS.filter(t=>t.estado!=='Completada').length,l:'Tareas por completar',t:'t-violet',i:'tasks'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:36px;height:36px">${svg(k.i)}</div></div><div class="kpi-val" style="font-size:25px">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
     <div class="card">
-      <div class="card-head"><h3>Bandeja de actividad</h3><div class="actions"><div class="seg">${[['all','Todas'],['notif','Notificaciones'],['tarea','Tareas']].map(([k,l])=>`<button class="${actFilter===k?'active':''}" onclick="setActFilter('${k}')">${l} (${counts[k]})</button>`).join('')}</div></div></div>
+      <div class="card-head"><h3>Bandeja de actividad</h3><div class="actions"><div class="seg">${[['all','Todas'],['notif','Notificaciones'],['tarea','Tareas']].map(([k,l])=>`<button class="${actFilter===k?'active':''}" data-click="setActFilter" data-click-args='["${k}"]'>${l} (${counts[k]})</button>`).join('')}</div></div></div>
       <div id="actList" class="lst"></div>
     </div></div>`;
   renderActList();
@@ -1200,11 +1200,11 @@ function openTaskDetail(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
       <p style="font-size:13.5px;color:var(--ink-500);line-height:1.6;margin-bottom:16px">${esc(t.desc)}</p>
       <div class="form-section-title">${svg('user')} Responsable</div>
       <div class="cell-user" style="margin-bottom:6px">${avatarHTML(t.asignadoA.fullName)}<div><b>${t.asignadoA.fullName}</b><br><small class="muted">${t.asignadoA.role||''}</small></div></div>`,
-    footer:`<button class="btn danger" onclick="deleteTask(${t.id})">${svg('trash')}Eliminar</button><button class="btn" onclick="openTaskEdit(${t.id})">${svg('edit')}Editar</button>${t.estado!=='Completada'?`<button class="btn primary" onclick="closeModal();completeActTask(${t.id})">${svg('check')}Completar</button>`:`<button class="btn primary" onclick="reopenTask(${t.id})">${svg('refresh')}Reabrir</button>`}`});}
+    footer:`<button class="btn danger" data-click="deleteTask" data-click-args='[${t.id}]'>${svg('trash')}Eliminar</button><button class="btn" data-click="openTaskEdit" data-click-args='[${t.id}]'>${svg('edit')}Editar</button>${t.estado!=='Completada'?`<button class="btn primary" onclick="closeModal();completeActTask(${t.id})">${svg('check')}Completar</button>`:`<button class="btn primary" data-click="reopenTask" data-click-args='[${t.id}]'>${svg('refresh')}Reabrir</button>`}`});}
 function openTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   swapModalContent({icon:'edit',tint:'t-violet',title:'Editar tarea',sub:t.titulo,size:'lg',
     body:`<div class="form-grid"><div class="form-row full"><label>Nombre de la tarea *</label><input class="input" id="tk_titulo" value="${esc(t.titulo)}"/></div><div class="form-row full"><label>Descripción</label><textarea class="textarea" id="tk_desc">${esc(t.desc)}</textarea></div><div class="form-row"><label>Asignada a</label><select class="select" id="tk_asig">${eldersM.map(p=>`<option value="${p.id}"${String(p.id)===String(t.asignadoA.id)?' selected':''}>${esc(p.fullName)}</option>`).join('')}</select></div><div class="form-row"><label>Prioridad</label><select class="select" id="tk_prio">${['Alta','Media','Baja'].map(x=>`<option${x===t.prioridad?' selected':''}>${x}</option>`).join('')}</select></div><div class="form-row"><label>Fecha límite</label><input class="input" id="tk_limite" type="date" value="${t.limiteD?diso(t.limiteD):diso(TODAY)}"/></div><div class="form-row"><label>Estado</label><select class="select" id="tk_estado">${['Pendiente','Completada'].map(x=>`<option${x===t.estado?' selected':''}>${x}</option>`).join('')}</select></div></div>`,
-    footer:`<button class="btn" onclick="openTaskDetail(${t.id})">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTaskEdit(${t.id}))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="openTaskDetail" data-click-args='[${t.id}]'>Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTaskEdit(${t.id}))">${svg('check')}Guardar</button>`});}
 function saveTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   const titulo=(document.getElementById('tk_titulo').value||'').trim();
   if(!titulo){document.getElementById('tk_titulo').classList.add('invalid');toast('Ingresa el nombre de la tarea');return;}
@@ -1229,7 +1229,7 @@ const COMM_DEST=['Congregación completa','Capitanes de grupo','Territorios','Cu
 function openComm(){if(!requireCap('comm.send'))return;
   openModalCustom({icon:'send',tint:'t-brand',title:'Enviar notificación',sub:'Comunica a la congregación de forma segmentada',size:'lg',
     body:`<div class="form-section-title">${svg('people')} Destinatarios</div>
-      <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:6px">${COMM_DEST.map((d,i)=>`<button type="button" data-on="${i===0?'1':'0'}" onclick="commChip(this)" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid ${i===0?'var(--brand-500)':'var(--border-strong)'};background:${i===0?'var(--brand-500)':'var(--surface-3)'};color:${i===0?'#fff':'var(--ink-700)'};transition:.15s">${svg('check')}${d}</button>`).join('')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:6px">${COMM_DEST.map((d,i)=>`<button type="button" data-on="${i===0?'1':'0'}" data-click="commChip" data-click-args='["$el"]' style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid ${i===0?'var(--brand-500)':'var(--border-strong)'};background:${i===0?'var(--brand-500)':'var(--surface-3)'};color:${i===0?'#fff':'var(--ink-700)'};transition:.15s">${svg('check')}${d}</button>`).join('')}</div>
       <div class="form-section-title">${svg('doc')} Contenido</div>
       <div class="form-grid">
         <div class="form-row full"><label>Título *</label><input class="input" id="comm_titulo" placeholder="Ej. Recordatorio reunión de servicio"/></div>
@@ -1259,13 +1259,13 @@ VIEWS.config=()=>{
   if(configTab==='sub'&&!can('billing'))configTab='general';
   document.getElementById('content').innerHTML=`<div class="page">
     ${pageHead('Configuración de la Congregación','Las Flores · administra los datos y ajustes generales',`<button class="btn primary" onclick="saveWithFeedback(this,()=>saveCongConfig())">${svg('check')}Guardar cambios</button>`)}
-    <div class="tabs">${tabs.map(([id,l])=>`<div class="tab ${configTab===id?'active':''}" onclick="setConfigTab('${id}')">${l}</div>`).join('')}</div>
+    <div class="tabs">${tabs.map(([id,l])=>`<div class="tab ${configTab===id?'active':''}" data-click="setConfigTab" data-click-args='["${id}"]'>${l}</div>`).join('')}</div>
     <div id="configContent"></div></div>`;
   renderConfig();
 };
 function setConfigTab(t){configTab=t;saveUiState();VIEWS.config()}
 /* --- Administración de grupos (Nuevo / Configurar) --- */
-function grpMembersChips(){return Array.from(window.__grpSel).map(id=>{const p=DB.find(x=>String(x.id)===String(id));return p?`<span style="display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:20px;background:var(--surface-3);border:1px solid var(--border);font-size:12.5px;font-weight:600">${esc(p.fullName)}<button type="button" onclick="grpRemoveMember('${id}')" style="background:none;color:var(--ink-400);font-weight:800;font-size:15px;line-height:1;cursor:pointer">×</button></span>`:'';}).join('')||'<span class="muted" style="font-size:12.5px">Sin integrantes aún.</span>';}
+function grpMembersChips(){return Array.from(window.__grpSel).map(id=>{const p=DB.find(x=>String(x.id)===String(id));return p?`<span style="display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:20px;background:var(--surface-3);border:1px solid var(--border);font-size:12.5px;font-weight:600">${esc(p.fullName)}<button type="button" data-click="grpRemoveMember" data-click-args='["${id}"]' style="background:none;color:var(--ink-400);font-weight:800;font-size:15px;line-height:1;cursor:pointer">×</button></span>`:'';}).join('')||'<span class="muted" style="font-size:12.5px">Sin integrantes aún.</span>';}
 function grpRefresh(){const m=document.getElementById('grp_members');if(m)m.innerHTML=grpMembersChips();const c=document.getElementById('grp_count');if(c)c.textContent='('+window.__grpSel.size+')';}
 function grpAddMember(){const id=sselValue('grp_add');if(!id)return;window.__grpSel.add(String(id));grpRefresh();}
 function grpRemoveMember(id){window.__grpSel.delete(String(id));grpRefresh();}
@@ -1374,8 +1374,8 @@ function renderConfig(){
     </div>
     <div class="form-section-title">${svg('phone')} Información de contacto</div>
     <div class="form-grid">
-      <div class="form-row"><label>Teléfono de la congregación</label><input class="input" id="cfg_tel" value="${C('tel')||'601 742 1180'}" inputmode="numeric" oninput="maskPhone(this)"/></div>
-      <div class="form-row"><label>Correo de contacto</label><input class="input" id="cfg_mail" type="email" value="${C('mail')||'lasflores@congregacion.org'}" oninput="validateEmail(this)" aria-describedby="cfg_mail_hint"/><span class="field-hint" id="cfg_mail_hint" aria-live="polite"></span></div>
+      <div class="form-row"><label>Teléfono de la congregación</label><input class="input" id="cfg_tel" value="${C('tel')||'601 742 1180'}" inputmode="numeric" data-input="maskPhone" data-input-args='["$el"]'/></div>
+      <div class="form-row"><label>Correo de contacto</label><input class="input" id="cfg_mail" type="email" value="${C('mail')||'lasflores@congregacion.org'}" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="cfg_mail_hint"/><span class="field-hint" id="cfg_mail_hint" aria-live="polite"></span></div>
       <div class="form-row"><label>Coordinador del cuerpo de ancianos</label><input class="input" id="cfg_coord" value="${C('coord')||'Paublo Díaz'}"/></div>
       <div class="form-row"><label>Secretario</label><input class="input" id="cfg_secre" value="${C('secre')||'Hugo Molano'}"/></div>
     </div>
@@ -1383,10 +1383,10 @@ function renderConfig(){
     <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><p class="muted" style="font-size:12.5px;flex:1;min-width:220px">Los cambios se guardan en este navegador (almacenamiento local). Puedes volver al estado original del demo en cualquier momento.</p><button class="btn" data-click="resetDemoData">${svg('refresh')}Restablecer datos demo</button></div>
   </div></div>`;}
   else if(configTab==='anuncios'){h=`<div class="card" style="margin-bottom:20px"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('bell')}</div><h3>Anuncios</h3><div class="actions"><button class="btn sm primary" data-click="openAnuncioModal">${svg('plus')}Crear anuncio</button></div></div>
-    <div class="table-wrap"><table class="data"><thead><tr><th>Título</th><th>Descripción</th><th>Fecha</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${ANUNCIOS.map((a,i)=>`<tr><td><b>${a.t}</b></td><td class="muted">${a.d}</td><td class="muted">${a.time}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" onclick="openAnuncioModal(${i})">${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" onclick="delAnuncio(${i})">${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="4"><div class="empty">Sin anuncios. Crea el primero con «Crear anuncio».</div></td></tr>`}</tbody></table></div></div>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Título</th><th>Descripción</th><th>Fecha</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${ANUNCIOS.map((a,i)=>`<tr><td><b>${a.t}</b></td><td class="muted">${a.d}</td><td class="muted">${a.time}</td><td style="text-align:right"><button class="icon-btn" style="width:30px;height:30px" data-tip="Editar" data-click="openAnuncioModal" data-click-args='[${i}]'>${svg('edit')}</button><button class="icon-btn" style="width:30px;height:30px" data-tip="Eliminar" data-click="delAnuncio" data-click-args='[${i}]'>${svg('trash')}</button></td></tr>`).join('')||`<tr><td colspan="4"><div class="empty">Sin anuncios. Crea el primero con «Crear anuncio».</div></td></tr>`}</tbody></table></div></div>
     <div class="cols-2"><div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:32px;height:32px">${svg('calendar')}</div><h3>Calendario de eventos</h3></div><div class="card-pad" style="display:flex;justify-content:center"><div style="max-width:300px;width:100%">${miniCalendar()}</div></div></div>
       <div class="card"><div class="card-head"><h3>Próximos eventos</h3><div class="actions"><button class="btn sm primary" data-click="openEventoModal">${svg('plus')}Nuevo evento</button></div></div><div class="lst">
-        ${EVENTS.map((e,i)=>`<div class="lst-item"><div class="lst-ico ${e.t}">${svg(e.i)}</div><div class="lst-body"><b>${e.n}</b><p>${e.d}</p></div><button class="icon-btn" style="width:28px;height:28px;flex-shrink:0" data-tip="Eliminar" onclick="delEvento(${i})">${svg('trash')}</button></div>`).join('')||`<div class="empty" style="padding:26px">Sin eventos próximos.</div>`}
+        ${EVENTS.map((e,i)=>`<div class="lst-item"><div class="lst-ico ${e.t}">${svg(e.i)}</div><div class="lst-body"><b>${e.n}</b><p>${e.d}</p></div><button class="icon-btn" style="width:28px;height:28px;flex-shrink:0" data-tip="Eliminar" data-click="delEvento" data-click-args='[${i}]'>${svg('trash')}</button></div>`).join('')||`<div class="empty" style="padding:26px">Sin eventos próximos.</div>`}
       </div></div></div>`;}
   else if(configTab==='inf'){const sw=(on)=>`<label class="switch"><input type="checkbox" ${on?'checked':''}/><span class="tr"></span></label>`;h=`
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start">
@@ -1404,7 +1404,7 @@ function renderConfig(){
       </div></div>
     </div>`;}
   else if(configTab==='grupos'){h=`<div class="card"><div class="card-head"><h3>Administración de grupos</h3><div class="actions"><button class="btn sm primary" data-click="openGrupoModal">${svg('plus')}Nuevo grupo</button></div></div>
-    <div class="table-wrap"><table class="data"><thead><tr><th>Grupo</th><th>Superintendente</th><th>Auxiliar</th><th>Publicadores</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${REAL_GROUPS.map((g,i)=>`<tr><td><b>${g.n}</b></td><td><div class="cell-user">${avatarHTML(g.sup)}<b>${g.sup}</b></div></td><td><div class="cell-user">${avatarHTML(g.aux)}<b>${g.aux}</b></div></td><td>${DB.filter(p=>p.grupoIdx===i).length}</td><td style="text-align:right"><button class="btn sm ghost" onclick="openGrupoModal(${i})">${svg('settings')}Configurar</button></td></tr>`).join('')}</tbody></table></div></div>`;}
+    <div class="table-wrap"><table class="data"><thead><tr><th>Grupo</th><th>Superintendente</th><th>Auxiliar</th><th>Publicadores</th><th style="text-align:right">Acciones</th></tr></thead><tbody>${REAL_GROUPS.map((g,i)=>`<tr><td><b>${g.n}</b></td><td><div class="cell-user">${avatarHTML(g.sup)}<b>${g.sup}</b></div></td><td><div class="cell-user">${avatarHTML(g.aux)}<b>${g.aux}</b></div></td><td>${DB.filter(p=>p.grupoIdx===i).length}</td><td style="text-align:right"><button class="btn sm ghost" data-click="openGrupoModal" data-click-args='[${i}]'>${svg('settings')}Configurar</button></td></tr>`).join('')}</tbody></table></div></div>`;}
   else if(configTab==='sub'){h=`<div class="cols-2">
     <div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:32px;height:32px">${svg('star')}</div><h3>Plan actual</h3></div><div class="card-pad">
       <div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:30px;font-weight:800">USD 20</b><span class="muted">/ año</span></div>
@@ -1417,8 +1417,8 @@ function renderConfig(){
   </div>`;}
   else if(configTab==='legalseg'){
     const seg=`<div class="seg" style="margin-bottom:20px">
-      <button class="${legalTab==='legal'?'active':''}" onclick="setLegalTab('legal')">${svg('scale')}Cumplimiento Legal</button>
-      <button class="${legalTab==='seguridad'?'active':''}" onclick="setLegalTab('seguridad')">${svg('shield')}Seguridad</button>
+      <button class="${legalTab==='legal'?'active':''}" data-click="setLegalTab" data-click-args='["legal"]'>${svg('scale')}Cumplimiento Legal</button>
+      <button class="${legalTab==='seguridad'?'active':''}" data-click="setLegalTab" data-click-args='["seguridad"]'>${svg('shield')}Seguridad</button>
     </div>`;
     const item=(ic,tint,t,d)=>`<div class="card" style="padding:16px 18px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--sh-xs)"><div class="lst-ico ${tint}" style="width:38px;height:38px;flex-shrink:0">${svg(ic)}</div><div><b style="font-size:13.5px;display:block;margin-bottom:3px">${t}</b><p style="font-size:12.5px;color:var(--ink-500);line-height:1.5">${d}</p></div></div>`;
     const grid=items=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">${items.map(a=>item(...a)).join('')}</div>`;
@@ -1456,8 +1456,8 @@ function renderConfig(){
         <p class="muted" style="font-size:12.5px;margin:-4px 0 16px">Completa el formulario y nuestro equipo te responderá en el menor tiempo posible. Los campos con * son obligatorios.</p>
         <div class="form-grid">
           <div class="form-row"><label>Nombre completo *</label><input class="input" id="sop_nombre" placeholder="Tu nombre" value="Paublo Díaz"/></div>
-          <div class="form-row"><label>Correo electrónico *</label><input class="input" type="email" id="sop_correo" placeholder="correo@ejemplo.com" value="nikoleonv@gmail.com" oninput="validateEmail(this)" aria-describedby="sop_correo_hint"/><span class="field-hint" id="sop_correo_hint" aria-live="polite"></span></div>
-          <div class="form-row"><label>Teléfono (opcional)</label><input class="input" id="sop_tel" inputmode="numeric" placeholder="3XX XXX XXXX" oninput="maskPhone(this)" aria-describedby="sop_tel_hint"/><span class="field-hint" id="sop_tel_hint" aria-live="polite"></span></div>
+          <div class="form-row"><label>Correo electrónico *</label><input class="input" type="email" id="sop_correo" placeholder="correo@ejemplo.com" value="nikoleonv@gmail.com" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="sop_correo_hint"/><span class="field-hint" id="sop_correo_hint" aria-live="polite"></span></div>
+          <div class="form-row"><label>Teléfono (opcional)</label><input class="input" id="sop_tel" inputmode="numeric" placeholder="3XX XXX XXXX" data-input="maskPhone" data-input-args='["$el"]' aria-describedby="sop_tel_hint"/><span class="field-hint" id="sop_tel_hint" aria-live="polite"></span></div>
           <div class="form-row"><label>Tipo de solicitud</label><select class="select" id="sop_tipo">${tipos.map(t=>`<option>${t}</option>`).join('')}</select></div>
           <div class="form-row"><label>Prioridad</label><select class="select" id="sop_prio"><option>Baja</option><option selected>Media</option><option>Alta</option></select></div>
           <div class="form-row"><label>Asunto *</label><input class="input" id="sop_asunto" placeholder="Resumen breve de la solicitud"/></div>
@@ -1465,7 +1465,7 @@ function renderConfig(){
           <div class="form-row full"><label>Adjuntar archivo o captura (opcional)</label><input class="input" type="file" id="sop_file" style="height:auto;padding:9px 12px"/></div>
         </div>
         <span class="field-hint err" id="sop_error" role="alert" style="display:none;margin-top:10px"></span>
-        <div style="margin-top:16px"><button class="btn primary" onclick="enviarSoporte(this)">${svg('send')}Enviar solicitud</button></div>
+        <div style="margin-top:16px"><button class="btn primary" data-click="enviarSoporte" data-click-args='["$el"]'>${svg('send')}Enviar solicitud</button></div>
       </div></div>
       <div class="card" style="align-self:start"><div class="card-head"><div class="kpi-ico t-violet" style="width:34px;height:34px">${svg('user')}</div><h3>Contacto de Soporte</h3></div><div class="card-pad">
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="avatar" style="width:52px;height:52px;font-size:18px;background:${avColor('Mateo Diaz')}">MD</div><div><b style="font-size:15px">Mateo Diaz</b><div style="font-size:12.5px;color:var(--ink-500)">Chief Marketing Officer (CMO)</div></div></div>
@@ -1548,10 +1548,10 @@ function renderAsistCal(){
   for(let i=0;i<startDow;i++){const pd=new Date(y,m,1-startDow+i);cells+=`<div class="bigcal-cell out"><div class="dnum">${pd.getDate()}</div></div>`}
   for(let dn=1;dn<=dim;dn++){const date=new Date(y,m,dn);const dw=date.getDay();const isToday=diso(date)===diso(TODAY);let ev='';
     if(dw===2||dw===0){const type=dw===2?'mid':'we';const a=attMeeting(date,type);const reg=a.registered;
-      ev=`<div class="cal-event ${reg?'terr':'mid'}" style="${reg?'':'background:var(--amber-50);color:var(--amber-700);border-color:var(--amber)'}" onclick="openAttReg('${diso(date)}','${type}')">${type==='mid'?'Entre semana':'Fin de semana'}<small>${reg?'🟢 '+a.count+' asistentes':(date<=TODAY?'🟡 Pendiente':'Programada')}</small></div>`;}
+      ev=`<div class="cal-event ${reg?'terr':'mid'}" style="${reg?'':'background:var(--amber-50);color:var(--amber-700);border-color:var(--amber)'}" data-click="openAttReg" data-click-args='["${diso(date)}", "${type}"]'>${type==='mid'?'Entre semana':'Fin de semana'}<small>${reg?'🟢 '+a.count+' asistentes':(date<=TODAY?'🟡 Pendiente':'Programada')}</small></div>`;}
     cells+=`<div class="bigcal-cell ${isToday?'today':''}"><div class="dnum">${dn}</div>${ev}</div>`;}
   const total=startDow+dim;const trail=(7-total%7)%7;for(let i=1;i<=trail;i++)cells+=`<div class="bigcal-cell out"><div class="dnum">${i}</div></div>`;
-  document.getElementById('asistCalWrap').innerHTML=`<div class="bigcal"><div class="bigcal-head"><h3>${monName}</h3><div class="actions"><button class="icon-btn" onclick="asistNav(-1)">${svg('chevL')}</button><button class="icon-btn" onclick="asistNav(1)">${svg('chevR')}</button></div></div><div class="bigcal-grid">${dows.map(d=>`<div class="bigcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
+  document.getElementById('asistCalWrap').innerHTML=`<div class="bigcal"><div class="bigcal-head"><h3>${monName}</h3><div class="actions"><button class="icon-btn" data-click="asistNav" data-click-args='[-1]'>${svg('chevL')}</button><button class="icon-btn" data-click="asistNav" data-click-args='[1]'>${svg('chevR')}</button></div></div><div class="bigcal-grid">${dows.map(d=>`<div class="bigcal-dow">${d}</div>`).join('')}${cells}</div></div>`;
 }
 function asistNav(d){asistCal.m+=d;if(asistCal.m<0){asistCal.m=11;asistCal.y--}if(asistCal.m>11){asistCal.m=0;asistCal.y++}renderAsistCal()}
 function openAttReg(iso,type){const date=new Date(iso+'T00:00:00');const meta=meetingMeta(type);const a=attMeeting(date,type);const reg=ATT_REG[type+iso];const ya=reg||a.registered;
@@ -1620,11 +1620,11 @@ VIEWS.ia=()=>{
       <div style="flex:1;min-width:200px"><b style="font-size:16px">Asistente de la congregación Las Flores</b><p style="color:var(--ink-500);font-size:13px;margin-top:3px">He analizado ${DB.length} publicadores, ${STATS.terrTotal} territorios y las próximas reuniones. Encontré <b>${recs.length} recomendaciones</b> para optimizar la operación.</p></div>
     </div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;margin-bottom:22px">
-      ${recs.map(r=>`<div class="card"><div class="card-pad"><div style="display:flex;gap:13px;align-items:flex-start"><div class="kpi-ico ${r.t}" style="width:40px;height:40px;flex-shrink:0">${svg(r.ico)}</div><div style="flex:1"><b style="font-size:14.5px;line-height:1.35;display:block">${esc(r.titulo)}</b><p style="font-size:13px;color:var(--ink-500);margin:7px 0 14px;line-height:1.5">${r.d}</p><button class="btn sm" onclick="go('${r.action}')">${r.cta} ${svg('chevR')}</button></div></div></div></div>`).join('')}
+      ${recs.map(r=>`<div class="card"><div class="card-pad"><div style="display:flex;gap:13px;align-items:flex-start"><div class="kpi-ico ${r.t}" style="width:40px;height:40px;flex-shrink:0">${svg(r.ico)}</div><div style="flex:1"><b style="font-size:14.5px;line-height:1.35;display:block">${esc(r.titulo)}</b><p style="font-size:13px;color:var(--ink-500);margin:7px 0 14px;line-height:1.5">${r.d}</p><button class="btn sm" data-click="go" data-click-args='["${r.action}"]'>${r.cta} ${svg('chevR')}</button></div></div></div></div>`).join('')}
     </div>
     <div class="cols-2">
       <div class="card"><div class="card-head"><div class="kpi-ico t-red" style="width:32px;height:32px">${svg('report')}</div><h3>Publicadores que no entregan informes</h3><div class="actions"><span class="badge red">${sinInforme.length}</span></div></div>
-        <div class="lst">${sinInforme.slice(0,6).map(r=>`<div class="lst-item">${avatarHTML(r.pub.fullName)}<div class="lst-body"><b>${r.pub.fullName}</b><p>${r.pub.grupo} · ${r.pub.role}</p></div><button class="btn sm" onclick="remindInforme(${r.pub.id})">${svg('send')}</button></div>`).join('')}</div></div>
+        <div class="lst">${sinInforme.slice(0,6).map(r=>`<div class="lst-item">${avatarHTML(r.pub.fullName)}<div class="lst-body"><b>${r.pub.fullName}</b><p>${r.pub.grupo} · ${r.pub.role}</p></div><button class="btn sm" data-click="remindInforme" data-click-args='[${r.pub.id}]'>${svg('send')}</button></div>`).join('')}</div></div>
       <div class="card"><div class="card-head"><div class="kpi-ico t-violet" style="width:32px;height:32px">${svg('chart')}</div><h3>Estadísticas inteligentes</h3></div><div class="card-pad">
         <div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><b>Tasa de entrega de informes</b><span class="muted">${Math.round(STATS.infEntreg/STATS.total*100)}%</span></div><div class="progress"><span style="width:${Math.round(STATS.infEntreg/STATS.total*100)}%;background:var(--green)"></span></div></div>
         <div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><b>Cobertura de territorios</b><span class="muted">${Math.round(STATS.terrComp/STATS.terrTotal*100)}%</span></div><div class="progress"><span style="width:${Math.round(STATS.terrComp/STATS.terrTotal*100)}%"></span></div></div>
@@ -1656,10 +1656,10 @@ const MODALS={
     </div>
     <div class="form-section-title">${svg('phone')} Información de contacto</div>
     <div class="form-grid">
-      <div class="form-row"><label>Teléfono casa</label><input class="input" id="np_telcasa" placeholder="601 000 0000" inputmode="numeric" oninput="maskPhone(this)"/></div>
-      <div class="form-row"><label>Teléfono móvil</label><input class="input" id="np_tel" placeholder="3XX XXX XXXX" inputmode="numeric" oninput="maskPhone(this)"/></div>
+      <div class="form-row"><label>Teléfono casa</label><input class="input" id="np_telcasa" placeholder="601 000 0000" inputmode="numeric" data-input="maskPhone" data-input-args='["$el"]'/></div>
+      <div class="form-row"><label>Teléfono móvil</label><input class="input" id="np_tel" placeholder="3XX XXX XXXX" inputmode="numeric" data-input="maskPhone" data-input-args='["$el"]'/></div>
       <div class="form-row"><label>Trabajo</label><input class="input" id="np_trabajo" placeholder="Teléfono / lugar de trabajo"/></div>
-      <div class="form-row"><label>Correo</label><input class="input" id="np_mail" type="email" placeholder="correo@ejemplo.com" oninput="validateEmail(this)"/></div>
+      <div class="form-row"><label>Correo</label><input class="input" id="np_mail" type="email" placeholder="correo@ejemplo.com" data-input="validateEmail" data-input-args='["$el"]'/></div>
       <div class="form-row full"><label>Dirección</label><input class="input" id="np_dir" placeholder="Calle, número, barrio, localidad"/></div>
       <div class="form-row full"><label>Familia / grupo familiar</label><input class="input" id="np_fam" placeholder="Ej. Familia Pérez Gómez"/></div>
     </div>
@@ -1671,7 +1671,7 @@ const MODALS={
       <div class="form-row"><label>Fecha de nombramiento</label><input class="input" id="np_nomb" type="date"/></div>
     </div>
     <div class="form-section-title">${svg('flag')} Etiquetas especiales</div>
-    <div style="display:flex;flex-wrap:wrap;gap:9px">${['Adulto mayor','Enfermo','Sordo','Ciego','Menor','Encarcelado'].map(t=>`<button type="button" data-on="0" onclick="commChip(this)" style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:20px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border-strong);background:var(--surface-3);color:var(--ink-700);transition:.15s">${t}</button>`).join('')}</div>`},
+    <div style="display:flex;flex-wrap:wrap;gap:9px">${['Adulto mayor','Enfermo','Sordo','Ciego','Menor','Encarcelado'].map(t=>`<button type="button" data-on="0" data-click="commChip" data-click-args='["$el"]' style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:20px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border-strong);background:var(--surface-3);color:var(--ink-700);transition:.15s">${t}</button>`).join('')}</div>`},
   territory:{icon:'map',tint:'t-green',title:'Nuevo territorio',sub:'Registra un territorio de predicación en Bogotá',body:`<div class="form-grid"><div class="form-row"><label>Número</label><input class="input" value="038" disabled/></div><div class="form-row"><label>Localidad</label><select class="select">${LOCALIDADES.map(l=>`<option>${l}</option>`).join('')}</select></div><div class="form-row full"><label>Barrio</label><input class="input" placeholder="Ej. Niza Norte"/></div><div class="form-row"><label>Cuadras</label><input class="input" type="number" placeholder="0"/></div><div class="form-row"><label>Viviendas aprox.</label><input class="input" type="number" placeholder="0"/></div><div class="form-row"><label>Responsable</label><select class="select"><option>Sin asignar</option>${maleOptions()}</select></div><div class="form-row"><label>Estado</label><select class="select"><option>Pendiente</option><option>Activo</option></select></div></div>`},
   nopredica:{icon:'home',tint:'t-red',title:'Registrar casa donde no se predica',sub:'Documenta direcciones a evitar',body:`<div class="form-grid"><div class="form-row full"><label>Dirección *</label><input class="input" id="npd_dir" placeholder="Calle, número"/></div><div class="form-row"><label>Territorio</label><select class="select" id="npd_terr">${TERR.map(t=>`<option value="${t.num}">#${t.num} · ${esc(t.barrio)}</option>`).join('')}</select></div><div class="form-row"><label>Localidad</label><select class="select" id="npd_loc">${LOCALIDADES.map(l=>`<option>${l}</option>`).join('')}</select></div><div class="form-row"><label>Motivo</label><select class="select" id="npd_motivo"><option>Oposición</option><option>No molestar</option><option>Perro agresivo</option><option>Acceso restringido</option><option>Solicitud expresa</option></select></div><div class="form-row"><label>Fecha</label><input class="input" id="npd_fecha" type="date" value="${diso(TODAY)}"/></div><div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="npd_obs"></textarea></div></div>`},
 };
@@ -1789,8 +1789,8 @@ function openMiPerfil(){
       <div class="form-grid">
         <div class="form-row"><label>Nombre</label><input class="input" id="mp_nombre" value="Paublo"/></div>
         <div class="form-row"><label>Apellidos</label><input class="input" id="mp_ape" value="Díaz"/></div>
-        <div class="form-row"><label>Correo electrónico</label><input class="input" type="email" id="mp_mail" value="compumat2009@hotmail.com" oninput="validateEmail(this)" aria-describedby="mp_mail_hint"/><span class="field-hint" id="mp_mail_hint" aria-live="polite"></span></div>
-        <div class="form-row"><label>Teléfono</label><input class="input" id="mp_tel" value="311 550 4820" inputmode="numeric" oninput="maskPhone(this)"/></div>
+        <div class="form-row"><label>Correo electrónico</label><input class="input" type="email" id="mp_mail" value="compumat2009@hotmail.com" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="mp_mail_hint"/><span class="field-hint" id="mp_mail_hint" aria-live="polite"></span></div>
+        <div class="form-row"><label>Teléfono</label><input class="input" id="mp_tel" value="311 550 4820" inputmode="numeric" data-input="maskPhone" data-input-args='["$el"]'/></div>
       </div>
       <div class="form-section-title">${svg('shield')} Seguridad</div>
       <div class="form-grid">
@@ -1919,7 +1919,7 @@ function renderGlobalSearch(){const inp=document.getElementById('globalSearch');
   if(!p){p=document.createElement('div');p.id='gsPop';document.body.appendChild(p);setTimeout(()=>document.addEventListener('click',gsCloseOnce),0);}
   const r=inp.getBoundingClientRect();
   p.style.cssText=`position:fixed;top:${r.bottom+8}px;left:${r.left}px;width:${Math.max(r.width,340)}px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 14px 44px rgba(15,23,42,.16);z-index:300;max-height:420px;overflow-y:auto`;
-  p.innerHTML=res.length?res.slice(0,10).map(x=>`<div class="lst-item" role="button" tabindex="0" style="cursor:pointer" onclick="gsGo('${x.k}','${x.id}')"><div class="lst-ico ${x.tint}">${svg(x.ico)}</div><div class="lst-body"><b>${x.t}</b><p>${x.s}</p></div>${svg('chevR')}</div>`).join(''):`<div class="empty" style="padding:22px">Sin resultados para «${q}»</div>`;
+  p.innerHTML=res.length?res.slice(0,10).map(x=>`<div class="lst-item" role="button" tabindex="0" style="cursor:pointer" data-click="gsGo" data-click-args='["${x.k}", "${x.id}"]'><div class="lst-ico ${x.tint}">${svg(x.ico)}</div><div class="lst-body"><b>${x.t}</b><p>${x.s}</p></div>${svg('chevR')}</div>`).join(''):`<div class="empty" style="padding:22px">Sin resultados para «${q}»</div>`;
 }
 const gsInput=document.getElementById('globalSearch');
 gsInput.addEventListener('input',renderGlobalSearch);
@@ -2250,7 +2250,7 @@ function renderUsersTable(){const wrap=document.getElementById('usersWrap');if(!
     const canEdit=(u.access_level>=myLevel)&&(u.id!==me);
     const lvlSel=`<select class="select" style="height:32px;font-size:12px;min-width:200px" ${canEdit?'':'disabled'} onchange="setUserLevel('${u.id}',this.value)">${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${u.access_level===l?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select>`;
     const estado=u.banned?`<span class="badge red">${svg('x')}Inactivo</span>`:`<span class="badge green">${svg('check')}Activo</span>`;
-    const actBtn=canEdit?(u.banned?`<button class="btn sm" onclick="toggleUserActive('${u.id}',true)">${svg('check')}Activar</button>`:`<button class="btn sm ghost" onclick="toggleUserActive('${u.id}',false)">${svg('x')}Desactivar</button>`):'<span class="muted" style="font-size:11.5px">—</span>';
+    const actBtn=canEdit?(u.banned?`<button class="btn sm" data-click="toggleUserActive" data-click-args='["${u.id}", true]'>${svg('check')}Activar</button>`:`<button class="btn sm ghost" data-click="toggleUserActive" data-click-args='["${u.id}", false]'>${svg('x')}Desactivar</button>`):'<span class="muted" style="font-size:11.5px">—</span>';
     return `<tr><td><div class="cell-user">${avatarHTML(u.full_name||u.email||'?')}<div><b>${u.full_name||'—'}</b>${u.id===me?' <span class="badge gray" style="font-size:9.5px">tú</span>':''}<br><small class="muted">${u.email||''}</small></div></div></td><td>${lvlSel}</td><td>${estado}</td><td style="text-align:right">${actBtn}</td></tr>`;
   }).join('');
   wrap.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('people')}</div><h3>Usuarios (${USERS_CACHE.length})</h3><div class="actions"><button class="btn sm" data-click="loadUsers">${svg('refresh')}Actualizar</button></div></div>
@@ -2262,7 +2262,7 @@ function openUserModal(){if(!requireCap('users.manage'))return;const myLevel=use
   openModalCustom({icon:'people',tint:'t-brand',title:'Nuevo usuario',sub:'Crea un acceso y asigna su nivel',
     body:`<div class="form-grid">
       <div class="form-row"><label>Nombre completo *</label><input class="input" id="nu_name" placeholder="Ej. Juan Pérez"/></div>
-      <div class="form-row"><label>Correo *</label><input class="input" id="nu_email" type="email" placeholder="correo@congregacion.org" oninput="validateEmail(this)" aria-describedby="nu_email_hint"/><span class="field-hint" id="nu_email_hint" aria-live="polite"></span></div>
+      <div class="form-row"><label>Correo *</label><input class="input" id="nu_email" type="email" placeholder="correo@congregacion.org" data-input="validateEmail" data-input-args='["$el"]' aria-describedby="nu_email_hint"/><span class="field-hint" id="nu_email_hint" aria-live="polite"></span></div>
       <div class="form-row"><label>Nivel de acceso *</label><select class="select" id="nu_level">${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${l===Math.max(myLevel,2)?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select></div>
       <div class="form-row"><label>Contraseña inicial *</label><input class="input" id="nu_pw" type="text" placeholder="Mínimo 8 caracteres"/><span class="field-hint" style="margin-top:6px">Compártela con el usuario; podrá cambiarla luego.</span></div>
     </div>`,
@@ -2326,7 +2326,7 @@ function removeAuthOverlay(){const o=document.getElementById('authOverlay');if(o
 function showLogin(){document.querySelector('.app')&&(document.querySelector('.app').style.visibility='hidden');
   const demoDesc={1:'Acceso total: todas las congregaciones, usuarios, configuración y datos',2:'Su congregación: publicadores (info completa), territorios, programa, reportes',3:'Operativo: programa, asignaciones y territorios · sin datos personales ni reportes',4:'Su app móvil: sus salidas, informe de predicación y perfil'};
   const demoIco={1:'shield',2:'db',3:'map',4:'user'};const demoTint={1:'t-violet',2:'t-brand',3:'t-cyan',4:'t-indigo'};
-  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left;width:100%;white-space:normal" onclick="demoLogin(${l})"><span style="display:flex;align-items:center;gap:11px;width:100%;min-width:0"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span style="min-width:0"><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="display:block;color:var(--ink-500);font-size:11.5px;line-height:1.4">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
+  const demoBtns=`<div style="display:grid;gap:9px">${[1,2,3].map(l=>`<button class="btn" style="justify-content:flex-start;height:auto;padding:12px 14px;text-align:left;width:100%;white-space:normal" data-click="demoLogin" data-click-args='[${l}]'><span style="display:flex;align-items:center;gap:11px;width:100%;min-width:0"><span class="kpi-ico ${demoTint[l]}" style="width:34px;height:34px;flex-shrink:0">${svg(demoIco[l])}</span><span style="min-width:0"><b style="display:block;font-size:13.5px">Nivel ${l} · ${ACCESS_LEVELS[l]}</b><small style="display:block;color:var(--ink-500);font-size:11.5px;line-height:1.4">${demoDesc[l]}</small></span></span></button>`).join('')}</div>`;
   const realForm=`<form id="loginForm" data-submit="submitLogin" data-submit-args='["$event"]' style="display:grid;gap:13px">
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Correo electrónico</label><input class="input" id="lg_email" type="email" autocomplete="username" placeholder="tucorreo@congregacion.org" required/></div>
       <div class="field-wrap"><label style="font-size:12.5px;font-weight:600;color:var(--ink-600);display:block;margin-bottom:5px">Contraseña</label><input class="input" id="lg_pw" type="password" autocomplete="current-password" placeholder="••••••••" required/></div>
