@@ -434,6 +434,21 @@ async function loadMe(user){
   let prof=null;try{const r=await sbRest('profiles?select=full_name,publisher_id,access_level&id=eq.'+user.id);prof=r&&r[0];}catch(e){}
   const nm=(prof&&prof.full_name)||(user.email||'').split('@')[0]||'Publicador';
   ME={name:nm,first:(nm||'').split(' ')[0]||'Publicador',cong:'Las Flores',role:'Publicador',photo:null,publisherId:(prof&&prof.publisher_id)||null,email:user.email};
+  await loadRealData();
+}
+/* ---- mapear filas de Supabase a las formas que usa la UI ---- */
+const MES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function periodLabel(p){const m=/(\d{4})-(\d{2})/.exec(p||'');return m?MES_ES[(+m[2])-1]+' '+m[1]:(p||'');}
+function curPeriod(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function frToMonth(fr){return {m:periodLabel(fr.period),h:(fr.hours||0)+Math.round((fr.minutes||0)/6)/10,est:fr.studies||0,rev:fr.revisits||0,sent:!!fr.submitted,sd:fr.submitted_at?new Date(fr.submitted_at).toLocaleDateString('es-CO'):'',cur:fr.period===curPeriod()};}
+function asgToItem(a,resp){const st=resp?(resp.status==='conf'?'conf':resp.status==='decline'?'pend':'pend'):'pend';return {id:a.id,type:a.title||a.category||'Asignación',cat:a.category||'cal',date:a.assign_date?new Date(a.assign_date+'T00:00:00'):new Date(),time:a.time_label||'',meet:a.meeting||'',status:st,desc:a.description||''};}
+function annToItem(an){return {ic:(an.data&&an.data.icon)||'bell',t:an.title||'',d:an.body||'',w:(an.data&&an.data.when)||''};}
+async function loadRealData(){
+  const pid=ME.publisherId; if(!pid)return; // cuenta sin ficha vinculada → se queda con datos de ejemplo
+  try{const pb=await sbRest('publishers?select=id,full_name&id=eq.'+pid);if(pb&&pb[0]&&pb[0].full_name){ME.name=pb[0].full_name;ME.first=pb[0].full_name.split(' ')[0]||ME.first;}}catch(e){}
+  try{const fr=await sbRest('field_reports?select=*&publisher_id=eq.'+pid+'&order=period.desc');if(fr&&fr.length){MONTHS=fr.map(frToMonth);const c=MONTHS.find(m=>m.cur);if(c)monthH=c.h;}}catch(e){}
+  try{const r=await Promise.all([sbRest('assignments?select=*&publisher_id=eq.'+pid+'&order=assign_date.asc'),sbRest('assignment_responses?select=*&publisher_id=eq.'+pid)]);const asg=r[0],resp=r[1]||[];if(asg&&asg.length)ASG=asg.map(a=>asgToItem(a,resp.find(x=>x.assignment_id===a.id)));}catch(e){}
+  try{const an=await sbRest('announcements?select=*&order=id.desc&limit=10');if(an&&an.length)ANN=an.map(annToItem);}catch(e){}
 }
 async function signOutPub(){const s=loadSession();if(SB_ENABLED&&s&&s.access_token){try{await fetch(SUPABASE_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token}})}catch(e){}}clearSession();SB=false;location.reload();}
 
