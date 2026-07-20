@@ -66,7 +66,7 @@ function renderPublisherHome(){
         {i:'report',t:'t-violet',n:'Reportar predicación',d:'Envía tu informe mensual.',fn:"toast('El reporte de predicación estará disponible próximamente')"},
         {i:'bell',t:'t-amber',n:'Notificaciones',d:'Avisos y recordatorios.',fn:"go('actividad')"},
         {i:'user',t:'t-cyan',n:'Mi perfil',d:'Edita tus datos y preferencias.',fn:"openUserConfig()"}
-      ].map(c=>`<button type="button" onclick="${c.fn}" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px;line-height:1.45">${c.d}</p></button>`).join('')}
+      ].map(c=>`<button type="button" onclick="${c.fn}" style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" data-mouseover="hoverTintOn" data-mouseout="hoverTintOff"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px;line-height:1.45">${c.d}</p></button>`).join('')}
     </div>
     <p class="muted" style="font-size:12px;margin-top:22px;text-align:center">La experiencia completa del Publicador está en desarrollo. Por ahora puedes editar tu perfil y ver tus notificaciones.</p>
   </div>`;
@@ -83,7 +83,7 @@ function renderOpsDashboard(){
     <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(185px,1fr))">${kpis.map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}">${svg(k.ico)}</div></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}</div>
     <div class="dash-rowlabel">Accesos rápidos</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
-      ${[{i:'calendar',t:'t-brand',n:'Programa de reuniones',d:'Partes y asignaciones.',v:'programaciones'},{i:'map',t:'t-green',n:'Territorios',d:'Entrega y devolución.',v:'territorios'},{i:'display',t:'t-cyan',n:'Exhibidores',d:'Turnos de predicación pública.',v:'exhibidores'},{i:'bell',t:'t-amber',n:'Actividad',d:'Tus tareas y avisos.',v:'actividad'}].map(c=>`<button type="button" data-click="go" data-click-args='["${c.v}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px">${c.d}</p></button>`).join('')}
+      ${[{i:'calendar',t:'t-brand',n:'Programa de reuniones',d:'Partes y asignaciones.',v:'programaciones'},{i:'map',t:'t-green',n:'Territorios',d:'Entrega y devolución.',v:'territorios'},{i:'display',t:'t-cyan',n:'Exhibidores',d:'Turnos de predicación pública.',v:'exhibidores'},{i:'bell',t:'t-amber',n:'Actividad',d:'Tus tareas y avisos.',v:'actividad'}].map(c=>`<button type="button" data-click="go" data-click-args='["${c.v}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);cursor:pointer;transition:.15s" data-mouseover="hoverTintOn" data-mouseout="hoverTintOff"><div class="kpi-ico ${c.t}" style="width:40px;height:40px;margin-bottom:11px">${svg(c.i)}</div><b style="font-size:14px;display:block">${c.n}</b><p style="font-size:12.5px;color:var(--ink-500);margin-top:3px">${c.d}</p></button>`).join('')}
     </div></div>`;
 }
 VIEWS.dashboard=()=>{
@@ -250,9 +250,9 @@ function openMeeting(isoDate,type){
     body:`<div class="parts-list">${parts.map(p=>`<div class="part-row">
       <div class="part-role">${p.role}${p.sub?`<small>${p.sub}</small>`:''}${p.theme?`<small>“${p.theme}”</small>`:''}</div>
       <div class="part-person">${p.person?`${avatarHTML(p.person.fullName)}<b style="font-size:13px">${p.person.fullName}</b>`:`<span class="badge red"><span class="bdot"></span>Vacante</span>`}</div>
-      <div class="part-badges">${p.person?confBadge(p.confirmed):''}<button class="icon-btn" style="width:32px;height:32px" data-tip="Reasignar" onclick="closeModal();openReassignPart('${isoDate}','${type}','${p.role}')">${svg('edit')}</button></div>
+      <div class="part-badges">${p.person?confBadge(p.confirmed):''}<button class="icon-btn" style="width:32px;height:32px" data-tip="Reasignar" data-click="openReassignPart" data-click-args='["${isoDate}", "${type}", "${p.role}"]' data-preclose="closeModal">${svg('edit')}</button></div>
     </div>`).join('')}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn" onclick="closeModal();openAttReg('${isoDate}','${type}')">${svg('check')}Registrar asistencia</button><button class="btn primary" onclick="closeModal();openAssignCategories()">${svg('plus')}Añadir asignación</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button><button class="btn" data-click="openAttReg" data-click-args='["${isoDate}", "${type}"]' data-preclose="closeModal">${svg('check')}Registrar asistencia</button><button class="btn primary" data-click="openAssignCategories" data-preclose="closeModal">${svg('plus')}Añadir asignación</button>`});
 }
 /* (renderVMC eliminado: sustituido por la programación de 3 meses) */
 function discFor(dt){const iso=diso(dt);const ov=DISC_OVR[iso]||{};
@@ -270,9 +270,9 @@ function openDiscursoMenu(e,iso){
   const dc=discFor(new Date(iso+'T00:00:00'));
   closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.id='ctxMenu';
   menu.innerHTML=`<button class="ctx-item" onclick="closeCtxMenu();verOradorContacto('${dc.orador.fullName.replace(/'/g,'')}')">${svg('user')}Ver contacto</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openDiscursoModal('${iso}')">${svg('edit')}Editar información</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openReemplazarOrador('${iso}')">${svg('refresh')}Reemplazar discursante</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openCambiarFechaDiscurso('${iso}')">${svg('calendar')}Cambiar fecha</button>`;
+    <button class="ctx-item" data-click="openDiscursoModal" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('edit')}Editar información</button>
+    <button class="ctx-item" data-click="openReemplazarOrador" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('refresh')}Reemplazar discursante</button>
+    <button class="ctx-item" data-click="openCambiarFechaDiscurso" data-click-args='["${iso}"]' data-preclose="closeCtxMenu">${svg('calendar')}Cambiar fecha</button>`;
   document.body.appendChild(menu);const r=e.currentTarget.getBoundingClientRect();
   let left=r.right-menu.offsetWidth,top=r.bottom+6;if(top+menu.offsetHeight>window.innerHeight)top=r.top-menu.offsetHeight-6;if(left<8)left=8;
   menu.style.left=left+'px';menu.style.top=top+'px';setTimeout(()=>document.addEventListener('click',closeCtxOnce),0);
@@ -340,7 +340,7 @@ const ASSIGN_CATS=[
 ];
 function openAssignCategories(){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'plus',tint:'t-brand',title:'Nueva asignación',sub:'Selecciona la categoría que deseas programar',size:'lg',
-    body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" data-click="pickAssignCat" data-click-args='["${c.id}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" onmouseover="this.style.borderColor='var(--brand-300)';this.style.background='var(--brand-50)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
+    body:`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">${ASSIGN_CATS.map(c=>`<button type="button" data-click="pickAssignCat" data-click-args='["${c.id}"]' style="text-align:left;border:1.5px solid var(--border);border-radius:14px;padding:18px;background:var(--surface);transition:.15s;cursor:pointer" data-mouseover="hoverTintOn" data-mouseout="hoverTintOff"><div class="kpi-ico ${c.t}" style="width:42px;height:42px;margin-bottom:12px">${svg(c.ico)}</div><b style="font-size:14px;display:block;line-height:1.3">${c.l}</b></button>`).join('')}</div>`,
     footer:`<button class="btn" data-click="closeModal">Cancelar</button>`});
 }
 function pickAssignCat(id){closeModal();if(id==='disc'){openDiscursoModal()}else if(id==='vmc'||id==='we'){progTab=id;if(currentView==='programaciones')VIEWS.programaciones();else go('programaciones')}else{openModal('assignment')}}
@@ -361,7 +361,7 @@ function meetingCardsHTML(type){
 }
 function meetingAccCard(dt,type,weekNo,meta){
   const parts=mkParts(dt,type);const conf=parts.filter(p=>p.confirmed).length;
-  return `<div class="card acc-card" style="margin-bottom:14px"><div class="card-head acc-head" data-click="toggleAcc" data-click-args='["$el"]'><div class="kpi-ico ${type==='mid'?'t-brand':'t-violet'}" style="width:36px;height:36px">${svg('meeting')}</div><div><h3>Semana ${weekNo} · ${dshort(dt)}</h3><div class="muted" style="font-size:12.5px">${esc(meta.title)} · ${dlong(dt).replace(/^\w/,c=>c.toUpperCase())} · ${meta.time}</div></div><div class="actions"><span class="badge ${conf===parts.length?'green':'amber'}"><span class="bdot"></span>${conf}/${parts.length} confirmadas</span><button class="btn sm" onclick="event.stopPropagation();openMeeting('${diso(dt)}','${type}')">${svg('eye')}Ver detalle</button><span class="acc-chev">${svg('chevD')}</span></div></div>
+  return `<div class="card acc-card" style="margin-bottom:14px"><div class="card-head acc-head" data-click="toggleAcc" data-click-args='["$el"]'><div class="kpi-ico ${type==='mid'?'t-brand':'t-violet'}" style="width:36px;height:36px">${svg('meeting')}</div><div><h3>Semana ${weekNo} · ${dshort(dt)}</h3><div class="muted" style="font-size:12.5px">${esc(meta.title)} · ${dlong(dt).replace(/^\w/,c=>c.toUpperCase())} · ${meta.time}</div></div><div class="actions"><span class="badge ${conf===parts.length?'green':'amber'}"><span class="bdot"></span>${conf}/${parts.length} confirmadas</span><button class="btn sm" data-click="openMeeting" data-click-args='["${diso(dt)}", "${type}"]' data-stop="1">${svg('eye')}Ver detalle</button><span class="acc-chev">${svg('chevD')}</span></div></div>
       <div class="acc-body" hidden><div class="table-wrap"><table class="data"><thead><tr><th>Parte</th><th>Responsable</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>
         ${parts.map(p=>`<tr><td><b>${p.role}</b>${p.theme?`<br><small class="muted">“${p.theme}”</small>`:p.sub?`<br><small class="muted">${p.sub}</small>`:''}</td><td>${p.person?`<div class="cell-user">${avatarHTML(p.person.fullName)}<b>${p.person.fullName}</b></div>`:`<span class="badge red"><span class="bdot"></span>Vacante</span>`}</td><td>${p.person?confBadge(p.confirmed):'—'}</td><td style="text-align:right"><button class="btn sm ghost" data-click="openReassignPart" data-click-args='["${diso(dt)}", "${type}", "${p.role}"]'>${svg('refresh')}Reasignar</button></td></tr>`).join('')}
       </tbody></table></div></div></div>`;
@@ -433,7 +433,7 @@ function renderDbTable(){
         <td><div class="cell-user">${avatarHTML(p.fullName)}<div><b>${esc(p.fullName)}</b><small>${esc(p.localidad)}</small></div></div></td>
         <td><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px">${esc(p.tel)}</span><span class="muted" style="font-size:11.5px">${esc(p.email)}</span></div></td>
         <td>${p.grupo}</td><td>${roleBadge(p.role)}</td><td>${estadoBadge(p.estado)}</td><td class="muted">${fmtFecha(p.bautismo)}</td>
-        <td style="text-align:right"><button class="icon-btn" style="width:32px;height:32px" onclick="event.stopPropagation();openRowMenu(event,${p.id})">${svg('dots')}</button></td>
+        <td style="text-align:right"><button class="icon-btn" style="width:32px;height:32px" data-click="openRowMenu" data-click-args='["$event", ${p.id}]' data-stop="1">${svg('dots')}</button></td>
       </tr>`).join('')||`<tr><td colspan="8"><div class="empty">Sin resultados para los filtros aplicados</div></td></tr>`}
     </tbody></table>
     <div class="pager"><span class="pager-info">Mostrando <b>${total?start+1:0}–${Math.min(start+dbState.pageSize,total)}</b> de <b>${total}</b> registros</span>
@@ -454,13 +454,13 @@ function dbGo(p){dbState.page=p;renderDbTable()}
 
 function openRowMenu(e,id){
   closeCtxMenu();const menu=document.createElement('div');menu.className='ctx-menu';menu.id='ctxMenu';
-  menu.innerHTML=`<button class="ctx-item" onclick="closeCtxMenu();openFicha(${id})">${svg('eye')}Ver</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openEditContact(${id})">${svg('edit')}Editar</button>
-    <button class="ctx-item" onclick="closeCtxMenu();downloadCard(${id})">${svg('download')}Descargar tarjeta</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openHistAsign(${id})">${svg('calendar')}Historial</button>
-    <button class="ctx-item" onclick="closeCtxMenu();openPrivilegio(${id})">${svg('shield')}Cambiar privilegios</button>
+  menu.innerHTML=`<button class="ctx-item" data-click="openFicha" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('eye')}Ver</button>
+    <button class="ctx-item" data-click="openEditContact" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('edit')}Editar</button>
+    <button class="ctx-item" data-click="downloadCard" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('download')}Descargar tarjeta</button>
+    <button class="ctx-item" data-click="openHistAsign" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('calendar')}Historial</button>
+    <button class="ctx-item" data-click="openPrivilegio" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('shield')}Cambiar privilegios</button>
     <div class="ctx-sep"></div>
-    <button class="ctx-item danger" onclick="closeCtxMenu();deletePublisher(${id})">${svg('trash')}Eliminar</button>`;
+    <button class="ctx-item danger" data-click="deletePublisher" data-click-args='[${id}]' data-preclose="closeCtxMenu">${svg('trash')}Eliminar</button>`;
   document.body.appendChild(menu);const r=e.currentTarget.getBoundingClientRect();
   let left=r.right-menu.offsetWidth,top=r.bottom+6;if(top+menu.offsetHeight>window.innerHeight)top=r.top-menu.offsetHeight-6;if(left<8)left=8;
   menu.style.left=left+'px';menu.style.top=top+'px';setTimeout(()=>document.addEventListener('click',closeCtxOnce),0);
@@ -523,7 +523,7 @@ function fichaViewConfig(id){
         ${statCard(estudios,'Estudios bíblicos')}
         ${statCard(asist+'%','Asistencia promedio')}
       </div>`,
-    footer:`<button class="btn" onclick="closeModal();openHistAsign(${id})">${svg('calendar')}Historial</button><button class="btn primary" data-click="closeModal">Cerrar</button>`};
+    footer:`<button class="btn" data-click="openHistAsign" data-click-args='[${id}]' data-preclose="closeModal">${svg('calendar')}Historial</button><button class="btn primary" data-click="closeModal">Cerrar</button>`};
 }
 function openFicha(id){if(!requireCap('personal.view'))return;openModalCustom(fichaViewConfig(id))}
 function fichaToEdit(id){if(!requireCap('data.edit'))return;swapModalContent(fichaEditConfig(id,true))}
@@ -762,7 +762,7 @@ function renderTerrTable(){
   const all=terrFiltered();const total=all.length;const pages=Math.max(1,Math.ceil(total/terrState.pageSize));
   if(terrState.page>pages)terrState.page=pages;const start=(terrState.page-1)*terrState.pageSize;const rows=all.slice(start,start+terrState.pageSize);
   document.getElementById('terrTableWrap').innerHTML=`<table class="data"><thead><tr>${sortHeader(terrState,'terrSortBy','num','N°')}${sortHeader(terrState,'terrSortBy','barrio','Localidad / Barrio')}${sortHeader(terrState,'terrSortBy','estado','Estado')}<th>Asignación</th><th>Completado</th>${sortHeader(terrState,'terrSortBy','cobertura','Cobertura')}<th></th></tr></thead><tbody>
-    ${rows.map(t=>`<tr class="clickable" data-dblclick="openTerrHist" data-dblclick-args='["${t.num}"]'><td><b>${t.num}</b></td><td><b>${esc(t.barrio)}</b><br><small class="muted">${esc(t.localidad)} · ${t.cuadras} cuadras · ${t.viviendas} viviendas</small></td><td>${estadoBadge(t.estado)}</td><td class="muted">${t.asign}</td><td class="muted">${t.comp}</td><td><span class="badge ${t.estado==='Vencido'?'red':'gray'}">${t.cobertura}</span></td><td style="text-align:right"><button class="btn sm ghost" onclick="event.stopPropagation();openTerrHist('${t.num}')">${svg('eye')}Ficha</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin territorios para la búsqueda</div></td></tr>`}
+    ${rows.map(t=>`<tr class="clickable" data-dblclick="openTerrHist" data-dblclick-args='["${t.num}"]'><td><b>${t.num}</b></td><td><b>${esc(t.barrio)}</b><br><small class="muted">${esc(t.localidad)} · ${t.cuadras} cuadras · ${t.viviendas} viviendas</small></td><td>${estadoBadge(t.estado)}</td><td class="muted">${t.asign}</td><td class="muted">${t.comp}</td><td><span class="badge ${t.estado==='Vencido'?'red':'gray'}">${t.cobertura}</span></td><td style="text-align:right"><button class="btn sm ghost" data-click="openTerrHist" data-click-args='["${t.num}"]' data-stop="1">${svg('eye')}Ficha</button></td></tr>`).join('')||`<tr><td colspan="7"><div class="empty">Sin territorios para la búsqueda</div></td></tr>`}
   </tbody></table>
   <div class="pager"><span class="pager-info">Mostrando <b>${total?start+1:0}–${Math.min(start+terrState.pageSize,total)}</b> de <b>${total}</b> territorios</span>
     <div class="pager-ctrl"><button class="pg" ${terrState.page===1?'disabled':''} data-click="terrGo" data-click-args='[${terrState.page-1}]'>${svg('chevL')}</button>${pagerButtons(pages,terrState.page,'terrGo')}<button class="pg" ${terrState.page===pages?'disabled':''} data-click="terrGo" data-click-args='[${terrState.page+1}]'>${svg('chevR')}</button></div>
@@ -919,7 +919,7 @@ function openTerrHist(num){
       ${noPred.length?`<div class="form-section-title">Casas donde no se predica</div><div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Dirección</th><th>Motivo</th><th>Fecha</th></tr></thead><tbody>${noPred.map(n=>`<tr><td><b>${esc(n.dir.split(',')[0])}</b></td><td><span class="badge red">${esc(n.motivo)}</span></td><td class="muted">${n.fecha}</td></tr>`).join('')}</tbody></table></div>`:''}
       <div class="form-section-title">Historial de asignaciones</div>
       <div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Responsable</th><th>Fecha asignación</th><th>Fecha completado</th><th>Observaciones</th></tr></thead><tbody>${t.hist.map(h=>`<tr><td><b>${h.resp}</b></td><td class="muted">${h.asign}</td><td>${h.comp==='Pendiente'?'<span class="badge amber">Pendiente</span>':`<span class="muted">${h.comp}</span>`}</td><td class="muted">${esc(h.obs)}</td></tr>`).join('')}</tbody></table></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cerrar</button>${t.maps?`<button class="btn" data-click="openTerrMaps" data-click-args='["${t.num}"]'>${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" onclick="closeModal();openAsignTerr('${t.num}')">${svg('refresh')}Reasignar</button><button class="btn primary" onclick="closeModal();openTerrEdit('${t.num}')">${svg('edit')}Editar territorio</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cerrar</button>${t.maps?`<button class="btn" data-click="openTerrMaps" data-click-args='["${t.num}"]'>${svg('pin')}Abrir en Google Maps</button>`:''}<button class="btn" data-click="openAsignTerr" data-click-args='["${t.num}"]' data-preclose="closeModal">${svg('refresh')}Reasignar</button><button class="btn primary" data-click="openTerrEdit" data-click-args='["${t.num}"]' data-preclose="closeModal">${svg('edit')}Editar territorio</button>`});
 }
 function terrMiniMap(t){
   const idx=(parseInt(t.num,10)-1)%42;const{x,y}=lfCell(idx);const cx=x+LF_CW/2,cy=y+LF_CH/2;
@@ -1121,7 +1121,7 @@ function repPreview(type){
   else if(type==='campo'){title='Resumen de servicio de campo · vista previa';body=tablePreview(['Publicador','Tipo','Estado','PR'],DB.slice(0,10).map(p=>[p.fullName,p.role==='Anciano'?'ANC':p.role==='Siervo Ministerial'?'SM':p.role==='Publicador no bautizado'?'PNB':'PUB',p.estado,p.role==='Precursor Regular'?'PR':'']),DB.length)}
   else if(type==='s1'){title='Servicio de campo y asistencia (S-1) · vista previa';body=tablePreview(['Indicador','Valor'],[['Publicadores activos',String(DB.filter(p=>p.estado!=='Inactivo').length)],['Promedio asistencia fin de semana',String(ATT_WE[TODAY.getMonth()])],['Publicadores · N.º informes','—'],['Precursores auxiliares · Horas','—'],['Precursores regulares · Horas','—']],5)}
   const dlAction=type==='terr'
-    ? `<button class="btn" onclick="closeModal();exportTerrDocx()">${svg('download')}Word</button><button class="btn primary" onclick="closeModal();exportTerrPdf()">${svg('download')}PDF</button>`
+    ? `<button class="btn" data-click="exportTerrDocx" data-preclose="closeModal">${svg('download')}Word</button><button class="btn primary" data-click="exportTerrPdf" data-preclose="closeModal">${svg('download')}PDF</button>`
     : `<button class="btn primary" onclick="closeModal();${REPORT_DL[type]||''}()">${svg('download')}Descargar</button>`;
   openModalCustom({icon:'eye',tint:'t-brand',title,sub:'Así se verá el reporte antes de descargarlo',size:'lg',body,footer:`<button class="btn" data-click="closeModal">Cerrar</button>${dlAction}`});
 }
@@ -1168,7 +1168,7 @@ function renderActList(){
     const typeBadge=it.kind==='notif'?`<span class="badge blue">${svg('bell')}Notificación</span>`:`<span class="badge violet">${svg('tasks')}Tarea</span>`;
     const stateBadge=it.pending?`<span class="badge amber">${svg('clock')}${it.kind==='notif'?'Sin leer':'Pendiente'}</span>`:`<span class="badge green">${svg('check')}${it.kind==='notif'?'Leída':'Completada'}</span>`;
     const prioB=it.kind==='tarea'?prioBadge(it.prioridad):'';
-    const action=it.pending?(it.kind==='notif'?`<button class="btn sm ghost" onclick="event.stopPropagation();markNotifRead(${it.idx})">${svg('check')}Marcar leída</button>`:`<button class="btn sm primary" onclick="event.stopPropagation();completeActTask(${it.idx})">${svg('check')}Completar</button>`):`<span class="muted" style="font-size:11.5px;display:inline-flex;align-items:center;gap:4px">${svg('check')}Resuelto</span>`;
+    const action=it.pending?(it.kind==='notif'?`<button class="btn sm ghost" data-click="markNotifRead" data-click-args='[${it.idx}]' data-stop="1">${svg('check')}Marcar leída</button>`:`<button class="btn sm primary" data-click="completeActTask" data-click-args='[${it.idx}]' data-stop="1">${svg('check')}Completar</button>`):`<span class="muted" style="font-size:11.5px;display:inline-flex;align-items:center;gap:4px">${svg('check')}Resuelto</span>`;
     const rowClick=it.kind==='tarea'?`openTaskDetail(${it.idx})`:(it.pending?`markNotifRead(${it.idx})`:'');
     return `<div class="lst-item" ${rowClick?`onclick="${rowClick}" role="button" tabindex="0"`:''} style="${it.pending?'background:var(--brand-50);':''}align-items:flex-start;gap:12px;padding:14px 18px${rowClick?';cursor:pointer':''}">
       <div class="lst-ico ${it.tint}">${svg(it.ico)}</div>
@@ -1200,7 +1200,7 @@ function openTaskDetail(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
       <p style="font-size:13.5px;color:var(--ink-500);line-height:1.6;margin-bottom:16px">${esc(t.desc)}</p>
       <div class="form-section-title">${svg('user')} Responsable</div>
       <div class="cell-user" style="margin-bottom:6px">${avatarHTML(t.asignadoA.fullName)}<div><b>${t.asignadoA.fullName}</b><br><small class="muted">${t.asignadoA.role||''}</small></div></div>`,
-    footer:`<button class="btn danger" data-click="deleteTask" data-click-args='[${t.id}]'>${svg('trash')}Eliminar</button><button class="btn" data-click="openTaskEdit" data-click-args='[${t.id}]'>${svg('edit')}Editar</button>${t.estado!=='Completada'?`<button class="btn primary" onclick="closeModal();completeActTask(${t.id})">${svg('check')}Completar</button>`:`<button class="btn primary" data-click="reopenTask" data-click-args='[${t.id}]'>${svg('refresh')}Reabrir</button>`}`});}
+    footer:`<button class="btn danger" data-click="deleteTask" data-click-args='[${t.id}]'>${svg('trash')}Eliminar</button><button class="btn" data-click="openTaskEdit" data-click-args='[${t.id}]'>${svg('edit')}Editar</button>${t.estado!=='Completada'?`<button class="btn primary" data-click="completeActTask" data-click-args='[${t.id}]' data-preclose="closeModal">${svg('check')}Completar</button>`:`<button class="btn primary" data-click="reopenTask" data-click-args='[${t.id}]'>${svg('refresh')}Reabrir</button>`}`});}
 function openTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   swapModalContent({icon:'edit',tint:'t-violet',title:'Editar tarea',sub:t.titulo,size:'lg',
     body:`<div class="form-grid"><div class="form-row full"><label>Nombre de la tarea *</label><input class="input" id="tk_titulo" value="${esc(t.titulo)}"/></div><div class="form-row full"><label>Descripción</label><textarea class="textarea" id="tk_desc">${esc(t.desc)}</textarea></div><div class="form-row"><label>Asignada a</label><select class="select" id="tk_asig">${eldersM.map(p=>`<option value="${p.id}"${String(p.id)===String(t.asignadoA.id)?' selected':''}>${esc(p.fullName)}</option>`).join('')}</select></div><div class="form-row"><label>Prioridad</label><select class="select" id="tk_prio">${['Alta','Media','Baja'].map(x=>`<option${x===t.prioridad?' selected':''}>${x}</option>`).join('')}</select></div><div class="form-row"><label>Fecha límite</label><input class="input" id="tk_limite" type="date" value="${t.limiteD?diso(t.limiteD):diso(TODAY)}"/></div><div class="form-row"><label>Estado</label><select class="select" id="tk_estado">${['Pendiente','Completada'].map(x=>`<option${x===t.estado?' selected':''}>${x}</option>`).join('')}</select></div></div>`,
@@ -1575,7 +1575,7 @@ function openRegAsist(){const list=scheduledMeetings();const def=list.find(m=>m.
 function raContinue(){const v=document.getElementById('ra_sel').value;const p=v.split('|');closeModal();openAttReg(p[0],p[1]);}
 function openPendientes(){const {pend}=attScanList();
   openModalCustom({icon:'clock',tint:'t-amber',title:'Pendientes por registrar',sub:`${pend.length} reunión(es) con fecha pasada sin asistencia registrada`,size:'lg',
-    body:pend.length?`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Fecha</th><th>Tipo</th><th>Reunión</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${pend.map(m=>{const meta=meetingMeta(m.type);const iso=diso(m.date);return `<tr><td class="muted">${dstr(m.date)}</td><td>${m.type==='mid'?'Entre semana':'Fin de semana'}</td><td><b>${esc(meta.title)}</b></td><td><span class="badge amber">${svg('clock')}Pendiente</span></td><td style="text-align:right"><button class="btn sm primary" onclick="closeModal();openAttReg('${iso}','${m.type}')">${svg('check')}Registrar</button></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">🎉 No hay reuniones pendientes por registrar.</div>`,
+    body:pend.length?`<div class="table-wrap" style="border:1px solid var(--border);border-radius:13px"><table class="data"><thead><tr><th>Fecha</th><th>Tipo</th><th>Reunión</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${pend.map(m=>{const meta=meetingMeta(m.type);const iso=diso(m.date);return `<tr><td class="muted">${dstr(m.date)}</td><td>${m.type==='mid'?'Entre semana':'Fin de semana'}</td><td><b>${esc(meta.title)}</b></td><td><span class="badge amber">${svg('clock')}Pendiente</span></td><td style="text-align:right"><button class="btn sm primary" data-click="openAttReg" data-click-args='["${iso}", "${m.type}"]' data-preclose="closeModal">${svg('check')}Registrar</button></td></tr>`;}).join('')}</tbody></table></div>`:`<div class="empty">🎉 No hay reuniones pendientes por registrar.</div>`,
     footer:`<button class="btn" data-click="closeModal">Cerrar</button>`});
 }
 function openRegistradas(){const {reg}=attScanList();
@@ -1755,7 +1755,7 @@ function closeNotifOnce(e){const p=document.getElementById('notifPop');if(p&&!p.
 function toggleProfile(e){e.stopPropagation();const ex=document.getElementById('profilePop');if(ex){ex.remove();return}
   const pop=document.createElement('div');pop.id='profilePop';pop.className='popover profile';
   const u=CURRENT_USER||{name:'Paublo Díaz',email:'demo@lasflores.org',level:1,role:ACCESS_LEVELS[1]};
-  pop.innerHTML=`<div class="profile-card"><div class="avatar">${initials(u.name)}</div><div><b>${u.name}</b><small>${u.email}</small><div style="margin-top:6px"><span class="badge ${u.level===1?'violet':u.level===2?'blue':u.level===3?'cyan':'gray'}">${svg('shield')}Nivel ${u.level} · ${u.role}</span></div></div></div><div class="profile-menu"><button class="ctx-item" onclick="closeProfile();openMiPerfil()">${svg('user')}Mi perfil</button><button class="ctx-item" onclick="closeProfile();openUserConfig()">${svg('settings')}Configuración</button><button class="ctx-item" onclick="closeProfile();openIdioma()">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" onclick="closeProfile();signOut()">${svg('logout')}Cerrar sesión</button></div>`;
+  pop.innerHTML=`<div class="profile-card"><div class="avatar">${initials(u.name)}</div><div><b>${u.name}</b><small>${u.email}</small><div style="margin-top:6px"><span class="badge ${u.level===1?'violet':u.level===2?'blue':u.level===3?'cyan':'gray'}">${svg('shield')}Nivel ${u.level} · ${u.role}</span></div></div></div><div class="profile-menu"><button class="ctx-item" data-click="openMiPerfil" data-preclose="closeProfile">${svg('user')}Mi perfil</button><button class="ctx-item" data-click="openUserConfig" data-preclose="closeProfile">${svg('settings')}Configuración</button><button class="ctx-item" data-click="openIdioma" data-preclose="closeProfile">${svg('refresh')}Cambiar idioma</button><div class="ctx-sep"></div><button class="ctx-item danger" data-click="signOut" data-preclose="closeProfile">${svg('logout')}Cerrar sesión</button></div>`;
   document.body.appendChild(pop);setTimeout(()=>document.addEventListener('click',closeProfileOnce),0);}
 function closeProfileOnce(e){const p=document.getElementById('profilePop');if(p&&!p.contains(e.target)&&!document.getElementById('profileBtn').contains(e.target)){p.remove();document.removeEventListener('click',closeProfileOnce)}}
 function closeProfile(){const p=document.getElementById('profilePop');if(p)p.remove()}
@@ -1814,7 +1814,7 @@ function openUserConfig(){const dark=document.documentElement.getAttribute('data
   openModalCustom({icon:'settings',tint:'t-brand',title:'Configuración',sub:'Preferencias de tu cuenta',size:'lg',
     body:`
       <div class="form-section-title">${svg('bell')} Notificaciones</div>
-      <div class="set-list"><div class="set-row"><div class="set-ico">${svg('bell')}</div><div><b>Preferencias de notificaciones</b><p>Tipos, recordatorios y canal de envío</p></div><div class="ctrl"><button class="btn sm" onclick="closeModal();openNotifPrefs()">${svg('settings')}Configurar</button></div></div></div>
+      <div class="set-list"><div class="set-row"><div class="set-ico">${svg('bell')}</div><div><b>Preferencias de notificaciones</b><p>Tipos, recordatorios y canal de envío</p></div><div class="ctrl"><button class="btn sm" data-click="openNotifPrefs" data-preclose="closeModal">${svg('settings')}Configurar</button></div></div></div>
       <div class="form-section-title">${svg('refresh')} Idioma y región</div>
       <div class="form-grid">
         <div class="form-row"><label>Idioma</label><select class="select" id="uc_lang"><option value="es"${APP_LANG==='es'?' selected':''}>Español</option><option value="en"${APP_LANG==='en'?' selected':''}>Inglés (English)</option></select></div>
@@ -2785,6 +2785,8 @@ function focusGlobalSearch(){ const s=document.getElementById('globalSearch'); i
     const t=e.target; if(!t||!t.closest) return;
     const el=t.closest('[data-'+e.type+']');
     if(!el) return;
+    if(el.hasAttribute('data-stop')) e.stopPropagation();
+    const pre=el.getAttribute('data-preclose'); if(pre&&typeof window[pre]==='function') window[pre]();
     const fn=window[el.getAttribute('data-'+e.type)];
     if(typeof fn!=='function') return;
     let args=[]; const raw=el.getAttribute('data-'+e.type+'-args');
@@ -2796,4 +2798,8 @@ function focusGlobalSearch(){ const s=document.getElementById('globalSearch'); i
 Object.assign(window,{kbdActivate,focusGlobalSearch});
 function saveDelegated(){var fn=window[this.getAttribute("data-save")];var raw=this.getAttribute("data-save-args");var args=[];if(raw){try{args=JSON.parse(raw)}catch(_){}}if(typeof fn==="function")saveWithFeedback(this,function(){fn.apply(null,args)});}
 Object.assign(window,{saveDelegated});
+function hoverTintOn(){this.style.borderColor="var(--brand-300)";this.style.background="var(--brand-50)"}
+function hoverTintOff(){this.style.borderColor="var(--border)";this.style.background="var(--surface)"}
+Object.assign(window,{hoverTintOn,hoverTintOff});
+
 
