@@ -281,7 +281,7 @@ function verOradorContacto(name){const p=DB.find(x=>x.fullName===name);if(p)open
 function openReemplazarOrador(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'refresh',tint:'t-violet',title:'Reemplazar discursante',sub:`${dstr(dt)} · actualmente ${dc.orador.fullName}`,
     body:`<div class="form-row full"><label>Nuevo discursante</label>${searchSelect('rep_orador',males.map(m=>({value:m.id,label:m.fullName})),dc.orador.id)}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReemplazarOrador('${iso}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveReemplazarOrador" data-save-args='["${iso}"]'>${svg('check')}Guardar</button>`});}
 function saveReemplazarOrador(iso){const pid=sselValue('rep_orador');if(!pid){toast('Selecciona el nuevo discursante');return;}
   const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   DISC_OVR[iso]={oradorId:pid,bosq:dc.bosq,cancion:dc.cancion,tema:dc.tema,cong:dc.cong};
@@ -293,7 +293,7 @@ function saveReemplazarOrador(iso){const pid=sselValue('rep_orador');if(!pid){to
 function openCambiarFechaDiscurso(iso){if(!requireCap('assign.manage'))return;const dt=new Date(iso+'T00:00:00');const dc=discFor(dt);
   openModalCustom({icon:'calendar',tint:'t-violet',title:'Cambiar fecha del discurso',sub:`${dc.orador.fullName} · actual: ${dstr(dt)}`,
     body:`<div class="form-row full"><label>Nueva fecha (domingo)</label><input class="input" type="date" id="cfd_date" value="${iso}"/><span class="field-hint" id="cfd_hint" aria-live="polite" style="margin-top:6px">Los discursos públicos se programan los domingos.</span></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveCambiarFechaDiscurso('${iso}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveCambiarFechaDiscurso" data-save-args='["${iso}"]'>${svg('check')}Guardar</button>`});}
 function saveCambiarFechaDiscurso(iso){const v=document.getElementById('cfd_date').value;if(!v){toast('Selecciona la nueva fecha');return;}
   const nd=new Date(v+'T00:00:00');
   if(nd.getDay()!==0){const h=document.getElementById('cfd_hint');if(h){h.textContent='La fecha elegida no es domingo. Selecciona un domingo.';h.className='field-hint err';}toast('La nueva fecha debe ser un domingo');return;}
@@ -371,7 +371,7 @@ function openReassignPart(iso,type,role){if(!requireCap('assign.manage'))return;
   openModalCustom({icon:'refresh',tint:type==='mid'?'t-brand':'t-violet',title:'Reasignar parte',sub:`${role} · ${dstr(date)} · ${meetingMeta(type).title}`,
     body:`<div class="form-row full"><label>Publicador asignado</label>${searchSelect('rp_pub',[{value:'',label:'— Dejar vacante —'}].concat(males.map(m=>({value:m.id,label:m.fullName}))),part.person?part.person.id:'')}</div>
       <div class="form-row full" style="margin-top:12px"><label>Estado</label><select class="select" id="rp_conf"><option value="0"${!part.confirmed?' selected':''}>Por confirmar</option><option value="1"${part.confirmed?' selected':''}>Confirmado</option></select></div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveReassignPart('${iso}','${type}','${role}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveReassignPart" data-save-args='["${iso}", "${type}", "${role}"]'>${svg('check')}Guardar</button>`});}
 function saveReassignPart(iso,type,role){const pid=sselValue('rp_pub');const conf=document.getElementById('rp_conf').value==='1';
   MEET_OVR[iso+type+'|'+role]={personId:pid||null,confirmed:pid?conf:false};
   refreshStats();persistAll();closeModal();
@@ -558,7 +558,7 @@ function fichaEditConfig(id,fromView){
         <div class="form-row"><label>Fecha de bautismo</label><input class="input" type="date" id="ec_baut" value="${p.bautismo}"/></div>
         <div class="form-row"><label>Fecha de nombramiento</label><input class="input" type="date" id="ec_nomb" value="${p.nombramiento}"/></div>
         <div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="ec_obs" placeholder="Notas internas…">${esc(p.obs)}</textarea></div></div>`,
-    footer:`<button class="btn" onclick="${fromView?`editFichaCancel(${id})`:'closeModal()'}">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveContact(${id},${fromView?'true':'false'}))">${svg('check')}Guardar cambios</button>`};
+    footer:`<button class="btn" onclick="${fromView?`editFichaCancel(${id})`:'closeModal()'}">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveContact" data-save-args='[${id}, ${fromView?'true':'false'}]'>${svg('check')}Guardar cambios</button>`};
 }
 function openEditContact(id){if(!requireCap('data.edit'))return;openModalCustom(fichaEditConfig(id,false))}
 function fieldHintEl(el){const hid=el.getAttribute('aria-describedby')||(el.id?el.id+'_hint':'');return hid?document.getElementById(hid):null}
@@ -679,7 +679,7 @@ function openAsignTerr(num){if(!requireCap('territory.manage'))return;const t=nu
       <div class="form-row"><label>Responsable *</label>${searchSelect('at_resp',males.map(p=>({value:p.id,label:p.fullName})),t&&t.resp?t.resp.id:'')}</div>
       <div class="form-row full"><label>Territorio</label><select class="select" id="at_terr">${TERR.map(x=>`<option value="${x.num}"${t&&x.num===t.num?' selected':''}>Territorio ${x.num} · ${esc(x.barrio)} (${esc(x.localidad)})</option>`).join('')}</select></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAsignTerr())">${svg('check')}Guardar</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveAsignTerr">${svg('check')}Guardar</button>`});
 }
 function saveAsignTerr(){const num=document.getElementById('at_terr').value;const t=TERR.find(x=>x.num===num);if(!t)return;
   const rid=sselValue('at_resp');if(!rid){toast('Selecciona el responsable');return;}
@@ -804,7 +804,7 @@ function openTerrEdit(num){if(!requireCap('territory.manage'))return;const t=TER
       </div>
       <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
       <div id="te_img_wrap">${terrImgFieldHTML(t.img,'te_img_wrap')}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrEdit('${num}'))">${svg('check')}Guardar cambios</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveTerrEdit" data-save-args='["${num}"]'>${svg('check')}Guardar cambios</button>`});}
 function saveTerrEdit(num){const t=TERR.find(x=>x.num===num);if(!t)return;
   const mapsEl=document.getElementById('te_maps');const maps=(mapsEl.value||'').trim();
   if(maps&&!isValidMaps(maps)){validateMapsUrl(mapsEl);toast('El enlace de Google Maps no es válido');return;}
@@ -826,7 +826,7 @@ function openTerrCreate(){if(!requireCap('territory.manage'))return;terrEditImg=
     </div>
     <div class="form-section-title">${svg('map')} Imagen de referencia del territorio</div>
     <div id="tc_img_wrap">${terrImgFieldHTML(null,'tc_img_wrap')}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTerrCreate('${nextNum}'))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveTerrCreate" data-save-args='["${nextNum}"]'>${svg('check')}Guardar</button>`});}
 function saveNoPredica(){
   const dir=(document.getElementById('npd_dir').value||'').trim();
   if(!dir){document.getElementById('npd_dir').classList.add('invalid');toast('Ingresa la dirección');return;}
@@ -975,7 +975,7 @@ function openExhibTurn(ex,iso,si){if(!requireCap('assign.manage'))return;const d
       <div class="form-row"><label>Responsable 2 *</label>${searchSelect('ext_p2',pubsActive.map(p=>({value:p.id,label:p.fullName})),cur?cur[1].id:'')}</div>
     </div>
     <span class="field-hint" style="margin-top:10px">Cada turno requiere dos publicadores. También puedes dejar el turno vacante.</span>`,
-    footer:`<button class="btn danger" data-click="vaciarExhibTurn">${svg('trash')}Dejar vacante</button><button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveExhibTurn())">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn danger" data-click="vaciarExhibTurn">${svg('trash')}Dejar vacante</button><button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveExhibTurn">${svg('check')}Guardar</button>`});}
 function __extKey(){const ex=document.getElementById('ext_ex').value;const iso=document.getElementById('ext_fecha').value;const si=document.getElementById('ext_slot').value;if(!iso){toast('Selecciona la fecha del turno');return null}return ex+'|'+iso+'|'+si;}
 function saveExhibTurn(){const key=__extKey();if(!key)return;
   const p1=sselValue('ext_p1'),p2=sselValue('ext_p2');
@@ -1006,7 +1006,7 @@ VIEWS.informes=()=>{
   const pct=base.length?Math.round(entregados.length/base.length*100):0;
   const allEnt=INFORMES.filter(r=>r.entregado).length;const globalPct=Math.round(allEnt/INFORMES.length*100);
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Informes Mensuales','Junio 2026 · seguimiento de entrega y actividad',`${can('report.send')?`<button class="btn primary" onclick="saveWithFeedback(this,()=>remindAllPending())">${svg('send')}Recordar pendientes</button>`:''}`)}
+    ${pageHead('Informes Mensuales','Junio 2026 · seguimiento de entrega y actividad',`${can('report.send')?`<button class="btn primary" data-click="saveDelegated" data-save="remindAllPending">${svg('send')}Recordar pendientes</button>`:''}`)}
     <div class="kpi-grid" style="margin-bottom:22px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
       ${[{v:entregados.length,l:'Informes entregados',t:'t-green',i:'check'},{v:base.length-entregados.length,l:'Pendientes',t:'t-amber',i:'clock'},{v:totalHoras,l:'Horas reportadas',t:'t-brand',i:'clock'},{v:totalEst,l:'Estudios bíblicos',t:'t-violet',i:'people'},{v:pct+'%',l:'Tasa de entrega',t:'t-cyan',i:'chart'}].map(k=>`<div class="kpi"><div class="kpi-top"><div class="kpi-ico ${k.t}" style="width:38px;height:38px">${svg(k.i)}</div></div><div class="kpi-val">${k.v}</div><div class="kpi-label">${k.l}</div></div>`).join('')}
     </div>
@@ -1065,7 +1065,7 @@ function openRegistrarInforme(pubId){const r=INFORMES.find(x=>String(x.pub.id)==
       <div class="form-row"><label>Estudios bíblicos</label><input class="input" id="ri_est" type="number" min="0" max="30" value="${r.entregado?r.estudios:''}" placeholder="0"/></div>
     </div>
     <label class="check" style="margin-top:14px"><input type="checkbox" id="ri_aux" ${r.auxiliar?'checked':''}/><span class="box">${svg('check')}</span>Participó como precursor (regular/auxiliar)</label>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveRegistrarInforme(${r.pub.id}))">${svg('check')}Guardar informe</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveRegistrarInforme" data-save-args='[${r.pub.id}]'>${svg('check')}Guardar informe</button>`});}
 function saveRegistrarInforme(pubId){const r=INFORMES.find(x=>String(x.pub.id)===String(pubId));if(!r)return;
   const horas=parseInt(document.getElementById('ri_horas').value,10);
   if(!(horas>=0)||horas>200){document.getElementById('ri_horas').classList.add('invalid');toast('Ingresa un número de horas válido (0–200)');return;}
@@ -1204,7 +1204,7 @@ function openTaskDetail(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
 function openTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   swapModalContent({icon:'edit',tint:'t-violet',title:'Editar tarea',sub:t.titulo,size:'lg',
     body:`<div class="form-grid"><div class="form-row full"><label>Nombre de la tarea *</label><input class="input" id="tk_titulo" value="${esc(t.titulo)}"/></div><div class="form-row full"><label>Descripción</label><textarea class="textarea" id="tk_desc">${esc(t.desc)}</textarea></div><div class="form-row"><label>Asignada a</label><select class="select" id="tk_asig">${eldersM.map(p=>`<option value="${p.id}"${String(p.id)===String(t.asignadoA.id)?' selected':''}>${esc(p.fullName)}</option>`).join('')}</select></div><div class="form-row"><label>Prioridad</label><select class="select" id="tk_prio">${['Alta','Media','Baja'].map(x=>`<option${x===t.prioridad?' selected':''}>${x}</option>`).join('')}</select></div><div class="form-row"><label>Fecha límite</label><input class="input" id="tk_limite" type="date" value="${t.limiteD?diso(t.limiteD):diso(TODAY)}"/></div><div class="form-row"><label>Estado</label><select class="select" id="tk_estado">${['Pendiente','Completada'].map(x=>`<option${x===t.estado?' selected':''}>${x}</option>`).join('')}</select></div></div>`,
-    footer:`<button class="btn" data-click="openTaskDetail" data-click-args='[${t.id}]'>Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveTaskEdit(${t.id}))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="openTaskDetail" data-click-args='[${t.id}]'>Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveTaskEdit" data-save-args='[${t.id}]'>${svg('check')}Guardar</button>`});}
 function saveTaskEdit(id){const t=TASKS.find(x=>x.id===id);if(!t)return;
   const titulo=(document.getElementById('tk_titulo').value||'').trim();
   if(!titulo){document.getElementById('tk_titulo').classList.add('invalid');toast('Ingresa el nombre de la tarea');return;}
@@ -1238,7 +1238,7 @@ function openComm(){if(!requireCap('comm.send'))return;
         <div class="form-row"><label>Hora de envío</label><input class="input" type="time" value="08:00"/></div>
       </div>
       <label class="check" style="margin-top:16px"><input type="checkbox"/><span class="box">${svg('check')}</span>Programar envío para la fecha y hora indicadas</label>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn" onclick="saveWithFeedback(this,()=>sendComm(true))">${svg('clock')}Programar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>sendComm(false))">${svg('send')}Enviar ahora</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn" data-click="saveDelegated" data-save="sendComm" data-save-args='[true]'>${svg('clock')}Programar</button><button class="btn primary" data-click="saveDelegated" data-save="sendComm" data-save-args='[false]'>${svg('send')}Enviar ahora</button>`});
 }
 function sendComm(scheduled){
   const t=(document.getElementById('comm_titulo').value||'').trim();const m=(document.getElementById('comm_msg').value||'').trim();
@@ -1258,7 +1258,7 @@ VIEWS.config=()=>{
   const tabs=[['general','Información general'],['anuncios','Anuncios'],['inf','Informes'],['grupos','Grupos'],['sync','Sincronización'],['legalseg','Legal y seguridad']].concat(can('billing')?[['sub','Suscripción']]:[]).concat([['soporte','Soporte']]);
   if(configTab==='sub'&&!can('billing'))configTab='general';
   document.getElementById('content').innerHTML=`<div class="page">
-    ${pageHead('Configuración de la Congregación','Las Flores · administra los datos y ajustes generales',`<button class="btn primary" onclick="saveWithFeedback(this,()=>saveCongConfig())">${svg('check')}Guardar cambios</button>`)}
+    ${pageHead('Configuración de la Congregación','Las Flores · administra los datos y ajustes generales',`<button class="btn primary" data-click="saveDelegated" data-save="saveCongConfig">${svg('check')}Guardar cambios</button>`)}
     <div class="tabs">${tabs.map(([id,l])=>`<div class="tab ${configTab===id?'active':''}" data-click="setConfigTab" data-click-args='["${id}"]'>${l}</div>`).join('')}</div>
     <div id="configContent"></div></div>`;
   renderConfig();
@@ -1302,7 +1302,7 @@ function openAnuncioModal(i){if(!requireCap('anuncio.manage'))return;const isEdi
       <div class="form-row full"><label>Título *</label><input class="input" id="an_titulo" value="${isEdit?a.t.replace(/"/g,'&quot;'):''}" placeholder="Ej. Asamblea de circuito"/></div>
       <div class="form-row full"><label>Descripción *</label><textarea class="textarea" id="an_desc" placeholder="Detalles del anuncio…">${isEdit?a.d:''}</textarea></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAnuncio(${isEdit?i:'null'}))">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveAnuncio" data-save-args='[${isEdit?i:'null'}]'>${svg('check')}Guardar</button>`});}
 function saveAnuncio(i){
   const t=(document.getElementById('an_titulo').value||'').trim();const d=(document.getElementById('an_desc').value||'').trim();
   if(!t||!d){if(!t)document.getElementById('an_titulo').classList.add('invalid');if(!d)document.getElementById('an_desc').classList.add('invalid');toast('Completa título y descripción');return;}
@@ -1324,7 +1324,7 @@ function openEventoModal(){if(!requireCap('anuncio.manage'))return;
       <div class="form-row"><label>Fecha</label><input class="input" id="ev_fecha" type="date" value="${diso(TODAY)}"/></div>
       <div class="form-row"><label>Detalle</label><input class="input" id="ev_det" placeholder="Ej. Todos los grupos"/></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveEvento())">${svg('check')}Guardar</button>`});}
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveEvento">${svg('check')}Guardar</button>`});}
 function saveEvento(){
   const n=(document.getElementById('ev_nombre').value||'').trim();
   if(!n){document.getElementById('ev_nombre').classList.add('invalid');toast('Ingresa el nombre del evento');return;}
@@ -1558,7 +1558,7 @@ function openAttReg(iso,type){const date=new Date(iso+'T00:00:00');const meta=me
   openModalCustom({icon:'people',tint:type==='mid'?'t-brand':'t-violet',title:'Registrar asistencia',sub:`${dlong(date).replace(/^\w/,c=>c.toUpperCase())} · ${esc(meta.title)}`,
     body:`<div class="form-grid"><div class="form-row"><label>Total de asistentes *</label><input class="input" type="number" min="0" id="att_total" value="${(reg?reg.count:a.count)||''}" placeholder="0" aria-describedby="att_total_hint"/><span class="field-hint" id="att_total_hint" aria-live="polite"></span></div><div class="form-row"><label>Conexiones Zoom</label><input class="input" type="number" min="0" id="att_zoom" value="${reg?reg.zoom:Math.round((a.count||30)*0.2)}"/></div><div class="form-row full"><label>Observaciones</label><textarea class="textarea" id="att_obs" placeholder="Notas opcionales…">${reg?reg.obs||'':''}</textarea></div></div>
       <div style="margin-top:14px">${ya?`<span class="badge green">${svg('check')}Registrado</span>`:`<span class="badge amber">${svg('clock')}Pendiente de registrar</span>`}</div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveAttReg('${iso}','${type}'))">${svg('check')}Guardar registro</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveAttReg" data-save-args='["${iso}", "${type}"]'>${svg('check')}Guardar registro</button>`});
 }
 function saveAttReg(iso,type){const el=document.getElementById('att_total');const val=parseInt((el.value||'').trim(),10);
   if(!(val>=1)||val>2000){el.classList.add('invalid');el.setAttribute('aria-invalid','true');const h=document.getElementById('att_total_hint');if(h){h.textContent='Ingresa un total de asistentes válido (1 o más).';h.className='field-hint err';}toast('Revisa el total de asistentes');return;}
@@ -2266,7 +2266,7 @@ function openUserModal(){if(!requireCap('users.manage'))return;const myLevel=use
       <div class="form-row"><label>Nivel de acceso *</label><select class="select" id="nu_level">${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${l===Math.max(myLevel,2)?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select></div>
       <div class="form-row"><label>Contraseña inicial *</label><input class="input" id="nu_pw" type="text" placeholder="Mínimo 8 caracteres"/><span class="field-hint" style="margin-top:6px">Compártela con el usuario; podrá cambiarla luego.</span></div>
     </div>`,
-    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" onclick="saveWithFeedback(this,()=>saveNewUser())">${svg('check')}Crear usuario</button>`});
+    footer:`<button class="btn" data-click="closeModal">Cancelar</button><button class="btn primary" data-click="saveDelegated" data-save="saveNewUser">${svg('check')}Crear usuario</button>`});
 }
 async function saveNewUser(){
   const name=(document.getElementById('nu_name').value||'').trim();
@@ -2794,3 +2794,6 @@ function focusGlobalSearch(){ const s=document.getElementById('globalSearch'); i
   TYPES.forEach(ty=>document.addEventListener(ty,handle,false));
 })();
 Object.assign(window,{kbdActivate,focusGlobalSearch});
+function saveDelegated(){var fn=window[this.getAttribute("data-save")];var raw=this.getAttribute("data-save-args");var args=[];if(raw){try{args=JSON.parse(raw)}catch(_){}}if(typeof fn==="function")saveWithFeedback(this,function(){fn.apply(null,args)});}
+Object.assign(window,{saveDelegated});
+
