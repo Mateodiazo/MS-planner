@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     if (action === "list") {
       const { data: profiles } = await admin
         .from("profiles")
-        .select("id,email,full_name,access_level,created_at")
+        .select("id,email,full_name,access_level,publisher_id,created_at")
         .order("access_level", { ascending: true });
       const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
       const banned: Record<string, boolean> = {};
@@ -97,6 +97,19 @@ Deno.serve(async (req) => {
       const { data: target } = await admin.from("profiles").select("access_level").eq("id", id).single();
       if (target && target.access_level < callerLevel) return json({ error: "No puedes modificar a un usuario de mayor nivel" }, 403);
       await admin.auth.admin.updateUserById(id, { ban_duration: active ? "none" : "876000h" });
+      return json({ ok: true });
+    }
+
+    if (action === "set_publisher") {
+      const id = String(body.id || "");
+      const pub = (body.publisher_id === null || body.publisher_id === "" || body.publisher_id === undefined)
+        ? null : Number(body.publisher_id);
+      if (!id) return json({ error: "Falta el usuario" }, 400);
+      if (pub !== null && !(pub > 0)) return json({ error: "Ficha inválida" }, 400);
+      const { data: target } = await admin.from("profiles").select("access_level").eq("id", id).single();
+      if (target && target.access_level < callerLevel) return json({ error: "No puedes modificar a un usuario de mayor nivel" }, 403);
+      const { error } = await admin.from("profiles").update({ publisher_id: pub }).eq("id", id);
+      if (error) return json({ error: error.message }, 400);
       return json({ ok: true });
     }
 

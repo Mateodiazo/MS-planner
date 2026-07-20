@@ -2251,11 +2251,14 @@ function renderUsersTable(){const wrap=document.getElementById('usersWrap');if(!
     const lvlSel=`<select class="select" style="height:32px;font-size:12px;min-width:200px" ${canEdit?'':'disabled'} data-change="setUserLevel" data-change-args='["${u.id}", "$val"]'>${[1,2,3,4].filter(l=>l>=myLevel).map(l=>`<option value="${l}"${u.access_level===l?' selected':''}>Nivel ${l} · ${ACCESS_LEVELS[l]}</option>`).join('')}</select>`;
     const estado=u.banned?`<span class="badge red">${svg('x')}Inactivo</span>`:`<span class="badge green">${svg('check')}Activo</span>`;
     const actBtn=canEdit?(u.banned?`<button class="btn sm" data-click="toggleUserActive" data-click-args='["${u.id}", true]'>${svg('check')}Activar</button>`:`<button class="btn sm ghost" data-click="toggleUserActive" data-click-args='["${u.id}", false]'>${svg('x')}Desactivar</button>`):'<span class="muted" style="font-size:11.5px">—</span>';
-    return `<tr><td><div class="cell-user">${avatarHTML(u.full_name||u.email||'?')}<div><b>${u.full_name||'—'}</b>${u.id===me?' <span class="badge gray" style="font-size:9.5px">tú</span>':''}<br><small class="muted">${u.email||''}</small></div></div></td><td>${lvlSel}</td><td>${estado}</td><td style="text-align:right">${actBtn}</td></tr>`;
+    const pubCell=u.access_level===4
+      ? `<select class="select" style="height:32px;font-size:12px;min-width:190px" ${canEdit?'':'disabled'} data-change="setUserPublisher" data-change-args='["${u.id}", "$val"]'><option value="">— Sin vincular —</option>${DB.map(p=>`<option value="${p.id}"${String(u.publisher_id)===String(p.id)?' selected':''}>${esc(p.fullName)}</option>`).join('')}</select>`
+      : '<span class="muted" style="font-size:11.5px">—</span>';
+    return `<tr><td><div class="cell-user">${avatarHTML(u.full_name||u.email||'?')}<div><b>${esc(u.full_name)||'—'}</b>${u.id===me?' <span class="badge gray" style="font-size:9.5px">tú</span>':''}<br><small class="muted">${esc(u.email)||''}</small></div></div></td><td>${lvlSel}</td><td>${pubCell}</td><td>${estado}</td><td style="text-align:right">${actBtn}</td></tr>`;
   }).join('');
   wrap.innerHTML=`<div class="card"><div class="card-head"><div class="kpi-ico t-brand" style="width:34px;height:34px">${svg('people')}</div><h3>Usuarios (${USERS_CACHE.length})</h3><div class="actions"><button class="btn sm" data-click="loadUsers">${svg('refresh')}Actualizar</button></div></div>
-    <div class="table-wrap"><table class="data"><thead><tr><th>Usuario</th><th>Nivel de acceso</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${rows||`<tr><td colspan="4"><div class="empty">Sin usuarios.</div></td></tr>`}</tbody></table></div>
-    <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--ink-500);line-height:1.5;display:flex;align-items:center;gap:7px">${svg('shield')}<span>Solo puedes asignar niveles iguales o inferiores al tuyo y no puedes modificar tu propia cuenta desde aquí.</span></div>
+    <div class="table-wrap"><table class="data"><thead><tr><th>Usuario</th><th>Nivel de acceso</th><th>Ficha (Publicador)</th><th>Estado</th><th style="text-align:right">Acción</th></tr></thead><tbody>${rows||`<tr><td colspan="5"><div class="empty">Sin usuarios.</div></td></tr>`}</tbody></table></div>
+    <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--ink-500);line-height:1.5;display:flex;align-items:center;gap:7px">${svg('shield')}<span>Vincula cada cuenta de Publicador (Nivel 4) con su ficha para que vea sus datos en la app móvil. Solo puedes asignar niveles iguales o inferiores al tuyo.</span></div>
   </div>`;
 }
 function openUserModal(){if(!requireCap('users.manage'))return;const myLevel=userLevel();
@@ -2280,6 +2283,8 @@ async function saveNewUser(){
   catch(e){toast('No se pudo crear: '+(e.message||e));}
 }
 async function setUserLevel(id,level){try{await sbFunc('set_level',{id:id,access_level:parseInt(level,10)});toast('Nivel actualizado ✓');loadUsers();}catch(e){toast('No se pudo cambiar: '+(e.message||e));loadUsers();}}
+async function setUserPublisher(id,pubId){try{await sbFunc('set_publisher',{id:id,publisher_id:pubId||null});toast(pubId?'Ficha vinculada ✓':'Vínculo quitado');loadUsers();}catch(e){toast('No se pudo vincular: '+(e.message||e));loadUsers();}}
+window.setUserPublisher=setUserPublisher; // nueva función: exponer al despachador de delegación
 function toggleUserActive(id,active){const u=USERS_CACHE.find(x=>x.id===id);const nm=u?(u.full_name||u.email):'este usuario';
   confirmAction({icon:active?'check':'x',tint:active?'t-green':'t-amber',danger:active?false:true,title:active?'Activar usuario':'Desactivar usuario',sub:nm,body:active?'El usuario podrá volver a iniciar sesión.':'El usuario no podrá iniciar sesión hasta que lo actives de nuevo.',ok:active?'Activar':'Desactivar'},async()=>{
     try{await sbFunc('set_active',{id:id,active:active});toast(active?'Usuario activado ✓':'Usuario desactivado');loadUsers();}catch(e){toast('No se pudo: '+(e.message||e));}
