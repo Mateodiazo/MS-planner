@@ -1,0 +1,601 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+body, html, #root {
+  width: 100%;
+  height: 100%;
+  background-color: #f8fafc;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 15px 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.app-header h1 {
+  font-size: 1.2rem;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  margin-right: 8px;
+}
+
+.dot.live {
+  background-color: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.map-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+/* Watermark styles */
+.territory-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(8rem, 30vw, 25rem);
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  z-index: 400; 
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  user-select: none;
+}
+
+.territory-watermark.visible {
+  opacity: 1;
+}
+
+/* Popup styles */
+.popup-content {
+  text-align: center;
+  min-width: 150px;
+}
+
+.popup-content h3 {
+  margin-bottom: 5px;
+  color: #0f172a;
+}
+
+.popup-content p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.sides-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.side-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.side-btn:hover {
+  background: #e2e8f0;
+}
+
+.side-btn.done {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #16a34a;
+}
+
+.type-toggle-btn {
+  border: 1px solid #cbd5e1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.type-toggle-btn:hover {
+  opacity: 0.8;
+}
+
+.complete-all-btn {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.complete-all-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Leaflet override to make popups rounded */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.block-number-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.block-number-label {
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 22px;
+  color: #1e293b;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.block-bag {
+  color: white;
+  border-radius: 3px;
+  padding: 2px 3px;
+  font-size: 11px;
+  margin-top: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  line-height: 1;
+}
+
+.territory-map-watermark span {
+  font-size: 15rem;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  display: block;
+  text-align: center;
+  line-height: 200px;
+}
+
+/* ============ Modal styles ============ */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  max-width: 90vw;
+  width: 360px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 10000;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #ef4444;
+}
+
+.modal-content p {
+  margin: 15px 0;
+}
+
+.modal-content button {
+  margin: 8px 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  background: #e5e7eb;
+}
+
+.modal-content button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Name modal specifics */
+.name-modal h2 {
+  color: #2563eb;
+}
+
+.name-modal-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.name-modal-input:focus {
+  border-color: #2563eb;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .name-modal-input {
+  padding-right: 45px;
+}
+
+.toggle-pwd-btn {
+  position: absolute;
+  right: 8px;
+  background: none !important;
+  border: none !important;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 6px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toggle-pwd-btn:hover {
+  color: #2563eb;
+}
+
+/* ============ User name bar (bottom) ============ */
+.user-name-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: rgba(255,255,255,0.95);
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  max-width: 85vw;
+}
+
+.name-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+}
+
+.name-edit-input {
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  width: 120px;
+  max-width: 40vw;
+  outline: none;
+}
+
+.name-edit-input:focus {
+  border-color: #2563eb;
+}
+
+.name-save-btn, .name-cancel-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 4px;
+}
+
+.name-save-btn { color: #22c55e; }
+.name-cancel-btn { color: #ef4444; }
+
+/* ============ Hamburger button ============ */
+.hamburger-btn {
+  padding: 10px 14px;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  line-height: 1;
+}
+
+.hamburger-btn:hover {
+  background: #f1f5f9;
+}
+
+.icon-btn {
+  padding: 10px 14px;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f1f5f9;
+}
+
+/* ============ Log panel ============ */
+.log-panel-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  z-index: 10001;
+}
+
+.log-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  max-width: 90vw;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 10002;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.log-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.log-panel-header h3 {
+  font-size: 16px;
+  color: #1e293b;
+  margin: 0;
+}
+
+.log-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #64748b;
+  padding: 4px 8px;
+}
+
+.log-close-btn:hover {
+  color: #ef4444;
+}
+
+.log-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 14px;
+}
+
+.log-empty {
+  text-align: center;
+  color: #94a3b8;
+  margin-top: 40px;
+  font-size: 14px;
+}
+
+.log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.log-emoji {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.log-info {
+  flex: 1;
+  font-size: 13px;
+  color: #334155;
+}
+
+.log-info strong {
+  display: block;
+  color: #0f172a;
+}
+
+.log-territory {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.log-meta {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.log-type-territorio_completo {
+  background: #f0fdf4;
+  border-radius: 8px;
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+
+.log-type-limpiar_todo {
+  background: #fef2f2;
+  border-radius: 8px;
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+
+.docx-btn {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.docx-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 400px) {
+  .modal-content {
+    padding: 20px 15px;
+  }
+  .name-modal-input {
+    font-size: 14px;
+    padding: 10px;
+  }
+  .user-name-bar {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .name-edit-input {
+    width: 100px;
+    font-size: 12px;
+  }
+}
+.leaflet-bottom.leaflet-left { margin-bottom: 130px; margin-left: 10px; } 
+
+/* ============================================================
+   Integración MS Planner — design tokens + header standalone + banner.
+   (Añadido en la fusión con MS Planner. Fase B mapas.)
+   ============================================================ */
+:root{
+  --brand-400:#8B5CF6; --brand-500:#5B21B6; --brand-600:#4c1d95; --brand-700:#312E81;
+  --blue:#3B82F6; --green:#22C55E; --amber:#F59E0B; --red:#EF4444;
+  --bg:#F5F7FB; --surface:#fff; --surface-2:#fafbfd; --surface-3:#f1f4f9;
+  --border:#E2E8F0; --border-strong:#cbd5e1;
+  --ink-900:#1E293B; --ink-700:#334155; --ink-500:#64748B; --ink-400:#94a3b8;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#0e1420; --surface:#161d2b; --surface-2:#1b2333; --surface-3:#222c40;
+  --border:#2a3446; --border-strong:#3b485f;
+  --ink-900:#e9eef6; --ink-700:#c7d1e0; --ink-500:#93a1b8; --ink-400:#6f7d94;
+  --brand-500:#7c3aed;
+}
+
+/* Layout: header + banner + mapa apilados */
+.app-container{ display:flex; flex-direction:column; height:100vh; height:100dvh; }
+.map-wrapper{ flex:1; min-height:0; position:relative; }
+
+/* Header standalone (solo cuando NO está embedido en iframe) */
+.map-standalone-header{
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:10px 20px; font-family:var(--font); z-index:1000; flex-shrink:0;
+}
+.msh-logo{ width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,#7c3aed,#4c1d95);
+  display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; }
+.msh-title{ font-weight:600; color:var(--ink-900); font-size:15px; }
+.msh-status{ display:flex; align-items:center; gap:6px; margin-left:8px; padding:3px 10px;
+  background:var(--surface-3); border-radius:20px; font-size:12px; color:var(--ink-500); }
+.msh-dot{ width:6px; height:6px; border-radius:50%; display:inline-block; }
+.msh-right{ margin-left:auto; display:flex; align-items:center; gap:12px; }
+.msh-user{ font-size:13px; color:var(--ink-500); }
+.msh-login{ font-size:13px; color:#fff; text-decoration:none; font-weight:500; background:var(--brand-500); padding:5px 14px; border-radius:8px; }
+.msh-back{ font-size:13px; color:var(--brand-500); text-decoration:none; font-weight:500; }
+
+/* Banner de modo lectura */
+.map-readonly-banner{
+  background:var(--amber); color:#1a1a1a; text-align:center; padding:6px 16px;
+  font-size:13px; font-family:var(--font); font-weight:500; flex-shrink:0;
+}
+.map-readonly-banner a{ color:#1a1a1a; font-weight:700; text-decoration:underline; }

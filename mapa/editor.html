@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editor de Mapas de Territorios</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; display: flex; height: 100vh; overflow: hidden; }
+    #sidebar { width: 350px; background: #f8fafc; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 1000; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+    #map { flex: 1; height: 100%; }
+    
+    .panel { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    h2 { margin-top: 0; font-size: 1.2rem; color: #1e293b; }
+    label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: bold; color: #475569; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
+    
+    button { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    button:hover { background: #1d4ed8; }
+    button.export { background: #16a34a; }
+    button.export:hover { background: #15803d; }
+    
+    /* Imagen flotante */
+    #image-container { margin-top: 15px; position: relative; }
+    #preview-image { max-width: 100%; display: none; border: 2px solid #cbd5e1; border-radius: 4px; }
+    
+    /* Lista de manzanas */
+    #blocks-list { list-style: none; padding: 0; margin: 0; }
+    #blocks-list li { background: #f1f5f9; padding: 8px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;}
+    .delete-btn { background: #ef4444; color: white; border: none; border-radius: 3px; padding: 3px 6px; cursor: pointer; width: auto; margin: 0;}
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <div class="panel">
+      <h2>1. Configuración</h2>
+      <label>Número de Territorio:</label>
+      <input type="text" id="territory-num" placeholder="Ej: 10">
+      
+      <label style="margin-top: 15px;">Subir Tarjeta (Guía):</label>
+      <input type="file" id="image-upload" accept="image/*">
+      
+      <div id="image-container">
+        <img id="preview-image" alt="Guía del Territorio">
+      </div>
+      <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">*La imagen solo sirve como referencia visual para que sepas dónde dibujar.</p>
+    </div>
+
+    <div class="panel">
+      <h2>2. Dibujar</h2>
+      <div style="margin-bottom: 10px;">
+        <label><input type="radio" name="drawMode" value="block" checked> Dibujar Manzana</label>
+        <label><input type="radio" name="drawMode" value="territory"> Dibujar Límite del Territorio</label>
+      </div>
+      <p style="font-size: 0.8rem; color: #64748b;">Selecciona qué vas a dibujar y usa el ícono de pentágono en el mapa. Solo puedes tener un límite de territorio.</p>
+      
+      <h3 style="font-size: 1rem; margin-top: 15px;">Manzanas Dibujadas</h3>
+      <ul id="blocks-list"></ul>
+    </div>
+
+    <div class="panel">
+      <h2>3. Exportar</h2>
+      <button class="export" id="export-btn">Descargar Archivo .json</button>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  
+  <script>
+    // Inicializar mapa (centrado en Bogotá por defecto, el usuario debe arrastrar o buscar)
+    const map = L.map('map').setView([4.745, -74.095], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    // Herramientas de dibujo
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    const drawControl = new L.Control.Draw({
+      draw: {
+        polygon: {
+          allowIntersection: false,
+          showArea: true,
+          shapeOptions: { color: '#2563eb' }
+        },
+        polyline: false,
+        circle: false,
+        rectangle: false,
+        circlemarker: false,
+        marker: false
+      },
+      edit: {
+        featureGroup: drawnItems,
+        remove: false // Se maneja en la barra lateral
+      }
+    });
+    map.addControl(drawControl);
+
+    // Estado interno
+    let blocks = []; // { id, number, layer }
+    let territoryBoundaryLayer = null;
+
+    // Al terminar de dibujar un polígono
+    map.on(L.Draw.Event.CREATED, function (e) {
+      const layer = e.layer;
+      const type = e.layerType;
+
+      if (type === 'polygon') {
+        const mode = document.querySelector('input[name="drawMode"]:checked').value;
+        
+        if (mode === 'territory') {
+          if (territoryBoundaryLayer) {
+             drawnItems.removeLayer(territoryBoundaryLayer);
+          }
+          layer.setStyle({ color: '#ef4444', fillOpacity: 0.1, dashArray: '5, 5' });
+          territoryBoundaryLayer = layer;
+          drawnItems.addLayer(layer);
+          alert("Límite del territorio definido con éxito.");
+        } else {
+          const blockNum = prompt("Ingresa el número de esta manzana (Ej: 1):");
+          if (!blockNum) return; // Cancelado
+
+          const id = 'b' + Date.now();
+          layer.bindTooltip("Manzana " + blockNum, { permanent: true, direction: "center", className: 'block-label' }).openTooltip();
+          drawnItems.addLayer(layer);
+          blocks.push({ id, number: blockNum, layer });
+          updateBlocksList();
+        }
+      }
+    });
+
+    map.on('draw:edited', function (e) {
+        // Automatically updates because layer is tied to bounds.
+    });
+
+    // Subir imagen
+    document.getElementById('image-upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.getElementById('preview-image');
+          img.src = event.target.result;
+          img.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Lista de manzanas
+    function updateBlocksList() {
+      const list = document.getElementById('blocks-list');
+      list.innerHTML = '';
+      blocks.forEach(b => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>Manzana ${b.number}</span> <button class="delete-btn" onclick="deleteBlock('${b.id}')">Eliminar</button>`;
+        list.appendChild(li);
+      });
+    }
+
+    // Borrar manzana
+    window.deleteBlock = function(id) {
+      const index = blocks.findIndex(b => b.id === id);
+      if (index !== -1) {
+        drawnItems.removeLayer(blocks[index].layer);
+        blocks.splice(index, 1);
+        updateBlocksList();
+      }
+    }
+
+    // Descargar JSON
+    document.getElementById('export-btn').addEventListener('click', function() {
+      const terrNum = document.getElementById('territory-num').value.trim();
+      if (!terrNum) {
+        alert("Por favor ingresa el Número del Territorio.");
+        return;
+      }
+      
+      if (blocks.length === 0) {
+        alert("No has dibujado ninguna manzana.");
+        return;
+      }
+
+      if (!territoryBoundaryLayer) {
+        alert("Debes dibujar el límite del territorio antes de exportar.");
+        return;
+      }
+
+      // Obtener el límite dibujado por el usuario
+      const boundaryLatLngs = territoryBoundaryLayer.getLatLngs()[0];
+      const limitsArr = boundaryLatLngs.map(ll => [ll.lat, ll.lng]);
+
+      const exportData = {
+        territorio_id: "T" + terrNum,
+        numero_territorio: terrNum,
+        limites: limitsArr, // Pasamos el polígono exacto que dibujaron
+        manzanas: blocks.map(b => {
+          // Extraer coordenadas
+          const latlngs = b.layer.getLatLngs()[0]; // Array de puntos
+          const puntos = latlngs.map(ll => [ll.lat, ll.lng]);
+          return {
+            id: `m_${b.number}_${b.id}`,
+            numero: b.number,
+            puntos: puntos
+          };
+        })
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href",     dataStr);
+      downloadAnchorNode.setAttribute("download", `territorio_${terrNum}.json`);
+      document.body.appendChild(downloadAnchorNode); // requerido en firefox
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    });
+  </script>
+</body>
+</html>

@@ -27,3 +27,11 @@
 # JS modular (Fase 2 del refactor)
 !js/
 !js/*
+# Mapa de territorios (rewrite integrado Socket.io->Supabase) — Fase B mapas
+!mapa/
+!mapa/**
+mapa/node_modules/
+mapa/dist/
+mapa/.env
+# Handoff de integración
+!HANDOFF_INTEGRACION.md
